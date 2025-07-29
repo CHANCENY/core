@@ -1,0 +1,47 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>Content type ({{ content.name }}) Edit</h3>
+    <p>Individual content types can have different fields, behaviors, and permissions assigned to them.</p>
+
+    <form action="#" method="POST">
+
+        <div class="row">
+            <div class="column">
+                <label for="name">Name *</label>
+                <input type="text" id="name" name="name" required value="{{ content.name }}">
+                <small>The human-readable name for this content type, displayed on the Content types page.</small>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3">{{ content.description }}</textarea>
+                <small>Displays on the Content types page.</small>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <details>
+                    <summary>Publishing options</summary>
+                    <p>Published, Promoted to front page, Create new revision</p>
+                </details>
+
+                <details>
+                    <summary>Display settings</summary>
+                    <p>Display author and date information</p>
+                </details>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <button type="submit" class="button">Save</button>
+            </div>
+        </div>
+
+    </form>
+
+{% endblock %}

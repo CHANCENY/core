@@ -1,0 +1,56 @@
+{% if content %}
+
+    <div class="field">
+    {% if content.data is iterable %}
+
+         {% if display[definition.name].display_label == '1' %}
+                        {% if definition.label %}
+                            <strong class="field-label">{{ definition.label }}</strong>
+                        {% endif %}
+         {% endif %}
+
+        {%  for item in content.data %}
+
+            {% set settings = display[definition.name] %}
+
+            {% if settings.display_enabled %}
+            <div class="field--{{ definition.name|replace({'_':'-'}) }} field-text-{{ definition.name|replace({'_':'-'}) }} margin-top-field">
+                {% if settings.display_as %}
+                    <{{ settings.display_as }}>
+                    {{ item }}
+                    </{{ settings.display_as }}>
+                {% else %}
+                    <p> {{ item }} </p>
+                {% endif %}
+                </div>
+            {% endif %}
+
+        {% endfor %}
+
+    {% else %}
+
+        {% set settings = display[definition.name] %}
+
+        {% if settings.display_enabled %}
+        <div class="field--{{ definition.name|replace({'_':'-'}) }} field-text-{{ definition.name|replace({'_':'-'}) }} margin-top-field">
+
+            {% if settings.display_label == '1' %}
+                {% if definition.label %}
+                    <strong class="field-label">{{ definition.label }}</strong>
+                {% endif %}
+            {% endif %}
+            {% if settings.display_as %}
+                <{{ settings.display_as }}>
+                {{ content.data }}
+                </{{ settings.display_as }}>
+            {% else %}
+                <p> {{ content.data }} </p>
+            {% endif %}
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+    </div>
+
+{% endif %}

@@ -1,0 +1,71 @@
+{% if request.user.getUser.uid %}
+    <!-- Top Black Admin Bar -->
+    <div class="admin-bar">
+        <div>
+            {% if request.user is not null and request.user.isIsAdmin %}
+                <a href="#" class="menu-toggle"><i class="fa fa-bars"></i> {{ "Manage"|t }}</a>
+                <a href="#"><i class="fa fa-star"></i> {{ "Shortcuts"|t }}</a>
+            {% endif %}
+
+            {% if request.user %}
+                <a href="/user/{{ request.user.getUser.uid }}"><i class="fa fa-user"></i> {{ request.user.getUser.name }}</a>
+            {% endif %}
+        </div>
+        {{ search_form('admin-content')|raw }}
+        <div>
+            {% if request.user is not null %}
+                {% if is_module_enabled('announcement') %}
+                    <a href="/admin/announcement/notifications"><i class="fa fa-bell"></i><sup>{{ announcement_unread_count() }}</sup></a>
+                {% endif %}
+                {% if request.user.isIsAdmin %}
+                    <a href="#"><i class="fa fa-pencil"></i> {{ "Edit"|t }}</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+{% if request.user is not null and request.user.isIsAdmin %}
+    <!-- Main Navigation Menu -->
+    <div class="main-menu">
+        <a href="/admin/content"><i class="fa fa-file"></i> {{ "Content"|t }} </a>
+        <a href="/admin/structure"><i class="fa fa-sitemap"></i> {{ "Structure"|t }}</a>
+        {# <a href="#"><i class="fa fa-paint-brush"></i> {{ "Appearance"|t }}</a> #}
+        <a href="/admin/extends"><i class="fa fa-wrench"></i> {{ "Extend"|t }}</a>
+        <a href="/admin/config"><i class="fa fa-cogs"></i> {{ "Configuration"|t }}</a>
+        <a href="/admin/people"><i class="fa fa-users"></i> {{ "People"|t }}</a>
+        <a href="/admin/reports"><i class="fa fa-chart-bar"></i> {{ "Reports"|t }}</a>
+        <a href="/user/logout"><i class="fa fa-sign-out"></i> {{ "Logout"|t }}</a>
+    </div>
+{% elseif request.user is not null and request.user.isIsManager %}
+
+    <div class="main-menu">
+        <a href="/admin/content"><i class="fa fa-file"></i> {{ "Content"|t }}</a>
+        <a href="/admin/people"><i class="fa fa-users"></i> {{ "People"|t }}</a>
+        <a href="/user/logout"><i class="fa fa-sign-out"></i> {{ "Logout"|t }}</a>
+    </div>
+
+{% elseif request.user is not null and request.user.isIsAuthenticated %}
+
+    <div class="main-menu">
+        <a href="#"><i class="fa fa-home"></i> {{ "Home"|t }}</a>
+        <a href="/admin/people"><i class="fa fa-info"></i> {{ "About"|t }}</a>
+        <a href="#"><i class="fa fa-contact-card"></i> {{ "Contact"|t }}</a>
+        <a href="/user/logout"><i class="fa fa-sign-out"></i> {{ "Logout"|t }}</a>
+    </div>
+
+{% elseif request.user is not null and request.user.isIsContentCreator %}
+    <div class="main-menu">
+        <a href="/admin/content"><i class="fa fa-file"></i> {{ "Content"|t }}</a>
+        <a href="/admin/people"><i class="fa fa-users"></i> {{ "People"|t }}</a>
+        <a href="/user/logout"><i class="fa fa-sign-out"></i> {{ "Logout"|t }}</a>
+    </div>
+{% else %}
+
+    <div class="main-menu justify-content-end">
+        <a href="/user/register"><i class="fa fa-user"></i> {{ "Register"|t }}</a>
+        <a href="/user/login"><i class="fa fa-sign-in"></i> {{ "Login"|t }}</a>
+    </div>
+
+{% endif %}
+

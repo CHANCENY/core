@@ -1,0 +1,4 @@
+# Add more data source for your rest integration.
+default:
+  handler: Simp\Core\components\rest_data_source\DefaultDataSource
+  title: "Default Data Source for rest integration"

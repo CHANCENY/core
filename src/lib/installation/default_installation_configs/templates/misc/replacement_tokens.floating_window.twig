@@ -1,0 +1,104 @@
+<div class="floating-opener">
+    <a id="toggle-floating" href="#">Global replacement tokens</a>
+</div>
+
+<div class="floating-window" id="floating-window">
+
+    {% for key, token in tokens %}
+
+    <h5 data-toggle="{{ key }}">{{ key }}</h5>
+
+    <ul class="group-{{ key }}">
+
+        {% for tk in token %}
+        <li data-token="{{ key }}:{{ tk }}">{{ key }}:{{ tk }}</li>
+        {% endfor %}
+
+    </ul>
+
+    {% endfor %}
+
+</div>
+
+<script>
+    (function () {
+        const floatingWindow = document.getElementById('floating-window');
+
+        let activeField = null;
+
+        // Save reference to the active input or textarea
+        document.addEventListener('focusin', function (e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                activeField = e.target;
+            }
+        });
+
+        // Toggle the floating window when clicking the "Global replacement tokens" link
+        document.getElementById('toggle-floating').addEventListener('click', function (e) {
+            e.preventDefault();
+            floatingWindow.classList.toggle('visible');
+        });
+
+        $(floatingWindow).find('li').on('click', function(e){
+            const token = e.target.dataset.token;
+            if (!activeField) return;
+
+            const field = activeField;
+            const start = field.selectionStart;
+            const end = field.selectionEnd;
+
+            const value = field.value;
+            const before = value.substring(0, start);
+            const after = value.substring(end, value.length);
+
+            // Insert token wrapped in brackets or similar format
+            const inserted = `[${token}]`;
+
+            field.value = before + inserted + after;
+
+            // Move the cursor to just after the inserted token
+            const cursorPos = before.length + inserted.length;
+            field.setSelectionRange(cursorPos, cursorPos);
+            field.focus();
+        })
+
+        // Toggle the visibility of token groups when clicking <h5>
+        const headers = floatingWindow.querySelectorAll('h5');
+        headers.forEach(header => {
+            header.addEventListener('click', function () {
+                const group = this.getAttribute('data-toggle');
+                const list = floatingWindow.querySelector('.group-' + group);
+                if (list) {
+                    const isVisible = window.getComputedStyle(list).display !== 'none';
+                    list.style.display = isVisible ? 'none' : 'block';
+                }
+            });
+        });
+
+        interact('.floating-window').draggable({
+            inertia: true,
+            modifiers: [
+                interact.modifiers.restrictRect({
+                    restriction: 'window', // allow full-screen dragging
+                    endOnly: true
+                })
+            ],
+            autoScroll: true,
+            listeners: {
+                move: dragMoveListener
+            }
+        });
+
+        function dragMoveListener(event) {
+            const target = event.target;
+            let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+            target.setAttribute('data-x', x);
+            target.setAttribute('data-y', y);
+        }
+
+        window.dragMoveListener = dragMoveListener;
+    })();
+</script>

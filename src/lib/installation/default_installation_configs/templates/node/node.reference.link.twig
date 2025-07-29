@@ -1,0 +1,26 @@
+{% if content %}
+
+    {% set settings = display[definition.name] %}
+
+    {% if settings.display_enabled %}
+        <div class="field">
+            <div class="node-link field-{{ definition.name|replace({'_':'-'}) }} field--{{ definition.name|replace({'_':'-'}) }}">
+                {% if settings.display_label == '1' %}
+                    {% if definition.label %}
+                        <strong class="field-label">{{ definition.label }}</strong>
+                    {% endif %}
+                {% endif %}
+
+                {%  for link in content.data %}
+                    <div class="reference-link">
+                        <a href="{{ link.url }}">{{ link.name }}</a>
+                    </div>
+
+
+                {% endfor %}
+            </div>
+
+        </div>
+    {% endif %}
+
+{% endif %}

@@ -1,0 +1,45 @@
+{% if request.user is not null and request.user.isIsAdmin %}
+
+    <div class="floating-window-token">
+        {{ tokens_floating_window()|raw }}
+    </div>
+
+{% endif %}
+
+<script>
+    {{ assets.getAssetsFile('bootstrap.js')|raw }}
+</script>
+
+{# TODO: add setting to enable message. #}
+<script>
+    {{ assets.getAssetsFile('toastfy.js')|raw }}
+</script>
+
+<script>
+    {{ assets.getAssetsFile('toast-messager.js')|raw }}
+</script>
+
+<script>
+    {{ assets.getAssetsFile('tabs.js')|raw }}
+</script>
+
+<script type="importmap">
+    {
+        "imports": {
+            "ckeditor5": "/system/assets/file?name=ckeditor5.js",
+            "ckeditor5/": "./ckeditor5/"
+        }
+    }
+</script>
+
+<script type="module">
+    {{ assets.getAssetsFile('ck-editor.js')|raw }}
+</script>
+
+<script>
+    {{ assets.getAssetsFile('menu.js')|raw }}
+</script>
+
+{{ attached_library('head')|raw }}
+
+{{ attached_library('footer')|raw }}

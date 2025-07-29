@@ -1,0 +1,39 @@
+{
+    "name": "simp/core",
+    "description": "This is content manager cms core bundle",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Simp\\Core\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "CHANCENY",
+            "email": "nyasuluchance6@gmail.com"
+        }
+    ],
+    "require": {
+        "symfony/http-foundation": "^7.2",
+        "symfony/yaml": "^7.2",
+        "symfony/var-dumper": "^7.2",
+        "simp/streamwrapper": "^1.0",
+        "phpfastcache/phpfastcache": "^9.2",
+        "simp/forms": "^1.0",
+        "simp/router": "^1.0",
+        "twig/twig": "^3.0",
+        "ext-pdo": "*",
+        "google/apiclient": "^2.18",
+        "league/oauth2-github": "^3.1",
+        "simp/uploader": "^1.0",
+        "simp/mail": "^1.0",
+        "catfan/medoo": "^2.1",
+        "ext-fileinfo": "*",
+        "ext-readline": "*",
+        "fakerphp/faker": "^1.24",
+        "simp/translate": "^1.0",
+        "ext-zip": "*",
+        "ext-intl": "*"
+    }
+}

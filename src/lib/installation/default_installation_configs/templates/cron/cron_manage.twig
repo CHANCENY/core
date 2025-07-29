@@ -1,0 +1,149 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Cron Manage"|t }}</h3>
+    <div>
+        <a href="/cron/add">+ Create cron</a>
+    </div>
+    <div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('cron')">{{ "Cron manage"|t }}</div>
+            <div class="tab" onclick="showTab('schedules')">{{ "Schedules"|t }}</div>
+            <div class="tab" onclick="showTab('logs')">{{ "Logs"|t }}</div>
+            <div class="tab" onclick="showTab('cron-setting')">{{ "Server settings"|t }}</div>
+        </div>
+
+        <div id="cron" class="tab-content active">
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                {%  for key, job in jobs  %}
+
+                    <tr>
+
+                        <td>{{ job.title  }}</td>
+                        <td>{{ job.description  }}</td>
+                        <td>
+                            {% if key != 'default_cron' %}
+                                <a href="/cron/{{ key }}/edit">Edit</a>
+                                <a href="/cron/{{ key }}/delete">Delete</a>
+                            {% else %}
+                                <a href="/cron/{{ key }}/edit">Reset</a>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+        </div>
+
+        <div id="schedules" class="tab-content">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Last Run</th>
+                    <th>Next Run</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for schedule in schedules %}
+
+                    <tr>
+                        <td>{{ schedule.name }}</td>
+                        <td>{{ schedule.last_run|date }} <i class="fa-regular fa-clock"></i></td>
+                        <td>{{ schedule.next_run|date }} <i class="fa-regular fa-clock"></i></td>
+                        <td>{{ schedule.next_run > "now"|date("U") ? 'on schedule 🕒' : 'delayed' }}</td>
+                        <td>{{ schedule.created_at|date }}</td>
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        <div id="logs" class="tab-content">
+            <table>
+                <thead>
+                 <tr>
+                     <th>Name</th>
+                     <th>Execution time</th>
+                     <th>Start Time</th>
+                     <th>End Time</th>
+                     <th>Status</th>
+                     <th>Message</th>
+                 </tr>
+                </thead>
+                <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td>{{ log.name }}</td>
+                        <td>{{ log.execute_time ~ 'secs' }} <i class="fa-regular fa-clock"></i></td>
+                        <td>{{ log.start_time|date }} <i class="fa-regular fa-clock"></i></td>
+                        <td>{{ log.end_time|date }} <i class="fa-regular fa-clock"></i></td>
+                        <td>{{ log.status }}</td>
+                        <td>{{ log.message }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="cron-setting" class="tab-content">
+            <h3>Cron server settings</h3>
+            <div>
+                <p>To ensure your scheduled tasks run properly, please set up a <strong>cron job</strong> on your server to execute the scripts listed below <strong>every minute</strong>.</p>
+
+                <h4>Cron Setup Instructions</h4>
+                <ol>
+                    <li><strong>Open your crontab file</strong> for editing:</li>
+                    <pre><code>crontab -e</code></pre>
+
+                    <li><strong>Add the following line</strong> for each script shown in the table:</li>
+                    <pre><code>* * * * * /usr/bin/php /full/path/to/your/script.php &gt;&gt; /dev/null 2&gt;&amp;1</code></pre>
+                    <p><em>Replace <code>/full/path/to/your/script.php</code> with the actual script path provided in the table.</em></p>
+                    <p><strong>his will run the PHP script every minute.</strong></p>
+                </ol>
+
+                <h4>Notes</h4>
+                <ul>
+                    <li>Make sure <code>/usr/bin/php</code> matches the location of PHP on your server. You can verify it with:
+                        <pre><code>which php</code></pre>
+                    </li>
+                    <li>Ensure the PHP script is <strong>executable</strong> and has the correct <strong>permissions</strong>.</li>
+                    <li><code>&gt;&gt; /dev/null 2&gt;&amp;1</code> suppresses output; remove it if you want to log output for debugging.</li>
+                </ul>
+            </div>
+
+            <h3>Cron script <em>pick one</em></h3>
+            <table>
+                <tbody>
+                 {% for script in scripts %}
+
+                     <tr>
+                         <td>{{ script }}</td>
+                     </tr>
+
+                  {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+{% endblock %}

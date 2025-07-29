@@ -1,0 +1,22 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ t("Structures") }}</h3>
+
+    <ul>
+        <li>
+            <a href="/admin/structure/types">{{ "Content types"|t }}</a>
+            <p>{{ "Create and manage fields, forms, and display settings for your content."|t }}</p>
+        </li>
+
+        <li>
+            <a href="/admin/structure/views">{{ "Views"|t }}</a>
+            <p>{{ "Manage customized lists of content."|t }}</p>
+        </li>
+        <li>
+            <a href="/admin/structure/taxonomy">{{ "Taxonomy"|t }}</a>
+            <p>{{ "Manage tagging, categorization, and classification of your content."|t }}</p>
+        </li>
+    </ul>
+
+{% endblock %}

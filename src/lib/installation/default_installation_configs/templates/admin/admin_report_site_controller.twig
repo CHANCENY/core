@@ -1,0 +1,113 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <div class="container">
+        <h2>{{ "Reports"|t }}</h2>
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('activity-report')">{{ "Site Activity Report"|t }}</div>
+            <div class="tab" onclick="showTab('error-report')">{{ "Errors Report"|t }}</div>
+            <div class="tab" onclick="showTab('database-report')">{{ "Database Report"|t }}</div>
+        </div>
+
+        <div id="activity-report" class="tab-content active">
+            <div class="mb-lg-5">
+                <form action="">
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            <label for="">Offset</label>
+                            <input class="form-control" type="number" min="0" value="{{ offset }}" max="{{ server_filter.offset_max }}" name="offset">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="">Limit</label>
+                            <input class="form-control" type="number" name="limit" min="2" max="50" value="{{ limit }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-primary" value="Filter">
+                    </div>
+                    <input type="hidden" name="filter" value="server">
+                </form>
+            </div>
+            <table class="table-stripped">
+                <thead class="table-light">
+                <tr>
+                    <th>{{ "Start Time"|t }}</th>
+                    <th>{{ "End Time"|t }}</th>
+                    <th>{{ "Elapsed Time"|t }}</th>
+                    <th>{{ "Memory Usage"|t }}</th>
+                    <th>{{ "System CPU"|t }}</th>
+                    <th>{{ "System USER"|t }}</th>
+                    <th>{{ "Path"|t }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for log in server %}
+
+                    <tr>
+                        <td>{{ log.start }}</td>
+                        <td>{{ log.end }}</td>
+                        <td>{{ log.elapsed }}</td>
+                        <td>{{ log.memory }}</td>
+                        <td>{{ log.system_usage }} secs</td>
+                        <td>{{ log.user_usage }} secs</td>
+                        <td>{{ log.path }}</td>
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div id="error-report" class="tab-content">
+            <div>
+                {% for log in errors %}
+                    <div class="column column-100" style="margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">
+                        <div>
+                            <p><strong>{{ "Level"|t }}</strong>&nbsp;{{ log.LEVEL }}</p>
+                        </div>
+                        <div>
+                            <p><strong>{{ "Severity"|t }}</strong>&nbsp;{{ log.Severity }}</p>
+                        </div>
+                        <div>
+                            <p><strong>{{ "Message"|t }}</strong></p>
+                            <pre><code>{{ br(log.MESSAGE,300)|raw }}</code></pre>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="database-report" class="tab-content">
+            <div>
+                {% for key,dblog in database_logs %}
+
+                    <details class="column column-100" {{ loop.index == 1 ? 'open' : '' }}>
+                        <summary><strong>{{ "URI"|t }}</strong>&nbsp;{{ key }}</summary>
+                        {% for query in dblog %}
+                            <div style="margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">
+                                <div>
+                                    <p><strong>{{ "Executed Time"|t }}</strong></p>
+                                    <p>{{ query.executed_time }}</p>
+                                </div>
+                                <div>
+                                    <p><strong>{{ "Created"|t }}</strong></p>
+                                    <p>{{ query.created }}</p>
+                                </div>
+                                <div>
+                                    <p><strong>{{ "Query"|t }}</strong></p>
+                                    <pre><code>{{ br(query.query_line,150)|raw }}</code></pre>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </details>
+                    <div class="clearfix"></div>
+
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Edit Field "|t }}{{ field.title }}</h3>
+    {{ _form|raw }}
+{% endblock %}

@@ -1,0 +1,61 @@
+<div class="card" style="padding: 1.5rem; margin-bottom: 2rem;">
+    <form class="row">
+        <!-- Search -->
+        <div class="column column-20">
+            <input name="search" type="text" placeholder="{{ 'Search by name or email'|t }}">
+        </div>
+
+        {% if filters.order_by %}
+            <div class="column column-15">
+                <select name="search_by">
+                    {% for order_by in filters.order_by %}
+                        <option value="{{ order_by }}">{{ order_by }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+        <div class="column column-15">
+            <select name="search_type">
+                <option value="1">Any</option>
+                <option value="2">Start with</option>
+                <option value="3">End with</option>
+            </select>
+        </div>
+
+        {% if filters.order_by %}
+            <div class="column column-15">
+                <select name="sort_by">
+                    <option value="">{{ 'Sort By'|t }}</option>
+                    {% for order_by in filters.order_by %}
+                        <option value="{{ order_by }}">{{ order_by }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="column column-10">
+                <select name="order_by">
+                    <option value="DESC">DESC</option>
+                    <option value="ASC">ASC</option>
+                </select>
+            </div>
+        {% endif %}
+
+        {% if filters.total_rows %}
+            <div class="column column-10">
+                <input type="number" name="limit" placeholder="Limit #" min="10" max="{{ filters.total_rows }}">
+            </div>
+        {% endif %}
+
+        {% if filters.offset %}
+            <div class="column column-10">
+                <input type="number" name="page" placeholder="Page #" min="1" max="{{ filters.offset }}">
+            </div>
+        {% endif %}
+
+        <!-- Button -->
+        <div class="column column-10">
+            <input class="button button-primary" type="submit" value="{{ 'Apply Filters'|t }}">
+        </div>
+    </form>
+</div>

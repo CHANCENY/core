@@ -1,0 +1,17 @@
+# database settings
+
+hostname: 'localhost'
+username: 'root'
+password: ''
+port: 3306
+
+#dsn line
+dsn: "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4"
+
+# caching output
+cache:
+  active: true
+  timeout: 3600
+
+# logging database activities
+log: true

@@ -1,0 +1,7 @@
+site: ['name', 'email', 'slogan','front_page', 'url']
+user: ['name', 'mail','created', 'updated','login', 'verify_token']
+profile: ['first_name','last_name','description','time_zone','translation_code', 'image_fid', 'image_uri']
+role: ['name', 'label']
+file: ['fid','uri','path','size', 'type','extension','uploaded']
+node: ['title','nid','created','updated','author','status','language', 'field?']
+request: ['uri', 'host', 'path','current_uri', 'get_value?', 'post_value?','origin', 'referrer','content_type', 'method', 'scheme', 'host', 'port', 'query', 'ip', 'user_agent', 'current_url','is_secure', 'is_ajax', 'hostname', 'base']

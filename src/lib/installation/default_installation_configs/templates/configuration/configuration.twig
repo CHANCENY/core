@@ -1,0 +1,92 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Configuration Settings"|t }}</h3>
+
+    <table>
+        <thead>
+        <tr>
+            <th>{{ "System"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="/admin/config/system/site-information">{{ "Basic Site Settings"|t }}</a></td>
+        </tr>
+        <tr>
+            <td><a href="/cron/manage">{{ "Cron Settings"|t }}</a></td>
+        </tr>
+        <tr>
+            <td><a href="/admin/config/smtp">{{ "SMTP Settings"|t }}</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table>
+        <thead>
+        <tr>
+            <th>{{ "People"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="/admin/config/people/accounts">{{ "Account Settings"|t }}</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table>
+        <thead>
+        <tr>
+            <th>{{ "Development"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="{{ url('system.search.settings') }}">{{ "Search Settings"|t }}</a></td>
+        </tr>
+        <tr>
+            <td><a href="/admin/config/development/settings">{{ "Development Settings"|t }}</a></td>
+        </tr>
+        <tr>
+            <td><a href="/admin/reports">{{ "Logging and Errors"|t }}</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <table>
+        <thead>
+        <tr>
+            <th>{{ "Integrations"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="/admin/integration/rest">{{ "REST"|t }}</a></td>
+        </tr>
+        {# <tr><td><a href="#">Image Styles</a></td></tr> #}
+        </tbody>
+    </table>
+
+    {% if is_module_enabled('auto_path') %}
+
+        <table>
+            <thead>
+            <tr>
+                <th>{{ "Auto path alias"|t }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="{{ url('auto_path.create') }}">{{ "create"|t }}</a></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url('auto_path.list') }}">{{ "aliases"|t }}</a></td>
+            </tr>
+            {# <tr><td><a href="#">Image Styles</a></td></tr> #}
+            </tbody>
+        </table>
+
+    {% endif %}
+
+{% endblock %}

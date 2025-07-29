@@ -1,0 +1,5 @@
+name: Announcements
+description: 'This module is built-in for announcements and chats'
+type: module
+core_version_requirement: ^1
+enabled: false

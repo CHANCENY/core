@@ -1,0 +1,42 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <a href="/admin/search/setting/new" class="btn btn-primary mb-3">+ {{ "Add new Search Configuration"|t }}</a>
+
+    <table class="table table-stripped">
+        <thead class="table-light">
+        <tr>
+            <th>{{ "Search Name"|t }}</th>
+            <th>{{ "Search Type"|t }}</th>
+            <th>{{ "Search URL"|t }}</th>
+            <th>{{ "Search Render"|t }}</th>
+            <th>{{ "Operations"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if not search_settings %}
+            <tr>
+                <td colspan="5">
+                    <p class="text-center mt-4">{{ "No configuration found"|t }}</p>
+                </td>
+            </tr>
+        {% else %}
+            {% for index, setting in search_settings %}
+                <tr>
+                    <td>
+                        <a href="/admin/search/settings/{{ index }}/configure">{{ setting.name }}</a>
+                    </td>
+                    <td>{{ setting.type }}</td>
+                    <td>/search/{{ index }}</td>
+                    <td>{{ setting.template }}</td>
+                    <td>
+                        <a href="/admin/search/settings/{{ index }}/edit" class="btn btn-sm btn-outline-secondary">{{ "Edit"|t }}</a>
+                        <a href="/admin/search/settings/{{ index }}/delete" class="btn btn-sm btn-outline-danger">{{ "Delete"|t }}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+
+{% endblock %}

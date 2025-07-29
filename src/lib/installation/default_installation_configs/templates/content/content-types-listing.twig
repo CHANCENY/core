@@ -1,0 +1,34 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h2>{{ "Content types"|t }}</h2>
+
+    <a href="/admin/structure/types/new" class="button button-outline" style="margin-bottom: 1.5rem;">
+        + {{ "Create content type"|t }}
+    </a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>{{ "Name"|t }}</th>
+            <th>{{ "Description"|t }}</th>
+            <th>{{ "Created Date"|t }}</th>
+            <th>{{ "Actions"|t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+            <tr>
+                <td><a href="/admin/structure/content-type/{{ item.machine_name }}/manage">{{ item.name }}</a></td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.created }}</td>
+                <td>
+                    <a href="/admin/structure/content-type/{{ item.machine_name }}/edit" class="button-clear">Edit</a>
+                    <a href="/admin/structure/content-type/{{ item.machine_name }}/delete" class="button-clear">Delete</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

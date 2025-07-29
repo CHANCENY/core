@@ -1,0 +1,8 @@
+admin-content:
+  name: Admin Content Search
+  type: content_type
+  template: default.view.admin_search_content
+admin-user:
+  name: Admin User Search
+  type: user_type
+  template: default.view.admin_search_user

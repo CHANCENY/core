@@ -1,0 +1,25 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Content type selection"|t }}</h3>
+
+    {% if contents %}
+        <table>
+            <tbody>
+            {% for content in contents %}
+                <tr>
+                    <td>
+                        <a href="/node/add/{{ content.machine_name }}">{{ content.name }}</a>
+                    </td>
+                    <td>{{ content.description }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div>
+            {{ "No content types found. Create content type first."|t }}
+        </div>
+    {% endif %}
+
+{% endblock %}

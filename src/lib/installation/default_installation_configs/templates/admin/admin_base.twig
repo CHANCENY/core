@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <meta name="description" content="{{ page_description }}">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="keywords" content="{{ page_keywords }}">
+    {% if theme.admin.admin_assets_head is defined %}
+        {% include (theme.admin.admin_assets_head) %}
+    {% endif %}
+</head>
+<body>
+
+{% if theme.admin.navigation is defined and theme.admin.navigation %}
+    {% include (theme.admin.navigation) %}
+{% endif %}
+
+<div class="container main-content">
+    {% block body %}{% endblock %}
+</div>
+
+{% if theme.admin.admin_assets_footer is defined and theme.admin.admin_assets_footer %}
+    {% include (theme.admin.admin_assets_footer) %}
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Note how it works the middlewares are executed from bottom up therefore
+# place middleware considerable in this file to avoid overriding.
+# Note: all middleware implements Middleware of Simp/Router
+
+access:
+  # This middleware checks only for routes with uid in params or uid in post body.
+  - Simp\Core\lib\middlewares\AccountOwnerShipMiddleware
+
+  # This middleware checks only for node access route.
+  - Simp\Core\lib\middlewares\NodeAccessMiddleware
+
+  # This middleware checks only on route access roles provided.
+  - Simp\Core\lib\middlewares\RouteAccessMiddleware
+
+  # [optional add more middlewares from here. ]

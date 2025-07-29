@@ -1,0 +1,41 @@
+title: Site Configuration Form
+attributes:
+  action: null
+  method: POST
+  is_silent: false
+  enctype: multipart/form-data
+fields:
+  site_name:
+    name: site_name
+    type: text
+    required: true
+    id: site_name
+    label: Site Name
+    class:
+      - form-control
+  site_email:
+    name: site_email
+    type: text
+    required: true
+    id: site_email
+    label: Site Email
+    class:
+      - form-control
+  site_timezone:
+    name: site_timezone
+    type: select
+    required: true
+    id: site_timezone
+    label: Site Timezone
+    class:
+      - form-control
+    option_values:
+
+  submit:
+    default_value: Save
+    type: submit
+    name: submit
+    id: submit
+    class:
+      - btn
+      - btn-submit

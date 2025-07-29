@@ -1,0 +1,34 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Auto Path Aliases"|t }}</h3>
+    <div>
+        <a href="{{ url('auto_path.create') }}">+create alias</a>
+    </div>
+    <div>
+        <table>
+            <thead>
+             <tr>
+                 <th>ID</th>
+                 <th>Type</th>
+                 <th>Pattern</th>
+                 <th>Action</th>
+             </tr>
+            </thead>
+            <tbody>
+            {% for auto_path in auto_paths %}
+
+                <tr>
+                    <td>{{ auto_path.id }}</td>
+                    <td>{{ auto_path.entity_type }}</td>
+                    <td>{{ auto_path.pattern_path }}</td>
+                    <td>
+                        <a href="{{ url('auto_path.delete',{id: auto_path.id}) }}">delete</a>
+                    </td>
+                </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

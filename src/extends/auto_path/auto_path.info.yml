@@ -1,0 +1,5 @@
+name: 'Auto Path Alias'
+description: 'This module is built-in for create alias path for nodes'
+type: module
+core_version_requirement: ^1
+enabled: true

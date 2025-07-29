@@ -1,0 +1,28 @@
+normal:
+  types:
+    - password
+    - password-less
+  default: password
+
+google:
+  types:
+    - google
+  default: null
+  credential:
+    client_id: null
+    client_secret: null
+    redirect: /user/oauth/google/access
+    scope:
+      - email
+      - profile
+
+github:
+  types:
+    - github
+  default: null
+  credential:
+    client_id: null
+    client_secret: null
+    redirect: /user/oauth/github/access
+
+active: normal

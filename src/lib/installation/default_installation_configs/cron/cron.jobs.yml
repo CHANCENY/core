@@ -1,0 +1,5 @@
+default_cron:
+  title: "Default Cron"
+  description: "Built-in cron for cleaning up unused files, nodes tables that they have no reference content type"
+  timing: "every|day"
+  subscribers: default

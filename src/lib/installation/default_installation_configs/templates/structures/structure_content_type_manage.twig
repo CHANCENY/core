@@ -1,0 +1,120 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>Manage Fields for Content Type: {{ content.name }}</h3>
+
+    <a href="/admin/structure/content-type/{{ content.machine_name }}/field/new" class="button button-outline">
+        + Create a new field
+    </a>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('manage-field')">Manage fields</div>
+        <div class="tab" onclick="showTab('display-settings')">Display settings</div>
+        <div class="tab" onclick="showTab('permission-settings')">Permission settings</div>
+    </div>
+
+    <!-- Manage Fields Tab -->
+    <div id="manage-field" class="tab-content active">
+        <table>
+            <thead>
+            <tr>
+                <th>Label</th>
+                <th>Machine Name</th>
+                <th>Field Type</th>
+                <th>Operations</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for field in content.fields %}
+                <tr>
+                    <td>{{ field.label }}</td>
+                    <td>{{ field.name }}</td>
+                    <td>{{ field.type }}</td>
+                    <td>
+                        <a href="/admin/structure/content-type/{{ content.machine_name }}/field/{{ field.name }}/edit" class="button button-small">Edit</a>
+                        <a href="/admin/structure/content-type/{{ content.machine_name }}/field/{{ field.name }}/delete" class="button button-clear">Delete</a>
+                        {% if field.type in ['details', 'fieldset', 'conditional'] %}
+                            <a href="/admin/structure/content-type/{{ content.machine_name }}/field/{{ field.name }}/inner-fields" class="button button-small">Fields</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Display Settings Tab -->
+    <div id="display-settings" class="tab-content">
+        <form method="post">
+            <table>
+                <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Display Label</th>
+                    <th>Display As</th>
+                    <th>Display Enabled</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for field in content.fields %}
+                    {% if field.type not in ['details', 'fieldset', 'conditional'] %}
+                        <tr>
+                            <td>{{ field.label }}</td>
+                            <td>
+                                <input type="checkbox" name="{{ field.name }}:display_label" value="1"
+                                       {% if content.display_setting[field.name].display_label == '1' %}checked{% endif %}>
+                            </td>
+                            <td>
+                                <select name="{{ field.name }}:display_as">
+                                    {% set options = {
+                                        'p': 'Paragraph text', 'link': 'Link', 'image': 'Image',
+                                        'h1': 'Heading text (h1)', 'h2': 'Heading text (h2)',
+                                        'h3': 'Heading text (h3)', 'h4': 'Heading text (h4)',
+                                        'h5': 'Heading text (h5)', 'h6': 'Heading text (h6)',
+                                        'strong': 'Strong Text',
+                                        'reference': 'Reference Link'
+                                    } %}
+                                    {% for key, value in options %}
+                                        {% if (field.type == 'file' and key in ['link', 'image']) or
+                                            (field.type != 'file' and key not in ['link', 'image']) %}
+                                            <option value="{{ key }}"
+                                                    {% if key == content.display_setting[field.name].display_as %}selected{% endif %}>
+                                                {{ value }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="checkbox" name="{{ field.name }}:display_enabled" value="1"
+                                       {% if content.display_setting[field.name].display_enabled == '1' %}checked{% endif %}>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td>{{ field.label }}</td><td colspan="3"></td></tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <input type="submit" name="display_submit" value="Save display settings" class="button">
+        </form>
+    </div>
+
+    <!-- Permission Settings Tab -->
+    <div id="permission-settings" class="tab-content">
+        <form method="post">
+            <label for="permissions">Select Roles</label>
+            <select name="permission[]" id="permissions" multiple>
+                {% for role in ['administrator', 'authenticated', 'manager', 'content_creator', 'anonymous'] %}
+                    <option value="{{ role }}"
+                            {% if role in content.permission %}selected{% endif %}>
+                        {{ role|capitalize|replace({'_': ' '}) }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="permission_submit" class="button">Save Permission Settings</button>
+        </form>
+    </div>
+
+{% endblock %}

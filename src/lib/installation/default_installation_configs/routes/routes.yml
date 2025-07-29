@@ -1,0 +1,954 @@
+database.form.route:
+  title: "Database Configuration Form"
+  path: '/admin/configure/database'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+  controller:
+    class: Simp\Core\lib\controllers\DatabaseController
+    method: database_form
+home.page.route:
+  title: "Home"
+  path: ''
+  method:
+    - GET
+  access:
+    - anonymous
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\HomeController
+    method: home_controller
+system.reports.errors:
+  title: "Reports"
+  path: '/admin/reports'
+  method:
+    - GET
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_report_site_controller
+system.error.page.denied:
+  title: "Access denied"
+  path: '/error/page/access-denied'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: system_error_page_denied
+
+system.user.filter.page:
+  title: "User Filter"
+  path: '/user/search/[search:string]/[content_name:string]/auto'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: system_user_filter_auto_page
+
+system.reference.filter.page:
+  title: "Reference Filter"
+  path: '/reference/field/filter'
+  method:
+    - POST
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: system_reference_filter
+
+# Account routes.
+user.account.login.form.route:
+  title: "Login"
+  path: '/user/login'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: user_login_form_controller
+user.account.google.redirect.route:
+  title: "Google Redirect"
+  path: '/user/oauth/google/access'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: user_login_google_redirect_controller
+user.account.github.redirect.route:
+  title: "Github Redirect"
+  path: '/user/oauth/github/access'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: user_login_github_redirect_controller
+user.account.logout.route:
+  title: "Logout"
+  path: '/user/logout'
+  method:
+    - GET
+    - POST
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: user_logout_controller
+user.account.form.page.route:
+  title: "Register"
+  path: '/user/register'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\UserAccountFormController
+    method: user_account_form_controller
+user.account.password.forgot:
+  title: "Forgot Password"
+  path: '/user/forgot-password'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\UserAccountFormController
+    method: user_account_password_form_controller
+user.account.password.reset:
+  title: "New Password"
+  path: '/user/password/reset/[hash:string]'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\UserAccountFormController
+    method: user_account_password_reset_form_controller
+user.account.email.verify:
+  title: "Email Verification"
+  path: '/user/verify/[hash:string]'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - administrator
+    - content_creator
+    - manager
+    - authenticated
+  controller:
+    class: Simp\Core\lib\controllers\UserAccountFormController
+    method: user_account_email_verify_form_controller
+
+system.messager.toastify:
+  title: "Messages"
+  path: '/system/messages'
+  method:
+    - GET
+    - POST
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: toastify_controller
+system.assets.loader:
+  title: "Assets"
+  path: '/system/assets/file'
+  method:
+    - GET
+    - POST
+  access:
+    - anonymous
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: assets_loader_controller
+
+# Admin account routes.
+system.people:
+  title: "People"
+  path: '/admin/people'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: people_controller
+system.account.delete:
+  title: "Account Deletion"
+  path: '/user/[uid:int]/delete'
+  method:
+    - GET
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: account_delete_controller
+system.account.edit:
+  title: "Account Edit"
+  path: '/user/[uid:int]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: account_edit_controller
+system.account.view:
+  title: "Account"
+  path: '/user/[uid:int]'
+  method:
+    - GET
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: account_controller
+system.account.profile.edit:
+  title: "Profile Account Edit"
+  path: '/user/[uid:int]/profile/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - authenticated
+    - administrator
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: account_profile_edit_controller
+
+# configuration routes.
+system.configuration:
+  title: "Configuration"
+  path: '/admin/config'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: configuration_controller
+system.configuration.basic:
+  title: "Site"
+  path: '/admin/config/system/site-information'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: configuration_basic_site_controller
+system.configuration.account:
+  title: "Account settings"
+  path: '/admin/config/people/accounts'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: configuration_account_controller
+system.configuration.smtp:
+  title: "Site Mail Server"
+  path: '/admin/config/smtp'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: configuration_smtp_controller
+system.configuration.logger:
+  title: "Development"
+  path: '/admin/config/development/settings'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: configuration_logger_controller
+
+# system content type.
+system.structure:
+  title: "Structure"
+  path: '/admin/structure'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: structure_controller
+system.structure.content-type:
+  title: "Content types"
+  path: '/admin/structure/types'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: structure_content_type_controller
+system.structure.content-type.form:
+  title: "Add content type"
+  path: '/admin/structure/types/new'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: structure_content_type_form_controller
+system.structure.content-type.edit:
+  title: "Content type edit"
+  path: '/admin/structure/content-type/[machine_name:string]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_edit_form_controller
+system.structure.content-type.delete:
+  title: "Delete content type"
+  path: '/admin/structure/content-type/[machine_name:string]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_delete_controller
+system.structure.content-type.manage:
+  title: "Content type manage"
+  path: '/admin/structure/content-type/[machine_name:string]/manage'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_manage_controller
+system.structure.content-type.manage.field.new:
+  title: "Add field"
+  path: '/admin/structure/content-type/[machine_name:string]/field/new'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_manage_add_field_controller
+system.structure.content-type.manage.field.type.new:
+  title: "Field Settings"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[type:string]/new'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_manage_add_field_type_controller
+system.structure.content-type.manage.field.edit:
+  title: "Edit field"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_manage_edit_field_controller
+system.structure.content-type.manage.field.delete:
+  title: "Delete field"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_manage_delete_field_controller
+system.structure.field.wrapper.field:
+  title: "Inner fields"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/inner-fields'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_structure_field_inner_manage_controller
+system.structure.field.wrapper.field.inner.add:
+  title: "Add Inner field"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/add/inner/new'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_structure_field_inner_add_controller
+system.structure.field.wrapper.field.inner.edit:
+  title: "Edit Inner field"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[parent_name:string]/[field_name:string]/inner/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_structure_field_inner_edit_controller
+system.structure.field.wrapper.field.inner.delete:
+  title: "Delete Inner field"
+  path: '/admin/structure/content-type/[machine_name:string]/field/[parent_name:string]/[field_name:string]/inner/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_type_manage_delete_inner_field_controller
+system.structure.content:
+  title: "Content"
+  path: '/admin/content'
+  method:
+    - GET
+  access:
+    - administrator
+    - manager
+    - content_creator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_content_admin_controller
+system.structure.content.add:
+  title: "Content Selection"
+  path: '/node/add'
+  method:
+    - GET
+  access:
+    - administrator
+    - manager
+    - content_creator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_content_node_add_controller
+system.structure.content.form:
+  title: "Add Content"
+  path: '/node/add/[content_name:string]'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - manager
+    - content_creator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_node_add_controller
+system.structure.content.node:
+  title: "Node page"
+  path: '/node/[nid:int]'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - content_creator
+    - authenticated
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_node_controller
+system.structure.content.form.edit:
+  title: "Edit Node"
+  path: '/node/[nid:int]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - content_creator
+    - authenticated
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_node_add_edit_controller
+system.structure.content.form.delete:
+  title: "Delete Node"
+  path: '/node/[nid:int]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - authenticated
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_node_add_delete_controller
+
+#views admin routes
+system.structure.views:
+  title: "Views"
+  path: '/admin/structure/views'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_views_controller
+system.structure.views.add:
+  title: "Add View"
+  path: '/admin/structure/views/add'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_views_add_controller
+system.structure.views.delete:
+  title: "Delete View"
+  path: '/admin/structure/views/view/[view_name:string]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_views_view_delete_controller
+system.structure.views.edit:
+  title: "Edit View"
+  path: '/admin/structure/views/view/[view_name:string]'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_views_view_edit_controller
+system.structure.views.display:
+  title: "Display View"
+  path: '/admin/structure/views/view/[view_name:string]/displays'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_views_view_display_controller
+
+system.structure.views.display.edit:
+  title: "Display Edit"
+  path: '/admin/structure/views/view/[view_name:string]/display/[display:string]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: content_views_view_display_edit_controller
+
+system.search.settings:
+  title: "Search Settings"
+  path: '/admin/search/settings'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_search_settings
+system.search.setting.add:
+  title: "Add Search Settings"
+  path: '/admin/search/setting/new'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_search_settings_new
+system.search.setting.edit:
+  title: "Edit Search Settings"
+  path: '/admin/search/settings/[key:string]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_search_settings_edit
+system.search.setting.delete:
+  title: "Delete Search Settings"
+  path: '/admin/search/settings/[key:string]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_search_settings_delete
+system.search.setting.configure:
+  title: "Configure Search Settings"
+  path: '/admin/search/settings/[key:string]/configure'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_search_settings_configure
+system.search.setting.search:
+  title: "Search"
+  path: '/search/[key:string]'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - authenticated
+    - anonymous
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: admin_search_settings_search_page
+
+#integration routes
+system.integration.configure.rest:
+  title: "REST"
+  path: '/admin/integration/rest'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: integration_configure_rest
+system.integration.configure.rest.version:
+  title: "REST Versions"
+  path: '/admin/integration/rest/version/[version_id:string]'
+  method:
+    - GET
+    - POST
+    - DELETE
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: integration_configure_rest_version
+system.integration.configure.rest.version.delete:
+  title: "Delete version"
+  path: '/admin/integration/rest/version/[version_id:string]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: integration_configure_rest_version_delete
+
+# Files routes
+system.files.add:
+  title: "Add File"
+  path: '/file/add'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\FileController
+    method: add_file
+system.files.upload.ajax:
+  title: "Ajax Add File"
+  path: '/file/upload/ajax'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - authenticated
+    - anonymous
+    - manager
+    - content_creator
+  controller:
+    class: Simp\Core\lib\controllers\FileController
+    method: file_upload
+system.files.upload.delete.ajax:
+  title: "Ajax Delete File"
+  path: '/file/delete/ajax'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+    - authenticated
+    - anonymous
+    - manager
+    - content_creator
+  controller:
+    class: Simp\Core\lib\controllers\FileController
+    method: file_delete_ajx
+
+system.cron.manage:
+  title: "Cron"
+  path: '/cron/manage'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: cron_manage
+
+system.cron.add:
+  title: "New Cron"
+  path: '/cron/add'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\SystemController
+    method: cron_add
+
+# Extends
+system.extends.manage:
+  title: "Extend"
+  path: '/admin/extends'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\ExtendController
+    method: extend_manage
+
+system.extends.manage.add:
+  title: "Upload extension"
+  path: '/admin/extend/add'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\ExtendController
+    method: extend_manage_add
+
+# Vocabulary and texonomy
+system.vocabulary.list:
+  title: "Taxonomy"
+  path: '/admin/structure/taxonomy'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: manage
+
+system.vocabulary.add:
+  title: "Add Vocabulary"
+  path: '/admin/structure/taxonomy/create'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: add
+system.vocabulary.edit:
+  title: "Edit Vocabulary"
+  path: '/admin/structure/taxonomy/[name:string]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: edit
+system.vocabulary.delete:
+  title: "Delete Vocabulary"
+  path: '/admin/structure/taxonomy/[name:string]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: delete
+
+system.vocabulary.terms:
+  title: "Vocabulary terms list"
+  path: '/admin/structure/taxonomy/[name:string]/terms'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: term_list
+
+system.vocabulary.term.add:
+  title: "Add Term"
+  path: '/admin/structure/taxonomy/[name:string]/term/add'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: term_add
+
+system.vocabulary.term.edit:
+  title: "Edit Term"
+  path: '/admin/structure/taxonomy/[name:string]/[tid:int]/edit'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: term_edit
+system.vocabulary.term.delete:
+  title: "Delete Term"
+  path: '/admin/structure/taxonomy/[name:string]/[tid:int]/delete'
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: term_delete
+system.vocabulary.term.view:
+  title: "Term"
+  path: '/term/[name:string]'
+  method:
+    - GET
+  access:
+    - administrator
+    - authenticated
+    - anonymous
+    - content_creator
+    - manager
+  controller:
+    class: Simp\Core\lib\controllers\VocabularyController
+    method: term_view

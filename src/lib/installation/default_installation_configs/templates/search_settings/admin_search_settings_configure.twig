@@ -1,0 +1,11 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>Search setting configure <em>{{ search_setting.name }}</em></h3>
+
+    {% if search_setting.type == 'content_type' %}
+        {{ include ('default.view.admin_search_settings_content_type', {}, with_context: true) }}
+    {% elseif search_setting.type == 'user_type' %}
+        {{ include ('default.view.admin_search_settings_user_type', {}, with_context: true) }}
+    {% endif %}
+{% endblock %}

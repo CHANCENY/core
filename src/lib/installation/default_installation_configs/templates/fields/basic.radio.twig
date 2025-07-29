@@ -1,0 +1,74 @@
+<form method="post" class="form">
+    <input type="hidden" name="type" value="{{ field.type }}">
+    <div class="field-wrapper">
+        <!-- Field Label and Name -->
+        <div class="form-group">
+            <label for="field-name">Label</label>
+            <input type="text" value="{{ definition.label }}" name="title" id="field-name" class="form-control" placeholder="Enter field label">
+        </div>
+
+        <!-- Allowed Number of Values -->
+        <div class="form-group">
+            <label for="storage-limit">Allowed number of values</label>
+            <input type="number" value="{{ definition.limit }}" name="limit" min="1" id="storage-limit" class="form-control" placeholder="e.g., 1 or unlimited">
+        </div>
+
+        <!-- Field Settings -->
+        <fieldset class="form-control">
+            <legend>Field Settings</legend>
+
+            <!-- Required Checkbox -->
+            <div class="form-group">
+                <label for="field-required">
+                    <input {{ definition.required ? 'checked' : ''}} type="checkbox" name="required" id="field-required">
+                    Required
+                </label>
+            </div>
+
+            <fieldset class="option-wrapper">
+                <legend>{{ field.title }} Options</legend>
+                <div class="option-collection">
+                    <div class="form-group">
+                        {% set options = definition.radios ?? definition.checkboxes %}
+
+                        {% if options %}
+
+                            {% for option in options %}
+                                <input value="{{ option }}" type="text" name="options[]" class="form-control" placeholder="Enter option">
+                            {% endfor %}
+
+                        {% else %}
+                            <input type="text" name="options[]" class="form-control" placeholder="Enter option">
+                        {% endif %}
+
+                        <a href="#" class="remove d-none">Remove option</a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary w-25 add-option">Add Option</button>
+                </div>
+            </fieldset>
+
+            <!-- Need Field (Custom Setting) -->
+            <div class="form-group">
+                <label for="default-value">Default value</label>
+                <input value="{{ definition.default_value }}" type="text" name="default_value" id="default-value" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="class">Css Classes (optional)</label>
+                <input value="{{ definition.class|join(' ') }}" type="text" name="class" id="class" class="form-control">
+                <small>Separate classes with a space</small>
+            </div>
+            <div class="form-group">
+                <label for="default-value">Html ID (optional)</label>
+                <input value="{{ definition.id }}" type="text" name="id" id="default-value" class="form-control">
+            </div>
+        </fieldset>
+        {% if definition.index is empty %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary w-25">Save</button>
+            </div>
+        {% endif %}
+    </div>
+</form>

@@ -1,0 +1,54 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <h3>{{ "Taxonomy"|t }}</h3>
+
+    <div>
+        <a href="/admin/structure/taxonomy/create">+create</a>
+    </div>
+
+    <div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% if list %}
+
+                {% for item in list %}
+
+                <tr>
+                    <td>{{ item.label }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>
+                        <a href="/admin/structure/taxonomy/{{ item.name }}/terms">List</a>
+                        <a href="/admin/structure/taxonomy/{{ item.name }}/edit">Edit</a>
+                        <a href="/admin/structure/taxonomy/{{ item.name }}/delete">Delete</a>
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <tr>
+                    <td colspan="3">no vocabulary found</td>
+                </tr>
+
+
+            {% endif %}
+
+            </tbody>
+        </table>
+
+    </div>
+
+{% endblock %}

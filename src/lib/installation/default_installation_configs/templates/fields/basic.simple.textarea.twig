@@ -1,0 +1,61 @@
+<form method="post" class="form">
+    <input type="hidden" name="type" value="{{ field.type }}">
+    <div class="field-wrapper">
+        <!-- Field Label and Name -->
+        <div class="form-group">
+            <label for="field-name">Label</label>
+            <input value="{{ definition.label }}" type="text" name="title" id="field-name" class="form-control" placeholder="Enter field label">
+        </div>
+
+        <!-- Allowed Number of Values -->
+        <div class="form-group">
+            <label for="storage-limit">Allowed number of values</label>
+            <input value="{{ definition.limit }}" type="number" name="limit" min="1" id="storage-limit" class="form-control" placeholder="e.g., 1 or unlimited">
+        </div>
+
+        <!-- Field Settings -->
+        <fieldset class="form-control">
+            <legend>Field Settings</legend>
+
+            <!-- Required Checkbox -->
+            <div class="form-group">
+                <input {{ definition.required ? 'checked' : '' }} type="checkbox" name="required" id="field-required">
+                <label for="field-required">
+                    Required
+                </label>
+            </div>
+
+            <!-- Need Field (Custom Setting) -->
+            <div class="form-group">
+                <label for="default-value">Default value</label>
+                <input value="{{ definition.default_value }}"  type="text" name="default_value" id="default-value" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="rows">Rows</label>
+                <input value="{{ definition.options.rows }}" type="number" name="rows" id="rows" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="cols">Rows</label>
+                <input value="{{ definition.options.cols }}" type="number" name="cols" id="cols" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="class">Css Classes (optional)</label>
+                <input value="{{ definition.class|join(' ') }}" type="text" name="class" id="class" class="form-control">
+                <small>Separate classes with a space</small>
+            </div>
+            <div class="form-group">
+                <label for="default-value">Html ID (optional)</label>
+                <input type="text" value="{{ definition.id }}" name="id" id="default-value" class="form-control">
+            </div>
+        </fieldset>
+        {% if definition.index is empty %}
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary w-25">Save</button>
+        </div>
+        {% endif %}
+    </div>
+
+</form>
