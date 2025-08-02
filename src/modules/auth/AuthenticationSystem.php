@@ -17,7 +17,7 @@ class AuthenticationSystem
     {
         $this->oauth = new StdClass();
         $system = new SystemDirectory();
-        $oauth_file = $system->setting_dir .DIRECTORY_SEPARATOR . 'defaults' . DIRECTORY_SEPARATOR . 'oauth'
+        $oauth_file = $system->webroot_dir .DIRECTORY_SEPARATOR . 'core'.DIRECTORY_SEPARATOR . 'defaults' . DIRECTORY_SEPARATOR . 'oauth'
             . DIRECTORY_SEPARATOR . 'oauth.yml';
 
         if (file_exists($oauth_file)) {

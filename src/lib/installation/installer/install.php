@@ -86,7 +86,7 @@ require_once __DIR__ . "/../../vendor/autoload.php";
             if (index >= steps.length) {
                 $('#finish').fadeIn();
                 setTimeout(() => {
-                    window.location.href = '/core/site-config.php'; // Change if needed
+                    window.location.href = '/core/db-config.php'; // Change if needed
                 }, 3000);
                 return;
             }

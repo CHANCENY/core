@@ -1,0 +1,26 @@
+title: "Login Form"
+name: 'user.entity.login.form'
+fields:
+  name:
+    type: text
+    name: name
+    id: name
+    label: 'Username or Email'
+    required: true
+    class: ['form-control']
+
+  password:
+    type: password
+    name: password
+    id: password
+    label: 'Password'
+    required: true
+    class: ['form-control']
+    handler: Simp\Core\components\password\PasswordField
+
+  submit:
+    type: submit
+    name: submit
+    id: submit
+    default_value: 'Login'
+    class: ['btn', 'btn-primary']

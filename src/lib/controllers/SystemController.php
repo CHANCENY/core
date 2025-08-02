@@ -3,6 +3,7 @@
 namespace Simp\Core\lib\controllers;
 
 use AddCronForm;
+use Simp\Core\components\form\FormDefinitionBuilder;
 use Simp\Core\components\rest_data_source\DefaultDataSource;
 use Simp\Core\lib\forms\ContentTypeInnerFieldEditForm;
 use Simp\Core\lib\forms\DisplayEditForm;
@@ -259,9 +260,7 @@ class SystemController
     public function account_edit_controller(...$args): RedirectResponse|Response
     {
         extract($args);
-        $form_base = new FormBuilder(new UserAccountEditForm());
-        $form_base->getFormBase()->setFormMethod('POST');
-        $form_base->getFormBase()->setFormEnctype('multipart/form-data');
+        $form_base = FormDefinitionBuilder::factory()->getForm('user.entity.edit.form');
         return new Response(View::view('default.view.edit.account.form',['_form'=>$form_base]),200);
     }
 
@@ -277,40 +276,7 @@ class SystemController
         return new Response(View::view('default.view.view.account', ['user'=>$user]),200);
     }
 
-    /**
-     * @throws SyntaxError
-     * @throws RuntimeError
-     * @throws LoaderError
-     */
-    public function user_login_form_controller(...$args): RedirectResponse|Response
-    {
-        extract($args);
-        $form_base = new FormBuilder(new LoginForm());
-        $form_base->getFormBase()->setFormMethod('POST');
-        $form_base->getFormBase()->setFormEnctype('multipart/form-data');
-        $field = $form_base->getFields();
-        $authenticate = new AuthenticationSystem();
-        $google_link = null;
-        $github_link = null;
-        if ($authenticate->isGoogleAuthActive()) {
-            $google = $authenticate->getOauthInstance('google');
-            $google_link = $google->generateLoginUrl();
-        }
-
-        if ($authenticate->isGithubAuthActive()) {
-            $github = $authenticate->getOauthInstance('github');
-            $github_link = $github->generateLoginUrl();
-        }
-
-        return new Response(View::view('default.view.view.login.form',[
-            'name'=> $field['name'],
-            'password'=> $field['password'],
-            'auth' => $authenticate,
-            'google_link' => $google_link,
-            'github_link' => $github_link,
-        ]),200);
-    }
-
+   
     /**
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheLogicException
@@ -327,20 +293,6 @@ class SystemController
         return new RedirectResponse($request->server->get('REDIRECT_URL'));
     }
 
-
-    /**
-     * @throws RuntimeError
-     * @throws SyntaxError
-     * @throws LoaderError
-     */
-    public function account_profile_edit_controller(...$args): RedirectResponse|Response
-    {
-        extract($args);
-        $form_base = new FormBuilder(new ProfileEditForm());
-        $form_base->getFormBase()->setFormMethod('POST');
-        $form_base->getFormBase()->setFormEnctype('multipart/form-data');
-        return new Response(View::view('default.view.profile.form.edit', ['_form'=>$form_base]),200);
-    }
 
     /**
      * @param ...$args
@@ -717,10 +669,28 @@ class SystemController
         /**@var Request $request**/
         $limit = $request->get('limit', 10);
         $limit = empty($limit) ? 10 : $limit;
+
         $filters = Node::filters('node_data', $limit);
         $files_filters = File::filters('file_managed', $limit);
-        $nodes = Node::parseFilter(Node::class, 'node_data', $filters, $request, Node::class);
-        //$files = File::parseFilter(File::class, 'file_managed', $files_filters, $request, File::class);
+
+        $files = [];
+        $nodes = [];
+        if (!empty($request->get('search_by'))) {
+
+            if ($request->get('storage') === 'file_managed') {
+                $files = File::parseFilter(File::class, 'file_managed',
+                    $files_filters, $request, File::class);
+            }
+            elseif ($request->get('storage') === 'node_data') {
+                $nodes = Node::parseFilter(Node::class, 'node_data', $filters, $request, Node::class);
+            }
+        }
+        else {
+            $nodes = Node::parseFilter(Node::class, 'node_data', $filters, $request, Node::class);
+            $files = File::parseFilter(File::class, 'file_managed',
+                $files_filters, $request, File::class);
+        }
+
         return new Response(View::view('default.view.content_content_admin',
             [
                 'nodes' => $nodes,

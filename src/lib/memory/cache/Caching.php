@@ -2,6 +2,8 @@
 
 namespace Simp\Core\lib\memory\cache;
 
+use Phpfastcache\CacheManager;
+use Phpfastcache\Config\ConfigurationOption;
 use Phpfastcache\Drivers\Files\Driver;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -9,6 +11,7 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Psr\Cache\InvalidArgumentException;
+use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\lib\memory\MemoryInterface;
 
 class Caching implements MemoryInterface
@@ -20,7 +23,13 @@ class Caching implements MemoryInterface
 
     public function __construct()
     {
-        $this->caching_object = $GLOBALS["caching"] ?? '';
+        $system = new SystemDirectory;
+        CacheManager::setDefaultConfig(new ConfigurationOption([
+            'path' => $system->var_dir . '/cache',
+        ]));
+
+        $this->caching_object = CacheManager::getInstance('files');
+        $GLOBALS['caching'] = $this;
     }
 
     /**
@@ -102,6 +111,9 @@ class Caching implements MemoryInterface
 
     public static function init(): Caching
     {
+        if (!empty($GLOBALS["caching"])) {
+            return $GLOBALS["caching"];
+        }
         return new self();
     }
 
@@ -120,5 +132,10 @@ class Caching implements MemoryInterface
     {
         $command = "usr/bin/php ". getcwd() . "/vendor/bin/simp.php cache:clear";
         exec($command, $output, $return);
+    }
+
+    public function driver(): Driver
+    {
+        return $this->caching_object;
     }
 }

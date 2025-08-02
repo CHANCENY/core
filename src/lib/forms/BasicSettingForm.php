@@ -17,7 +17,7 @@ class BasicSettingForm extends FormBase
        return 'basic_setting';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $config = ConfigManager::config()->getConfigFile('basic.site.setting');
         $form['site'] = [
@@ -131,7 +131,7 @@ class BasicSettingForm extends FormBase
         }
     }
 
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             unset($form['submit']);

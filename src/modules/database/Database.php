@@ -2,6 +2,8 @@
 
 namespace Simp\Core\modules\database;
 
+use Simp\Core\components\extensions\ModuleHandler;
+use Simp\Core\lib\memory\cache\Caching;
 use Throwable;
 use PDO;
 use Medoo\Medoo;
@@ -199,4 +201,75 @@ class Database
             return false;
         }
     }
+
+    public static function prepareSystemTable(): bool
+    {
+        $tables = Caching::init()->get('default.admin.built_in_tables');
+
+        $flag = [];
+        if (file_exists($tables)) {
+            $tables = Yaml::parseFile($tables);
+            if (is_array($tables['table'])) {
+                foreach ($tables['table'] as $query) {
+                   try{ $flag[] = Database::database()->con()->query($query); }catch (\Throwable){}
+                }
+            }
+        }
+        $module_handler = ModuleHandler::factory();
+        $modules = $module_handler->getModules();
+        foreach($modules as $key=>$module) {
+            if ($module_handler->isModuleEnabled($key)) {
+                $module_install = $module['path'] . DIRECTORY_SEPARATOR . $key. '.install.php';
+                if (file_exists($module_install)) {
+                    $database_install = $key . '_database_install';
+                    require_once $module_install;
+                    if (function_exists($database_install)) {
+                        $database_install();
+                    }
+                }
+            }
+        }
+        return !in_array(false, $flag);
+    }
+
+    public function getHostname(): string
+    {
+        return $this->hostname;
+    }
+
+    public function getDbname(): string
+    {
+        return $this->dbname;
+    }
+
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function getPort(): int
+    {
+        return $this->port;
+    }
+
+    public function getDsn(): string
+    {
+        return $this->dsn;
+    }
+
+    public function getCache(): array
+    {
+        return $this->cache;
+    }
+
+    public function isLog(): bool
+    {
+        return $this->log;
+    }
+
 }

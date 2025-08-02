@@ -51,9 +51,9 @@ class ContentDefinitionStorage
                if ($type === 'number') {
                    $type = "INT";
                } elseif ($type === 'textarea') {
-                   $type = "TEXT";
+                   $type = "LONGTEXT";
                } else {
-                   $type = "VARCHAR(255)";
+                   $type = "VARCHAR(500)";
                }
 
                if (!empty($key)) {

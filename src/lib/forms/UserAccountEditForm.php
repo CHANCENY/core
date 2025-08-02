@@ -13,6 +13,7 @@ use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\entity\User;
 use Simp\Core\modules\user\roles\Role;
 use Simp\Default\DetailWrapperField;
+use Simp\Default\FieldSetField;
 use Simp\Default\SelectField;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,8 +32,9 @@ class UserAccountEditForm extends UserAccountForm
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
+        
         $form = parent::buildForm($form);
         $request = Service::serviceManager()->request;
         $user = User::load($request->get('uid'));
@@ -65,13 +67,13 @@ class UserAccountEditForm extends UserAccountForm
         if (CurrentUser::currentUser()?->isIsAdmin()) {
             $roles = $user->getRoles();
             $form['roles'] = [
-                'type' => 'details',
+                'type' => 'fieldset',
                 'name' => 'users_roles',
                 'id' => 'users_roles',
                 'class' => ['form-control'],
                 'label' => 'Manage account roles from here. you can select to keep or remove the existing role from account.',
                 'inner_field' => array(),
-                'handler' => DetailWrapperField::class,
+                'handler' => FieldSetField::class,
                 'options' => [
                     'open' => 'open'
                 ]
@@ -110,7 +112,7 @@ class UserAccountEditForm extends UserAccountForm
     {
     }
 
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $request = Service::serviceManager()->request;
         $user = User::load($request->get('uid'));
@@ -122,12 +124,20 @@ class UserAccountEditForm extends UserAccountForm
         ];
 
         if (CurrentUser::currentUser()?->isIsAdmin()) {
-            $updated_data['status'] = $form['status']->getValue();
+            $status = 0;
+            if (!empty($form['status']->getValue())) {
+                $status = $form['status']->getValue();
+            }
+            else {
+                $status = $user->getStatus();
+            }
+            $updated_data['status'] = $status;
         }
 
         // Avoid duplication
-        if (!empty($form['roles'])) {
-            $roles = $form['roles']->getValue();
+        if (!empty($form['roles']->getValue())) {
+            $roles = $form['roles']->getValue() ?? [];
+            $roles = is_string($roles) ? [$roles] : $roles;
             $count = count($roles);
             $user_roles = $user->getRoles();
             for ($i = 0; $i < $count; $i++) {

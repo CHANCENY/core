@@ -72,7 +72,7 @@ class ContentTypeDefinitionForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $form['title'] = [
             'type' => 'text',
@@ -239,7 +239,7 @@ class ContentTypeDefinitionForm extends FormBase
      * @throws PhpfastcacheInvalidArgumentException
      * @throws Exception
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
 

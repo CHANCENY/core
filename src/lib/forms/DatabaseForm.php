@@ -18,16 +18,35 @@ use Symfony\Component\Yaml\Yaml;
 class DatabaseForm extends FormBase
 {
     protected bool $validated = true;
+
+    protected array $schema;
+
+    protected ?Database $database;
+
+    public function __construct(mixed $options = [])
+    {
+        parent::__construct($options);
+        $schema = Caching::init()->get('default.admin.database');
+        if (file_exists($schema)) {
+            $this->schema = Yaml::parseFile($schema);
+        }
+        $this->database = Database::database();
+    }
+
     public function getFormId(): string
     {
         return "database_form";
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
-        $form_file = Caching::init()->get('default.admin.database.form');
-        if (file_exists($form_file)) {
-            $form = Yaml::parseFile($form_file)['fields']?? [];
+        $form =  parent::buildForm($form);
+        if (!empty($this->schema) && !empty($this->database)) {
+            $form['host_name']['default_value'] = $this->database->getHostname() ?? '';
+            $form['user_name']['default_value'] = $this->database->getUsername() ?? '';
+            $form['database_name']['default_value'] = $this->database->getDbname() ?? '';
+            $form['password']['default_value'] = $this->database->getPassword() ?? '';
+            $form['database_port']['default_value'] = $this->database->getPort() ?? '';
         }
         return $form;
     }
@@ -75,7 +94,7 @@ class DatabaseForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             $data = [
@@ -90,16 +109,16 @@ class DatabaseForm extends FormBase
             if ($result) {
                 Messager::toast()->addMessage("Database connection created successfully");
             }
-            $schema = Caching::init()->get('default.admin.database');
-            if (file_exists($schema)) {
-                $schema_data = Yaml::parseFile($schema);
-                $schema_data = array_merge($schema_data, $data);
+            if (!empty($this->schema)) {
+                $schema_data = array_merge($this->schema, $data);
                 $system = new SystemDirectory();
                 @mkdir($system->setting_dir . DIRECTORY_SEPARATOR . 'database', 0777, true);
                 $setting_data = $system->setting_dir . DIRECTORY_SEPARATOR . 'database' .
                     DIRECTORY_SEPARATOR . 'database.yml';
-                if (file_put_contents($setting_data, Yaml::dump($schema_data))) {
-                    (new RedirectResponse('/'))->send();
+                $size = file_put_contents($setting_data, Yaml::dump($schema_data));
+                if ($size) {
+                    Database::prepareSystemTable();
+                    (new RedirectResponse('/core/site-config.php'))->send();
                 }
             }
         }

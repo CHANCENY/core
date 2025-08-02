@@ -16,7 +16,7 @@ class AddCronForm extends FormBase {
         return "cron_form";
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $form['title'] = [
             'type'=> 'text',
@@ -162,7 +162,7 @@ class AddCronForm extends FormBase {
 
     }
 
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $data = \array_map(function($item){ return $item->getValue(); },$form);
         $name = \str_replace(' ', '_', $data['title']);

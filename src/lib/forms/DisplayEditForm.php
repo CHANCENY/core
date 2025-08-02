@@ -25,7 +25,7 @@ class DisplayEditForm extends FormBase
         return 'display_edit_form';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $display = ViewsManager::viewsManager()->getDisplay(Service::serviceManager()->request->get('display'));
 
@@ -122,7 +122,7 @@ class DisplayEditForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $data = array_map(fn($item) => $item->getValue(), $form);
         $display = ViewsManager::viewsManager()->getDisplay(Service::serviceManager()->request->get('display'));

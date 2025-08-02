@@ -22,11 +22,11 @@ trait StaticHelperTrait
      */
     public static function filters(string $table_name, int $limit = 10): array
     {
+        $filters['storage'] = $table_name;
         $query = "SHOW COLUMNS FROM $table_name";
         $query = Database::database()->con()->prepare($query);
         $query->execute();
         $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        $filters = array();
         if (!empty($result)) {
             $columns = array_column($result, 'Field');
             $filters['order_by'] = $columns;

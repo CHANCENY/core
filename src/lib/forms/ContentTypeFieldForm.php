@@ -31,7 +31,7 @@ class ContentTypeFieldForm extends FormBase
         return 'content_type_manage_add_field';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $form['title'] = [
             'type' => 'text',
@@ -254,7 +254,7 @@ class ContentTypeFieldForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $request = Service::serviceManager()->request;
        if ($this->validated) {

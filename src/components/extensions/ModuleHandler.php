@@ -23,7 +23,7 @@ class ModuleHandler extends SystemDirectory
         parent::__construct();
 
         // Load the default modules. All default modules are in the extents directory.
-        $default_modules = $this->root_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'extends';
+        $default_modules = $this->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'modules';
         if (!is_dir($default_modules)) {
             @mkdir($default_modules, 0777, true);
         }

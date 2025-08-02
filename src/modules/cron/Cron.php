@@ -30,7 +30,6 @@ class Cron
         if (!empty($default_cron) && \file_exists($default_cron)) {
             $this->jobs = Yaml::parseFile($default_cron) ?? [];
         }
-
         $system = new SystemDirectory;
         $custom_cron = $system->setting_dir . \DIRECTORY_SEPARATOR . 'cron' . \DIRECTORY_SEPARATOR . 'custom_cron.yml';
         if (!\is_dir( $system->setting_dir . \DIRECTORY_SEPARATOR . 'cron' )) {

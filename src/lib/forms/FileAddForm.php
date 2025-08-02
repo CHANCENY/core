@@ -25,7 +25,7 @@ class FileAddForm extends FormBase
        return "add_file_form";
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $form['files'] = [
             'type' => 'drag_and_drop',
@@ -79,7 +79,7 @@ class FileAddForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
        if ($this->validated) {
 

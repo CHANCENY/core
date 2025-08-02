@@ -81,7 +81,7 @@ class ContentTypeDefinitionEditForm extends FormBase
      * @param array $form
      * @return array
      */
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $form['title'] = [
             'type' => 'text',
@@ -251,7 +251,7 @@ class ContentTypeDefinitionEditForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
 

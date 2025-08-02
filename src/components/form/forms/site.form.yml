@@ -1,0 +1,132 @@
+title: Website Installer Form
+name: 'site.form'
+attributes:
+  action: null
+  method: POST
+  enctype: multipart/form-data
+  id: installForm
+  class: []
+
+fields:
+
+  # --- Website Settings Tab ---
+  site_name:
+    name: site_name
+    type: text
+    required: true
+    id: siteName
+    label: Site Name
+    class:
+      - form-control
+  # --- Admin Tab ---
+  admin_username:
+    name: admin_username
+    type: text
+    required: true
+    id: adminUsername
+    label: Username
+    class:
+      - form-control
+
+  admin_email:
+    name: admin_email
+    type: email
+    required: true
+    id: adminEmail
+    label: Email
+    class:
+      - form-control
+
+  admin_password:
+    name: admin_password
+    type: password
+    required: true
+    id: adminPassword
+    label: Password
+    class:
+      - form-control
+    handler: Simp\Core\components\password\PasswordField
+
+  confirm_password:
+    name: confirm_password
+    type: password
+    required: true
+    id: confirmPassword
+    label: Confirm Password
+    class:
+      - form-control
+    handler:  Simp\Core\components\password\PasswordField
+
+  # --- Timezone Tab ---
+  timezone:
+    name: timezone
+    type: select
+    required: true
+    id: timezone
+    label: Timezone
+    option_values:
+      "": "Select a timezone"
+      "UTC": "UTC"
+      "Africa/Blantyre": "Africa/Blantyre"
+      "America/New_York": "America/New_York"
+      "Asia/Kolkata": "Asia/Kolkata"
+      "Europe/London": "Europe/London"
+      "Australia/Sydney": "Australia/Sydney"
+    class:
+      - form-control
+    handler: Simp\Default\SelectField
+
+  site_mail:
+    name: site_mail
+    type: email
+    required: false
+    id: site_mail
+    label: Site Email
+    class:
+      - form-control
+
+  site_slogan:
+    name: site_slogan
+    type: text
+    required: false
+    id: site_slogan
+    label: Site Slogan
+    class:
+      - form-control
+
+  front_page_url:
+    name: front_page_url
+    type: text
+    required: false
+    id: front_page_url
+    label: Front Page URL
+    class:
+      - form-control
+
+  not_found_page:
+    name: not_found_page
+    type: text
+    required: false
+    id: not_found_page
+    label: 404 Not Found Page URL
+    class:
+      - form-control
+
+  access_denied_page:
+    name: access_denied_page
+    type: text
+    required: false
+    id: access_denied_page
+    label: Access Denied Page URL
+    class:
+      - form-control
+
+  # --- Submit ---
+  submit:
+    name: submit
+    type: submit
+    id: submit
+    default_value: Install
+    class:
+      - btn
+      - btn-success

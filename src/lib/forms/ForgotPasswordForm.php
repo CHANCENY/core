@@ -16,27 +16,9 @@ class ForgotPasswordForm extends FormBase
        return 'forgot_password';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
-        $form['name'] = [
-            'type' => 'text',
-            'label' => 'Email Address or Username',
-            'name' => 'name',
-            'required' => true,
-            'id' => 'name',
-            'class' => ['form-control'],
-            'options' => [
-                'autocomplete' => 'off',
-                'autofocus' => 'autofocus',
-            ]
-        ];
-        $form['submit'] = [
-            'type' => 'submit',
-            'default_value' => 'Request Change Password',
-            'name' => 'submit',
-            'id' => 'submit',
-            'class' => ['btn', 'btn-primary'],
-        ];
+        $form = parent::buildForm($form);
         return $form;
     }
 
@@ -51,7 +33,7 @@ class ForgotPasswordForm extends FormBase
     /**
      * @throws Exception
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             $name = $form['name']->getValue();

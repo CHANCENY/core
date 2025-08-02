@@ -23,7 +23,7 @@ class VocabularyForm extends FormBase
         return 'vocabulary';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $taxonomy = [];
         $name = Service::serviceManager()->request->get('name');
@@ -64,7 +64,7 @@ class VocabularyForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
 

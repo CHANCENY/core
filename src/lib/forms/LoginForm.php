@@ -7,6 +7,7 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Simp\Core\modules\auth\AuthenticationSystem;
 use Simp\Core\modules\auth\normal_auth\AuthUser;
 use Simp\Core\modules\messager\Messager;
 use Simp\FormBuilder\FormBase;
@@ -25,24 +26,21 @@ class LoginForm extends FormBase
         return 'login_form';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
-        $form['name'] = [
-            'type' => 'text',
-            'name' => 'name',
-            'id' => 'name',
-            'label' => 'Username or Email',
-            'required' => true,
-            'class' => ['form-control'],
-        ];
-        $form['password'] = [
-            'type' => 'password',
-            'name' => 'password',
-            'id' => 'password',
-            'label' => 'Password',
-            'required' => true,
-            'class' => ['form-control'],
-        ];
+        $form = parent::buildForm($form);
+        $authenticate = new AuthenticationSystem();
+
+        if ($authenticate->isNormalAuthActive()) {
+
+            if ($authenticate->isNormalDefaultPasswordLessType()) {
+                unset($form['password']);
+            }
+        }
+        else {
+            unset($form['name']);
+            unset($form['password']);
+        }
         return $form;
     }
 
@@ -60,7 +58,7 @@ class LoginForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
        if ($this->validated) {
            $name = $form['name']->getValue();

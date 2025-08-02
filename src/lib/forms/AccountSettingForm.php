@@ -19,7 +19,7 @@ class AccountSettingForm extends FormBase
        return 'account_setting';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $config = ConfigManager::config()->getConfigFile('account.setting');
         $form['anonymous'] = [
@@ -238,7 +238,7 @@ class AccountSettingForm extends FormBase
         // TODO: Implement validateForm() method.
     }
 
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $account_settings = array_map(function ($account_setting) {
             return $account_setting->getValue();

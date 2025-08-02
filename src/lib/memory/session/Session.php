@@ -2,6 +2,8 @@
 
 namespace Simp\Core\lib\memory\session;
 
+use Phpfastcache\CacheManager;
+use Phpfastcache\Config\ConfigurationOption;
 use Phpfastcache\Drivers\Files\Driver;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -10,6 +12,7 @@ use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Phpfastcache\Exceptions\PhpfastcacheUnsupportedMethodException;
 use Psr\Cache\InvalidArgumentException;
+use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\lib\memory\MemoryInterface;
 
 class Session implements MemoryInterface
@@ -21,8 +24,13 @@ class Session implements MemoryInterface
 
     public function __construct()
     {
-        $this->session_object = $GLOBALS["session_store"];
+        $system = new SystemDirectory;
+        CacheManager::setDefaultConfig(new ConfigurationOption([
+            'path' => $system->var_dir . '/sessions',
+        ]));
+        $this->session_object = CacheManager::getInstance('files');
         $this->session_id = session_id();
+        $GLOBALS["session_store"] = $this;
     }
 
     private function persistAndReload(): bool
@@ -161,5 +169,10 @@ class Session implements MemoryInterface
             return iterator_to_array($this->session_object->getAllItems());
         }
         return array_keys($this->session_object);
+    }
+
+    public function driver(): Driver
+    {
+        return $this->session_object;
     }
 }

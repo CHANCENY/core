@@ -44,7 +44,7 @@ class Theme extends SystemDirectory
             $this->twig_functions = get_functions();
         }
 
-        $this->twig_function_definition_file = $this->setting_dir .DIRECTORY_SEPARATOR . 'twig'.DIRECTORY_SEPARATOR.'functions.php';
+        $this->twig_function_definition_file = $this->webroot_dir .DIRECTORY_SEPARATOR . 'twig'.DIRECTORY_SEPARATOR.'functions.php';
         if (file_exists($this->twig_function_definition_file)) {
             require_once $this->twig_function_definition_file;
             $custom_functions = get_functions();
@@ -60,7 +60,7 @@ class Theme extends SystemDirectory
         }
 
         // Loading custom filters.
-        $this->twig_filter_definition_file = $this->setting_dir .DIRECTORY_SEPARATOR . 'twig'.DIRECTORY_SEPARATOR.'filters.php';
+        $this->twig_filter_definition_file = $this->webroot_dir .DIRECTORY_SEPARATOR . 'twig'.DIRECTORY_SEPARATOR.'filters.php';
         if(file_exists($this->twig_filter_definition_file)) {
             require_once $this->twig_filter_definition_file;
             $custom_filters = get_filters();

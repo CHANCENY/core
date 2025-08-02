@@ -10,7 +10,7 @@ use Simp\Core\modules\services\Service;
 
 class ContentTypeEditForm extends ContentTypeForm
 {
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $request = Service::serviceManager()->request;
         $new_data = $request->request->all();

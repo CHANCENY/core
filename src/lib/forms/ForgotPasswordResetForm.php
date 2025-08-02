@@ -25,35 +25,9 @@ class ForgotPasswordResetForm extends FormBase
         return 'forgot_password_form';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
-        $form['password'] = [
-            'type' => 'password',
-            'label' => 'Password',
-            'class' => ['form-control'],
-            'required' => true,
-            'id' => 'password',
-            'name' => 'password',
-            'options' => [
-                'autocomplete' => 'off',
-                'autofocus' => true,
-            ]
-        ];
-        $form['password_confirmation'] = [
-            'type' => 'password',
-            'label' => 'Confirm Password',
-            'class' => ['form-control'],
-            'required' => true,
-            'id' => 'password_confirmation',
-            'name' => 'password_confirmation',
-        ];
-        $form['submit'] = [
-            'type' => 'submit',
-            'default_value' => 'Submit',
-            'class' => ['btn btn-primary'],
-            'name' => 'submit',
-            'id' => 'submit',
-        ];
+        $form = parent::buildForm($form);
         return $form;
     }
 
@@ -81,7 +55,7 @@ class ForgotPasswordResetForm extends FormBase
      * @throws PhpfastcacheInvalidArgumentException
      * @throws Exception
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             $hash = Service::serviceManager()->request->get('hash');

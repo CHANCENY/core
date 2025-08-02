@@ -13,7 +13,7 @@ class TimeZone extends SystemDirectory
     public function __construct(?string $timezone = null)
     {
         parent::__construct();
-        $timezone_file = $this->setting_dir .DIRECTORY_SEPARATOR . 'defaults' . DIRECTORY_SEPARATOR . 'timezones'
+        $timezone_file = $this->webroot_dir .DIRECTORY_SEPARATOR .'core'. DIRECTORY_SEPARATOR .'defaults' . DIRECTORY_SEPARATOR . 'timezones'
         . DIRECTORY_SEPARATOR . 'timezone.yml';
         if (file_exists($timezone_file)) {
             $this->timezones = Yaml::parse(file_get_contents($timezone_file));

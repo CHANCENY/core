@@ -21,7 +21,7 @@ class TermAddForm extends FormBase
         return 'termAddForm';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $term = Term::factory()->getTerm(Service::serviceManager()->request->get('tid',0));
         $form['title'] = [
@@ -60,7 +60,7 @@ class TermAddForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $vid = Service::serviceManager()->request->get('name');
         $tid = Service::serviceManager()->request->get('tid');

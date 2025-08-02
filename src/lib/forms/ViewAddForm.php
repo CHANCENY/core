@@ -35,7 +35,7 @@ class ViewAddForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $routes = Caching::init()->get('system.routes.keys');
         $routes = array_values($routes);
@@ -166,7 +166,7 @@ class ViewAddForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
 

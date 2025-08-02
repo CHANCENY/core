@@ -30,7 +30,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
         return 'ContentTypeFieldEditForm';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $request = Service::serviceManager()->request;
         $name = $request->get('machine_name');
@@ -207,7 +207,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $request = Service::serviceManager()->request;
         if ($this->validated) {

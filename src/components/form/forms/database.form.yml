@@ -1,0 +1,63 @@
+title: Database Configuration Form
+name: 'database.form'
+attributes:
+  action: null
+  method: POST
+  is_silent: false
+  enctype: multipart/form-data
+fields:
+  host_name:
+    name: host_name
+    type: text
+    required: true
+    id: host_name
+    label: Database Hostname
+    class:
+      - form-control
+
+  user_name:
+    name: user_name
+    type: text
+    required: true
+    id: user_name
+    label: Database Username
+    class:
+      - form-control
+
+  database_port:
+    name: database_port
+    type: number
+    required: true
+    id: database_port
+    label: Database Port
+    default_value: 3306
+    class:
+      - form-control
+
+  database_name:
+    name: database_name
+    type: text
+    required: true
+    id: database_name
+    label: Database Name
+    class:
+      - form-control
+
+  password:
+    name: password
+    type: password
+    id: password
+    label: Database Password
+    description: you can leave this empty if password is not required
+    class:
+      - form-control
+    handler: Simp\Core\components\password\PasswordField
+
+  submit:
+    name: submit
+    type: submit
+    id: submit
+    default_value: Create Database
+    class:
+      - btn
+      - btn-primary

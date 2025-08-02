@@ -22,6 +22,13 @@ class InstallTasks
         }
 
         self::recursiveCopy($source, $destination);
+
+        $assets = __DIR__ ."/../../vendor/simp/core/src/modules/assets_manager/assets";
+        $destination = __DIR__ . DIRECTORY_SEPARATOR . 'assets';
+        if (!is_dir($destination)) {
+            mkdir($destination, 0777, true);
+        }
+        self::recursiveCopy($assets, $destination);
         return;
     }
 
@@ -91,13 +98,12 @@ class InstallTasks
 
 }
 
-sleep(1); // Simulate delay
-
 $action = $_POST['action'] ?? null;
 
 switch ($action) {
     case 'directories':
-       InstallTasks::moveDirectories();
+        InstallTasks::moveDirectories();
+        (new \Simp\Core\lib\installation\InstallerValidator())->bootStorage();
         break;
 
     case 'modules':

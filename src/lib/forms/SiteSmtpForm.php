@@ -19,7 +19,7 @@ class SiteSmtpForm extends FormBase
         return 'sitesmtp';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $config = ConfigManager::config()->getConfigFile("site.smtp.setting");
         $form['smtp_host'] = [
@@ -91,7 +91,7 @@ class SiteSmtpForm extends FormBase
         }
     }
 
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
        if ($this->validated) {
            $new_smtp = array_map(function ($item) {

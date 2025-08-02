@@ -34,7 +34,7 @@ class CreateAutoPathForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $content_types = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $options = array_keys($content_types);
@@ -165,7 +165,7 @@ class CreateAutoPathForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             $pattern = $form['path']->getValue();

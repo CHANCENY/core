@@ -2,6 +2,8 @@
 
 namespace Simp\Core\lib\memory;
 
+use Phpfastcache\Drivers\Files\Driver;
+
 interface MemoryInterface
 {
     public function set(string $key, $value, int $duration = 3600): bool;
@@ -19,5 +21,7 @@ interface MemoryInterface
     public static function init();
 
     public function allKeys(): array;
+
+    public function driver(): Driver;
 
 }

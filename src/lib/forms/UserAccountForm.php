@@ -7,6 +7,7 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Simp\Core\components\form\FormDefinitionBuilder;
 use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\modules\config\ConfigManager;
 use Simp\Core\modules\messager\Messager;
@@ -27,23 +28,20 @@ class UserAccountForm extends FormBase
     private array $roles = [];
 
 
-    /**
-     * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheLogicException
-     * @throws PhpfastcacheDriverException
-     * @throws PhpfastcacheInvalidArgumentException
-     */
-    public function __construct()
+    public function __construct(mixed $options = [])
     {
-        $user_form = Caching::init()->get('default.admin.user.entity.form');
-        if (file_exists($user_form)) {
-            $this->entity_form = Yaml::parseFile($user_form);
-        }
+        parent::__construct($options);
 
-        $timezone = new  TimeZone();
-        $list = $timezone->getSimplifiedTimezone();
-        sort($list);
-        $this->entity_form['fields']['user_prefer_timezone']['option_values'] = $list;
+    }
+
+    public function getFormId(): string
+    {
+       return 'user_account_form';
+    }
+
+    public function buildForm(array $form): array
+    {
+        $this->entity_form = parent::buildForm($form);
 
         $config = ConfigManager::config()->getConfigFile('account.setting');
         if ($config?->get('allow_account_creation') !== 'administrator') {
@@ -52,16 +50,12 @@ class UserAccountForm extends FormBase
                 $this->roles = ['authenticated'];
             }
         }
-    }
 
-    public function getFormId(): string
-    {
-       return 'user_account_form';
-    }
-
-    public function buildForm(array &$form): array
-    {
-        return [...$form, ...$this->entity_form['fields']];
+        $timezone = new  TimeZone();
+        $list = $timezone->getSimplifiedTimezone();
+        sort($list);
+        $this->entity_form['user_prefer_timezone']['option_values'] = $list;
+        return $this->entity_form;
     }
 
     public function validateForm(array $form): void
@@ -102,7 +96,7 @@ class UserAccountForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
        if ($this->validated) {
           $user_data['name'] = $form['name']?->getValue();

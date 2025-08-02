@@ -89,7 +89,7 @@ user.account.login.form.route:
   access:
     - anonymous
   controller:
-    class: Simp\Core\lib\controllers\SystemController
+    class: Simp\Core\lib\controllers\UserAccountFormController
     method: user_login_form_controller
 user.account.google.redirect.route:
   title: "Google Redirect"
@@ -282,7 +282,7 @@ system.account.profile.edit:
     - content_creator
     - manager
   controller:
-    class: Simp\Core\lib\controllers\SystemController
+    class: Simp\Core\lib\controllers\UserAccountFormController
     method: account_profile_edit_controller
 
 # configuration routes.

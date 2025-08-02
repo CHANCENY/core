@@ -1,0 +1,85 @@
+title: Account Form
+name: 'user.entity.form'
+attributes:
+  action: null
+  method: POST
+  is_silent: false
+  enctype: multipart/form-data
+fields:
+  name:
+    name: name
+    type: text
+    required: true
+    id: name
+    label: User Name
+    class:
+      - form-control
+  mail:
+    name: mail
+    type: text
+    required: true
+    id: mail
+    label: User Email
+    class:
+      - form-control
+  user_prefer_timezone:
+    name: user_prefer_timezone
+    type: select
+    required: true
+    id: user_prefer_timezone
+    label: Site Timezone
+    class:
+      - form-control
+    option_values: {}
+    handler: Simp\Default\SelectField
+  roles:
+    name: roles
+    type: select
+    id: roles
+    label: "User Roles"
+    description: "Select roles the account will need to have on site."
+    class:
+      - form-control
+    option_values:
+      administrator: "Administrator"
+      manager: "Manager"
+      content_creator: "Content Creator"
+      authenticated: "Authenticated"
+    handler: Simp\Default\SelectField
+    default_value: authenticated
+
+  cond_password:
+    name: cond_password
+    type: fieldset
+    id: cond_password
+    label: Please enter your password and confirm it below
+    class:
+      - form-control
+    handler: Simp\Default\FieldSetField
+    inner_field:
+      password:
+        name: password
+        type: password
+        required: true
+        id: password
+        label: Password
+        class:
+          - form-control
+        handler: Simp\Core\components\password\PasswordField
+      password_confirm:
+        name: password_confirm
+        type: password
+        required: true
+        id: mail
+        label: Confirm Password
+        class:
+          - form-control
+        handler:  Simp\Core\components\password\PasswordField
+  submit:
+    default_value: Save
+    type: submit
+    name: submit
+    id: submit
+    class:
+      - btn
+      - btn-primary

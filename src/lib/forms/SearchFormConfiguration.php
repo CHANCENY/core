@@ -26,7 +26,7 @@ class SearchFormConfiguration extends FormBase
         return 'search_form_configuration';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $key = Service::serviceManager()->request->get('key','');
         $search = SearchManager::searchManager()->getSetting($key);
@@ -95,7 +95,7 @@ class SearchFormConfiguration extends FormBase
     public function validateForm(array $form): void
     {
         /**@var FieldBase $field**/
-        $field = &$form['search_wrapper'];
+        $field = $form['search_wrapper'];
         foreach ($field->getField() as &$details) {
             if (!empty($details['inner_field'])) {
 
@@ -113,7 +113,7 @@ class SearchFormConfiguration extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             $search_key = Service::serviceManager()->request->get('key');

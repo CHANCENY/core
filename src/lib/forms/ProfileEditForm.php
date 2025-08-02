@@ -30,98 +30,26 @@ class ProfileEditForm extends FormBase
         return 'profile_edit';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
+        $form = parent::buildForm($form);
         $request = Service::serviceManager()->request;
         $user = User::load($request->get('uid'));
         if ($profile = $user->getProfile()) {
-            $form['first_name'] = [
-                'label' => 'First Name',
-                'name' => 'first_name',
-                'type' => 'text',
-                'id' => 'first_name',
-                'class' => ['form-control'],
-                'default_value' => $profile->getFirstName(),
-            ];
-            $form['last_name'] = [
-                'label' => 'Last Name',
-                'name' => 'last_name',
-                'type' => 'text',
-                'id' => 'last_name',
-                'class' => ['form-control'],
-                'default_value' => $profile->getLastName(),
-            ];
-            $form['profile_image'] = [
-                'label' => 'Profile Image',
-                'name' => 'profile_image',
-                'type' => 'file',
-                'id' => 'profile_image',
-                'class' => ['form-control'],
-                'handler' => FileField::class,
-            ];
+
+            $form['first_name']['default_value'] = $profile->getFirstName();
+            $form['last_name']['default_value'] = $profile->getLastName();
             $checked = [];
             if ($profile->isTranslationEnabled()) {
                 $checked['checked'] = $checked;
             }
-            $form['translations'] = [
-                'label' => 'Translations',
-                'name' => 'translations',
-                'type' => 'conditional',
-                'id' => 'translations',
-                'class' => ['form-group'],
-                'handler' => ConditionalField::class,
-                'inner_field' => [
-                    'enable_translation' => [
-                        'label' => 'Enable Translation',
-                        'name' => 'enable_translation',
-                        'type' => 'select',
-                        'id' => 'enable_translation',
-                        'class' => ['form-check'],
-                        'default_value' => $profile->isTranslationEnabled() ? 'yes' : 'no',
-                        'option_values' => [
-                            'yes' => 'Yes',
-                            'no' => 'No',
-                        ],
-                        'handler' => SelectField::class,
-                    ],
-                    'language' => [
-                        'label' => 'Language',
-                        'name' => 'language',
-                        'type' => 'select',
-                        'id' => 'language',
-                        'class' => ['form-control'],
-                        'option_values' => LanguageManager::manager()->getLanguages(),
-                        'default_value' => 'ny',
-                        'handler' => SelectField::class,
-                    ],
-                ],
-                'conditions' => [
-                    'enable_translation' => [
-                        'event' => 'change',
-                        'receiver_field' => 'language'
-                    ]
-                ],
-                'description' => 'this site uses "english" as default language.'
+            $form['translations']['inner_field']['enable_translation']['default_value'] =  $profile->isTranslationEnabled() ? 'yes' : 'no';
+            $form['translations']['inner_field']['language']['option_values'] = LanguageManager::manager()->getLanguages();
+            $form['translations']['inner_field']['language']['default_value'] =  $profile->getTranslationCode();
+            $form['description']['default_value'] = $profile->getDescription();
 
-            ];
-            $form['description'] = [
-                'label' => 'Description',
-                'name' => 'description',
-                'type' => 'textarea',
-                'id' => 'description',
-                'class' => ['form-control'],
-                'handler' => TextareaField::class,
-                'default_value' => $profile->getDescription(),
-            ];
-            $form['submit'] = [
-                'type' => 'submit',
-                'name' => 'submit',
-                'id' => 'submit',
-                'class' => ['btn btn-primary'],
-                'default_value' => 'Submit',
-            ];
-            return $form;
         }
+
         return $form;
     }
 
@@ -137,7 +65,7 @@ class ProfileEditForm extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $request = Service::serviceManager()->request;
         $user = User::load($request->get('uid'));

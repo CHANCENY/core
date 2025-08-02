@@ -27,7 +27,7 @@ class ExtendAddFrom extends FormBase
         return 'extend_add_from';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
        $form['file_extension'] = [
            'type' => 'file',
@@ -68,7 +68,7 @@ class ExtendAddFrom extends FormBase
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         if ($this->validated) {
             $file = $form['file_extension']->getValue();

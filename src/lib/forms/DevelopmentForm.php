@@ -18,7 +18,7 @@ class DevelopmentForm extends FormBase
         return 'logger';
     }
 
-    public function buildForm(array &$form): array
+    public function buildForm(array $form): array
     {
         $form['logger'] = [
             'type' => 'fieldset',
@@ -106,7 +106,7 @@ class DevelopmentForm extends FormBase
         // TODO: Implement validateForm() method.
     }
 
-    public function submitForm(array &$form): void
+    public function submitForm(array $form): void
     {
         $settings = array_map(function ($setting) {
             return $setting->getValue();

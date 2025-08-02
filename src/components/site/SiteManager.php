@@ -13,7 +13,7 @@ class SiteManager extends SystemDirectory
     public function __construct()
     {
         parent::__construct();
-        $site_file = $this->setting_dir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'basic.site.setting.yml';
+        $site_file = $this->setting_dir . DIRECTORY_SEPARATOR . 'basic.site.setting.yml';
         if (file_exists($site_file)) {
             $this->basic_settings = Yaml::parseFile($site_file);
         }
@@ -31,5 +31,16 @@ class SiteManager extends SystemDirectory
             return $GLOBALS['site_manager'];
         }
         return new self();
+    }
+
+    public function set(array $data)
+    {
+        $this->basic_settings = array_merge($this->basic_settings, $data);
+        $setting_data = $this->setting_dir .
+            DIRECTORY_SEPARATOR . 'basic.site.setting.yml';
+        if (file_put_contents($setting_data, Yaml::dump($this->basic_settings))) {
+           return true;
+        }
+        return false;
     }
 }

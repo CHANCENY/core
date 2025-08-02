@@ -29,7 +29,7 @@ class HomeController
         $theme = ThemeManager::manager();
         $home_template = 'default.view.home';
 
-        if ($home_controller !== null) {
+        if (!empty($home_controller)) {
             $route = Route::fromRouteUrl($home_controller);
             if ($route !== null) {
                 return Route::getControllerResponse($route);

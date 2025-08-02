@@ -1,0 +1,74 @@
+title: Profile Edit Form
+name: 'user.entity.profile.form'
+fields:
+  first_name:
+    label: First Name
+    name: first_name
+    type: text
+    id: first_name
+    class: [form-control]
+
+  last_name:
+    label: Last Name
+    name: last_name
+    type: text
+    id: last_name
+    class: [form-control]
+
+  profile_image:
+    label: Profile Image
+    name: profile_image
+    type: file
+    id: profile_image
+    class: [form-control]
+    handler: Simp\Default\FileField
+
+  translations:
+    label: Translations
+    name: translations
+    type: conditional
+    id: translations
+    class: [form-group]
+    handler: Simp\Default\ConditionalField
+    inner_field:
+      enable_translation:
+        label: Enable Translation
+        name: enable_translation
+        type: select
+        id: enable_translation
+        class: [form-check]
+        option_values:
+          yes: Yes
+          no: No
+        handler: Simp\Default\SelectField
+
+      language:
+        label: Language
+        name: language
+        type: select
+        id: language
+        class: [form-control]
+        option_values: {}
+        handler: Simp\Default\SelectField
+
+    conditions:
+      enable_translation:
+        event: change
+        receiver_field: language
+
+    description: this site uses "english" as default language.
+
+  description:
+    label: Description
+    name: description
+    type: textarea
+    id: description
+    class: [form-control]
+    handler: Simp\Default\TextAreaField
+
+  submit:
+    type: submit
+    name: submit
+    id: submit
+    class: [btn, btn-primary]
+    default_value: 'Save'
