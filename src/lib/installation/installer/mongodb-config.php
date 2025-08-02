@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../../vendor/autoload.php";
 
-$database_form = \Simp\Core\components\form\FormDefinitionBuilder::factory()->getForm('database.form');
+$database_form = \Simp\Core\components\form\FormDefinitionBuilder::factory()->getForm('mongodb.configuration.form');
 
 ?>
 <!DOCTYPE html>
@@ -78,8 +78,8 @@ $database_form = \Simp\Core\components\form\FormDefinitionBuilder::factory()->ge
     <h2>MySQL Database Settings</h2>
     <?= $database_form ?>
     <div class="mongo" style="margin-top: 20px;">
-        <a href="/core/mongodb-config.php" target="_blank" rel="noopener noreferrer">
-            Do you want to use MongoDB? Please open this configuration page
+        <a href="/core/db-config.php" target="_blank" rel="noopener noreferrer">
+            Do you want to use Mysql? Please open this configuration page
             <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" style="margin-left: 5px;"></i>
         </a>
     </div>

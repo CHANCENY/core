@@ -1,0 +1,83 @@
+title: MongoDB Configuration Form
+name: mongodb.configuration.form
+attributes:
+  method: POST
+  enctype: multipart/form-data
+fields:
+  host:
+    label: MongoDB Host
+    name: host
+    type: text
+    id: host
+    class: [form-control]
+    required: true
+    options:
+      autocomplete: off
+      placeholder: 'e.g. localhost'
+
+  port:
+    label: MongoDB Port
+    name: port
+    type: number
+    id: port
+    class: [form-control]
+    required: true
+    default_value: 27017
+    options:
+      min: 1
+      max: 65535
+
+  database:
+    label: Database Name
+    name: database
+    type: text
+    id: database
+    class: [form-control]
+    required: true
+    options:
+      autocomplete: off
+
+  username:
+    label: Username
+    name: username
+    type: text
+    id: username
+    class: [form-control]
+    required: false
+    options:
+      autocomplete: off
+
+  password:
+    label: Password
+    name: password
+    type: password
+    id: password
+    class: [form-control, password]
+    required: false
+    options:
+      autocomplete: off
+
+  auth_source:
+    label: Authentication Database
+    name: auth_source
+    type: text
+    id: auth_source
+    class: [form-control]
+    required: false
+    options:
+      placeholder: 'e.g. admin'
+
+  ssl:
+    label: Use SSL
+    name: ssl
+    type: checkbox
+    id: ssl
+    class: [form-check-input]
+    required: false
+
+  submit:
+    type: submit
+    name: submit
+    id: submit
+    default_value: Save Configuration
+    class: [btn, btn-primary]

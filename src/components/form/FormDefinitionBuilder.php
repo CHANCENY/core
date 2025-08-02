@@ -6,6 +6,7 @@ use Simp\Core\lib\forms\DatabaseForm;
 use Simp\Core\lib\forms\ForgotPasswordForm;
 use Simp\Core\lib\forms\ForgotPasswordResetForm;
 use Simp\Core\lib\forms\LoginForm;
+use Simp\Core\lib\forms\MongodbForm;
 use Simp\Core\lib\forms\ProfileEditForm;
 use Simp\Core\lib\forms\SiteConfigForm;
 use Simp\Core\lib\forms\UserAccountEditForm;
@@ -58,6 +59,9 @@ final class FormDefinitionBuilder
         switch ($form_handler_name) {
             case 'database.form':
                 $handler = DatabaseForm::class;
+                break;
+            case 'mongodb.configuration.form':
+                $handler = MongodbForm::class;
                 break;
             case 'site.form':
                 $handler = SiteConfigForm::class;

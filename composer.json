@@ -20,7 +20,7 @@
         "symfony/var-dumper": "^7.2",
         "simp/streamwrapper": "^1.0",
         "phpfastcache/phpfastcache": "^9.2",
-        "simp/forms": "^1.0",
+        "simp/forms": "^1.1.1-alpha",
         "simp/router": "^1.0",
         "twig/twig": "^3.0",
         "ext-pdo": "*",
@@ -34,6 +34,7 @@
         "fakerphp/faker": "^1.24",
         "simp/translate": "^1.0",
         "ext-zip": "*",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "mongodb/mongodb": "^2.1"
     }
 }
