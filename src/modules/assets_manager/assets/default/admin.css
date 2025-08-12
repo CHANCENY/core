@@ -40,7 +40,13 @@ body {
     clear: both;
     margin-top: 12rem;
 }
-
+.container {
+    max-width: unset;
+}
+.field-message {
+    font-size: large;
+    color: #4e0303;
+}
 .container h2 {
     margin-bottom: 2rem;}
 .db-form-container h2 {
@@ -743,21 +749,4 @@ fieldset input[type="radio"] {
 .image-icon {
     background-color: #e1f5fe;
     color: #0288d1;
-}
-
-@media (max-width: 778px) {
-    .main-menu {
-        display: none;
-        position: absolute;
-        z-index: 9999;
-        width: 65%;
-        top: 66px;
-        transition: max-height 0.4s ease, padding 0.4s ease;
-        background-color: #f9f9f9;
-        border: 1px solid #ddd;
-    }
-
-    .main-menu.active {
-        display: block;
-    }
 }

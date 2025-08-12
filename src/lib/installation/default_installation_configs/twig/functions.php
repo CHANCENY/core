@@ -436,6 +436,10 @@ function get_functions(): array
             return implode('',$sections);
 
         }),
+        new TwigFunction('attach_library',function(string $section, string $file) {
+            $GLOBALS['theme'][$section][] = $file;
+            $GLOBALS['theme'][$section] = array_unique($GLOBALS['theme'][$section]);
+        }),
 
         new TwigFunction('auto_path_key',function(int $number){
             return AutoPathAlias::createRouteId($number);

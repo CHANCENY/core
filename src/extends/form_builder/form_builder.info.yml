@@ -1,0 +1,5 @@
+name: Form Builder
+description: 'This is module for creating forms'
+type: module
+core_version_requirement: ^1
+enabled: true

@@ -17,7 +17,7 @@ use Simp\Core\modules\services\Service;
 
 class Route
 {
-    public string $route_id;
+
     public string $route_title;
     public string $route_path;
     public array $method = [];
@@ -27,9 +27,8 @@ class Route
     public string $route_type;
     public array $options;
 
-    public function __construct(string $route_id, array $route_data)
+    public function __construct(public readonly string $route_id, private readonly array $route_data)
     {
-        $this->route_id = $route_id;
         $this->route_title = $route_data['title'];
         $this->route_path = $route_data['path'];
         $this->method = $route_data['method'];
@@ -85,6 +84,7 @@ class Route
             'route_id', 'id' => $this->route_id,
             'route_title', 'title' => $this->route_title,
             'route_path', 'path' => $this->route_path,
+            'options' => $this->options,
             default => null,
         };
     }
@@ -147,5 +147,14 @@ class Route
         return $this->route_type;
     }
 
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    public function toArray()
+    {
+        return $this->route_data;
+    }
 
 }

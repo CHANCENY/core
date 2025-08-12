@@ -51,6 +51,7 @@ class View
         }catch (Throwable $e) {
             ErrorLogger::logger()->logError($e->__toString());
         }
+
         $string = $this->theme->twig->render($view,$options);
         if (CurrentUser::currentUser()?->isIsAdmin()) {
             $string .= "<!-- Current Theme: {$currentTheme} -->";
@@ -61,9 +62,16 @@ class View
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
+     * @param string $view
+     * @param array $data
+     * @return string
      * @throws LoaderError
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     * @throws PhpfastcacheLogicException
+     * @throws RuntimeError
+     * @throws SyntaxError
      */
     public static function view(string $view, array $data = []): string
     {

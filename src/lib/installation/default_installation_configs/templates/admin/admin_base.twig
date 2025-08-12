@@ -10,6 +10,7 @@
     {% if theme.admin.admin_assets_head is defined %}
         {% include (theme.admin.admin_assets_head) %}
     {% endif %}
+    {% block head %}{% endblock %}
 </head>
 <body>
 
@@ -24,6 +25,8 @@
 {% if theme.admin.admin_assets_footer is defined and theme.admin.admin_assets_footer %}
     {% include (theme.admin.admin_assets_footer) %}
 {% endif %}
+
+{% block footer %}{% endblock %}
 
 </body>
 </html>

@@ -183,6 +183,8 @@ class InstallerValidator extends SystemDirectory
             'site-config.php',
             'db-config.php',
             'mongodb-config.php',
+            'rebuild.php',
+            'InstallTasks.php'
         ];
 
         $destinationDir = $this->webroot_dir . DIRECTORY_SEPARATOR . 'core';

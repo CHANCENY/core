@@ -70,7 +70,6 @@ class App
      */
     protected function mapRouteListeners(): Response|JsonResponse|null
     {
-        /**@var Driver $cache **/
         $cache = Caching::init()->driver();
         $route_keys = $cache->getItem('system.routes.keys');
 

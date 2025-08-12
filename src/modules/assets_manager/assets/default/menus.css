@@ -1,0 +1,138 @@
+
+.main-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+}
+
+.main-menu > a,
+.main-menu > .menu-item-has-children > a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.main-menu > a:hover,
+.main-menu > .menu-item-has-children > a:hover {
+    background: #f0f0f0;
+}
+
+.main-menu i {
+    font-size: 14px;
+}
+
+/* Dropdown container */
+.menu-item-has-children {
+    position: relative;
+}
+
+/* Dropdown menu */
+.sub-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+    min-width: 180px;
+}
+
+/* Dropdown links */
+.sub-menu a {
+    padding: 8px 14px;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease;
+}
+
+.sub-menu a:hover {
+    background: #f0f0f0;
+}
+
+/* Show dropdown on hover */
+.menu-item-has-children:hover > .sub-menu {
+    display: flex;
+}
+
+
+
+
+@media (max-width: 778px) {
+    .main-menu {
+        display: none;
+        position: absolute;
+        z-index: 9999;
+        width: 65%;
+        top: 66px;
+        transition: max-height 0.4s ease, padding 0.4s ease;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+    }
+
+    .main-menu.active {
+        display: block;
+    }
+}
+
+/* Arrow for parent menu items */
+.menu-item-has-children > a::after {
+    content: "▼";
+    font-size: 0.6em;
+    margin-left: auto; /* push to right edge */
+    transition: transform 0.3s ease;
+}
+
+/* Rotate arrow when hovered */
+.menu-item-has-children:hover > a::after {
+    transform: rotate(180deg);
+}
+
+/* Nested menu arrows */
+.sub-menu .menu-item-has-children > a::after {
+    content: "▶";
+}
+
+/* Rotate nested arrow when hovered */
+.sub-menu .menu-item-has-children:hover > a::after {
+    transform: rotate(90deg);
+}
+
+/* Indent nested submenu levels */
+.sub-menu .sub-menu {
+    left: 100%; /* position to the right of the parent */
+    top: 0;
+    margin-left: 2px; /* small gap between levels */
+}
+
+/* Optional: visual indentation for links in deeper levels */
+.sub-menu .sub-menu a {
+    padding-left: 24px; /* extra padding for second level */
+}
+
+.sub-menu .sub-menu .sub-menu a {
+    padding-left: 36px; /* extra padding for third level */
+}
+
+.sub-menu .sub-menu .sub-menu .sub-menu a {
+    padding-left: 48px; /* extra padding for fourth level */
+}
+
+.sub-menu .sub-menu .sub-menu .sub-menu .sub-menu a {
+    padding-left: 60px; /* extra padding for fifth level */
+}
+

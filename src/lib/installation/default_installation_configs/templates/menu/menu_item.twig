@@ -1,0 +1,23 @@
+{% macro render_link(menu) %}
+    <a href="{{ menu.getMenu().route_path }}">
+        {% if menu.getMenu().options.classes %}
+            <i class="{{ menu.getMenu().options.classes|join(' ') }}"></i>
+        {% endif %}
+        {{ menu.getMenu().route_title|t }}
+    </a>
+{% endmacro %}
+
+{% import _self as menus %}
+
+{% if menu.hasChildren == false %}
+    {{ menus.render_link(menu) }}
+{% else %}
+    <div class="menu-item-has-children">
+        {{ menus.render_link(menu) }}
+        <div class="sub-menu">
+            {% for child in menu.children %}
+                {% include 'default.view.menu_item' with { menu: child } %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

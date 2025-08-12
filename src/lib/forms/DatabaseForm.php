@@ -23,6 +23,12 @@ class DatabaseForm extends FormBase
 
     protected ?Database $database;
 
+    /**
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
     public function __construct(mixed $options = [])
     {
         parent::__construct($options);
@@ -109,6 +115,7 @@ class DatabaseForm extends FormBase
             if ($result) {
                 Messager::toast()->addMessage("Database connection created successfully");
             }
+
             if (!empty($this->schema)) {
                 $schema_data = array_merge($this->schema, $data);
                 $system = new SystemDirectory();

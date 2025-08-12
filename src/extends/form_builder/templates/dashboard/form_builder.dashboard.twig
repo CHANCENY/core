@@ -1,0 +1,255 @@
+{% extends 'default.view.admin_base' %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="/core/modules/form_builder/assets/styles.css">
+
+{% endblock %}
+
+{% block body %}
+
+    <div class="form-builder">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-edit"></i>
+                    Form Builder
+                </h1>
+                <div class="header-actions">
+                    <button id="save-form-btn" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Form
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-form-builder-content">
+            <!-- Left Sidebar - Field Palette -->
+            <aside class="sidebar sidebar-left">
+                <div class="sidebar-header">
+                    <h3>Field Types</h3>
+                </div>
+                <div class="field-palette">
+                    <div class="field-type" draggable="true" data-type="text">
+                        <i class="fas fa-font"></i>
+                        <span>Text Input</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="number">
+                        <i class="fas fa-hashtag"></i>
+                        <span>Number</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="date">
+                        <i class="fas fa-calendar"></i>
+                        <span>Date</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="file">
+                        <i class="fas fa-file-upload"></i>
+                        <span>File Upload</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="textarea">
+                        <i class="fas fa-align-left"></i>
+                        <span>Textarea</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="select">
+                        <i class="fas fa-list"></i>
+                        <span>Select</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="checkbox">
+                        <i class="fas fa-check-square"></i>
+                        <span>Checkbox</span>
+                    </div>
+                    <div class="field-type" draggable="true" data-type="reference">
+                        <i class="fas fa-link"></i>
+                        <span>Reference</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <section class="canvas-container">
+                <div class="canvas-header">
+                    <h3 id="form-title">Untitled Form</h3>
+                    <p id="form-description">Click on the form to edit settings</p>
+                </div>
+                <div id="form-canvas" class="form-canvas">
+                    <div class="canvas-placeholder">
+                        <i class="fas fa-plus-circle"></i>
+                        <p>Drag fields from the left panel to start building your form</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar - Settings Panel -->
+            <aside class="sidebar sidebar-right">
+                <div class="sidebar-header">
+                    <h3 id="settings-title">Form Settings</h3>
+                </div>
+                <div id="settings-panel" class="settings-panel">
+                    <!-- Form Settings (Default) -->
+                    <div id="form-settings" class="settings-section active">
+                        <div class="form-group">
+                            <label for="form-name">Form Name</label>
+                            <input type="text" id="form-name" class="form-control" placeholder="Enter form name">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-desc">Description</label>
+                            <textarea id="form-desc" class="form-control" rows="3" placeholder="Enter form description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-machine-name">Machine Name</label>
+                            <input type="text" id="form-machine-name" class="form-control" placeholder="machine_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-method">Method</label>
+                            <select type="text" id="form-method" class="form-control">
+                                <option value="POST">POST</option>
+                                <option value="GET">GET</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-enctype">Enctype</label>
+                            <select type="text" id="form-enctype" class="form-control">
+                                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                                <option value="multipart/form-data">multipart/form-data</option>
+                                <option value="text/plain">text/plain</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="form-action">Action</label>
+                            <input type="text" id="form-action" class="form-control" placeholder="action_url">
+                        </div>
+                        <div class="form-group">
+                            <label for="form-target">Target</label>
+                            <select type="text" id="form-target" class="form-control">
+                                <option value="_self">_self</option>
+                                <option value="_blank">_blank</option>
+                                <option value="_parent">_parent</option>
+                                <option value="_top">_top</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="form-novalidate">
+                                <span class="checkmark"></span>
+                                Novalidate
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <!-- Field Settings (Hidden by default) -->
+                    <div id="field-settings" class="settings-section">
+                        <div class="form-group">
+                            <label for="field-label">Label</label>
+                            <input type="text" id="field-label" class="form-control" placeholder="Field label">
+                        </div>
+                        <div class="form-group">
+                            <label for="field-name">Name</label>
+                            <input type="text" id="field-name" class="form-control" placeholder="field_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="field-id">ID</label>
+                            <input type="text" id="field-id" class="form-control" placeholder="field-id">
+                        </div>
+                        <div class="form-group">
+                            <label for="field-class">CSS Classes</label>
+                            <input type="text" id="field-class" class="form-control" placeholder="class1 class2">
+                        </div>
+                        <div class="form-group">
+                            <label for="field-default">Default Value</label>
+                            <input type="text" id="field-default" class="form-control" placeholder="Default value">
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="field-required">
+                                <span class="checkmark"></span>
+                                Required Field
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="field-limit">Limit</label>
+                            <input type="number" id="field-limit" class="form-control" placeholder="0 for unlimited">
+                        </div>
+
+                        <!-- Type-specific settings -->
+                        <div id="file-settings" class="type-settings">
+                            <div class="form-group">
+                                <label for="allowed-file-types">Allowed File Types</label>
+                                <input type="text" id="allowed-file-types" class="form-control" placeholder="image/*, application/pdf">
+                            </div>
+                            <div class="form-group">
+                                <label for="allowed-file-size">Max File Size (bytes)</label>
+                                <input type="number" id="allowed-file-size" class="form-control" placeholder="6000000">
+                            </div>
+                        </div>
+
+                        <div id="textarea-settings" class="type-settings">
+                            <div class="form-group">
+                                <label for="textarea-rows">Rows</label>
+                                <input type="number" id="textarea-rows" class="form-control" value="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="textarea-cols">Columns</label>
+                                <input type="number" id="textarea-cols" class="form-control" value="9">
+                            </div>
+                        </div>
+
+                        <div id="select-settings" class="type-settings">
+                            <div class="form-group">
+                                <label for="select-options">Options (one per line)</label>
+                                <textarea id="select-options" class="form-control" rows="5" placeholder="Option 1&#10;Option 2&#10;Option 3"></textarea>
+                            </div>
+                        </div>
+
+                        <div id="checkbox-settings" class="type-settings">
+                            <div class="form-group">
+                                <label for="checkbox-options">Checkbox Options (one per line)</label>
+                                <textarea id="checkbox-options" class="form-control" rows="3" placeholder="Yes&#10;No"></textarea>
+                            </div>
+                        </div>
+
+                        <div id="reference-settings" class="type-settings">
+                            <div class="form-group">
+                                <label for="reference-type">Reference Type</label>
+                                <select id="reference-type" class="form-control">
+                                    <option value="node">Node</option>
+                                    <option value="user">User</option>
+                                    <option value="term">Term</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reference-entity">Reference Entity</label>
+                                <input type="text" id="reference-entity" class="form-control" placeholder="content_type">
+                            </div>
+                        </div>
+
+                        <div class="field-actions">
+                            <button id="delete-field-btn" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                Delete Field
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Saving form...</p>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+
+<script src="/core/modules/form_builder/assets/script.js"></script>
+
+{% endblock %}

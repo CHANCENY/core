@@ -4,6 +4,7 @@ namespace Simp\Core\lib\themes;
 
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\components\request\Request;
+use Simp\Core\modules\menu\Menus;
 use Twig\Loader\ArrayLoader;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -69,6 +70,7 @@ class Theme extends SystemDirectory
 
         /**@var Request $request**/
         $request = Service::serviceManager()->request;
+        $menus = Menus::menus();
 
         $assets_manager = new AssetsManager();
         $this->options = [
@@ -89,7 +91,8 @@ class Theme extends SystemDirectory
                 'assets' => [
                     'head' => $GLOBALS['theme']['head'] ?? [],
                     'footer' => $GLOBALS['theme']['footer'] ?? [],
-                ]
+                ],
+                'menus' => $menus,
             ]
         ];
         $twig_views = [];

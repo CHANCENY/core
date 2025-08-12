@@ -33,6 +33,8 @@ system.reports.errors:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_report_site_controller
+  options:
+    classes: ['fa', 'fa-chart-bar']
 system.error.page.denied:
   title: "Access denied"
   path: '/error/page/access-denied'
@@ -230,6 +232,8 @@ system.people:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: people_controller
+  options:
+    classes: ['fa', 'fa-users']
 system.account.delete:
   title: "Account Deletion"
   path: '/user/[uid:int]/delete'
@@ -297,6 +301,8 @@ system.configuration:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: configuration_controller
+  options:
+    classes: ['fa', 'fa-cog']
 system.configuration.basic:
   title: "Site"
   path: '/admin/config/system/site-information'
@@ -354,6 +360,8 @@ system.structure:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: structure_controller
+  options:
+    classes: ['fa', 'fa-sitemap']
 system.structure.content-type:
   title: "Content types"
   path: '/admin/structure/types'
@@ -509,6 +517,8 @@ system.structure.content:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_content_admin_controller
+  options:
+    classes: ['fa', 'fa-file']
 system.structure.content.add:
   title: "Content Selection"
   path: '/node/add'
@@ -832,6 +842,8 @@ system.extends.manage:
   controller:
     class: Simp\Core\lib\controllers\ExtendController
     method: extend_manage
+  options:
+    classes: ['fa', 'fa-wrench']
 
 system.extends.manage.add:
   title: "Upload extension"
