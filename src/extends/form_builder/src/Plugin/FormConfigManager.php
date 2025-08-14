@@ -101,19 +101,19 @@ class FormConfigManager
                 $query = "CREATE TABLE IF NOT EXISTS `{$table_name}` ";
 
                 if ($field['type'] === 'checkbox' || $field['type'] === 'radio' || $field['type'] === 'select') {
-                    $query .= "(`f_sid` int(11) NOT NULL, `value` VARCHAR(255) NULL, PRIMARY KEY (`f_sid`))";
+                    $query .= "(`id` INT(11) AUTO_INCREMENT NOT NULL, `sid` int(11) NOT NULL, `value` VARCHAR(255) NULL, PRIMARY KEY (`id`))";
                 }
                 elseif ($field['type'] === 'number') {
-                    $query .= "(`f_sid` int(11) NOT NULL, `value` INT(11) NULL, PRIMARY KEY (`f_sid`))";
+                    $query .= "(`id` INT(11) AUTO_INCREMENT NOT NULL,  `sid` int(11) NOT NULL, `value` INT(11) NULL, PRIMARY KEY (`id`))";
                 }
                 elseif ($field['type'] === 'file') {
-                    $query .= "(`f_sid` int(11) NOT NULL, `value` INT(11) NULL, PRIMARY KEY (`f_sid`))";
+                    $query .= "(`id` INT(11) AUTO_INCREMENT NOT NULL,  `sid` int(11) NOT NULL, `value` INT(11) NULL, PRIMARY KEY (`id`))";
                 }
                 elseif ($field['type'] === 'textarea') {
-                    $query .= "(`f_sid` int(11) NOT NULL, `value` LONGTEXT NULL, PRIMARY KEY (`f_sid`))";
+                    $query .= "(`id` INT(11) AUTO_INCREMENT NOT NULL,  `sid` int(11) NOT NULL, `value` LONGTEXT NULL, PRIMARY KEY (`id`))";
                 }
                 else {
-                    $query .= "(`f_sid` int(11) NOT NULL, `value` VARCHAR(500) NULL, PRIMARY KEY (`f_sid`))";
+                    $query .= "(`id` INT(11) AUTO_INCREMENT NOT NULL,  `sid` int(11) NOT NULL, `value` VARCHAR(500) NULL, PRIMARY KEY (`id`))";
                 }
 
                 $create_tables[] = $query;

@@ -96,6 +96,7 @@ class FormBuilder {
             
             const fieldType = e.dataTransfer.getData('text/plain');
             this.addField(fieldType);
+            this.setupFieldSettings();
         });
     }
     
@@ -471,7 +472,7 @@ class FormBuilder {
         
         const fieldConfig = this.formConfig.fields[this.selectedField];
         if (!fieldConfig) return;
-        
+
         // Update basic settings
         fieldConfig.label = document.getElementById('field-label').value;
         fieldConfig.name = document.getElementById('field-name').value;
@@ -480,7 +481,7 @@ class FormBuilder {
         fieldConfig.default_value = document.getElementById('field-default').value;
         fieldConfig.required = document.getElementById('field-required').checked;
         fieldConfig.limit = parseInt(document.getElementById('field-limit').value) || 1;
-        
+
         // Update type-specific settings
         this.updateTypeSpecificSettings(fieldConfig);
         

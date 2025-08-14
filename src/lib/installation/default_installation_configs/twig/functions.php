@@ -431,7 +431,6 @@ function get_functions(): array
         }),
 
         new TwigFunction('attached_library',function(string $section){
-
             $sections = $GLOBALS['theme'][$section] ?? [];
             return implode('',$sections);
 
@@ -443,6 +442,9 @@ function get_functions(): array
 
         new TwigFunction('auto_path_key',function(int $number){
             return AutoPathAlias::createRouteId($number);
+        }),
+        new TwigFunction('base64',function(string $file_path){
+            return FileFunction::base64_file($file_path);
         })
     );
 }

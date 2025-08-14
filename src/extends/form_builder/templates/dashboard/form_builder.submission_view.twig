@@ -1,0 +1,117 @@
+{% extends 'default.view.admin_base' %}
+
+
+{% block body %}
+
+    <style>
+        :root {
+            --bg: #f9fafb;
+            --card-bg: #fff;
+            --border: #e5e7eb;
+            --primary: #2563eb;
+            --text: #374151;
+            --muted: #6b7280;
+        }
+        .submission-fields {
+            margin: auto;
+            display: grid;
+            gap: 1rem;
+        }
+        .submission-fields {
+            div {
+                font-size: large;
+            }
+        }
+
+        .field-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: transform 0.15s ease;
+            margin-bottom: 1rem;
+            margin-top: 1rem;
+        }
+        .field-card:hover {
+            transform: translateY(-2px);
+        }
+        .field-name {
+            font-size: 0.9rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        .field-value {
+            font-size: 1.05rem;
+            font-weight: 500;
+            word-break: break-word;
+        }
+        .empty {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            color: var(--muted);
+        }
+        img,
+        a img,
+        span img {
+            max-width: 300px;   /* limit width */
+            max-height: 300px;  /* limit height */
+            width: auto;       /* keep aspect ratio */
+            height: auto;      /* keep aspect ratio */
+            object-fit: cover; /* crop if needed */
+            vertical-align: middle;
+            border-radius: 4px; /* optional, small rounded corners */
+        }
+    </style>
+
+    <div>
+        <h3>Submission</h3>
+        <div>
+            <div class="submission-fields">
+                {% if submission %}
+                    {% for key,field in fields %}
+                <div class="field-card">
+                    <div class="field-name">{{ field.label }}</div>
+                    <div class="field-value">
+                        {% if field.type == 'file'%}
+
+                            {% for item in submission.get(key) %}
+
+                                {% set file = file(item.value) %}
+
+                                {% if file %}
+
+                                    {% if 'image' in file.getMimeType()  %}
+                                        <img src="{{ request.http.getSchemeAndHttpHost() }}{{ file_uri(file.getFid()) }}" alt="{{ file.getName }}">
+                                    {% else %}
+                                        <a href="{{ request.http.getSchemeAndHttpHost() }}{{ file_uri(file.getFid()) }}" target="_blank">{{ file.getName }}</a>
+                                    {%  endif %}
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                        {% else %}
+
+                           {% for item in submission.get(key) %}
+
+                               <div>{{ item.value }}</div>
+
+                           {% endfor %}
+
+                        {% endif %}
+                    </div>
+                </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty">No data submitted found.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

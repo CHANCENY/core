@@ -157,4 +157,46 @@ class Route
         return $this->route_data;
     }
 
+    public static function url(string $route_name, array $options = [], array $params = []): ?string
+    {
+        /**
+         * @throws PhpfastcacheCoreException
+         * @throws PhpfastcacheLogicException
+         * @throws PhpfastcacheDriverException
+         * @throws PhpfastcacheInvalidArgumentException
+         */
+        $builder = function(string $id, array $options, array $params = []): ?string
+        {
+            if (!empty($options['nid']) && empty($options['is_alias'])) {
+
+                $alias = AutoPathAlias::createRouteId($options['nid']);
+                $options['is_alias'] = true;
+                $found = url($alias, $options, $params);
+                if (!empty($found)) {
+                    return $found;
+                }
+            }
+
+            if (!empty($id)) {
+                $route = Caching::init()->get($id);
+                if (empty($route) && ModuleHandler::factory()->isModuleEnabled('auto_path')) {
+                    $routes = AutoPathAlias::injectAliases();
+                    $route = $routes[$id] ?? null;
+                }
+                if ($route instanceof Route) {
+                    $pattern = $route->getRoutePath();
+                    $generatePath = function (string $pattern, array $values): string {
+                        return getStr($pattern, $values);
+                    };
+                    $with_value_pattern = $generatePath($pattern, $options);
+
+
+                    return empty($params) ? $with_value_pattern : $with_value_pattern . '?'. http_build_query($params);
+                }
+            }
+            return null;
+        };
+        return $builder($route_name, $options, $params);
+    }
+
 }

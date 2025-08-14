@@ -116,6 +116,50 @@ function form_builder_route_install(): array
             ),
             'access' => array('administrator'),
             'options' => array()
+        ),
+        'form_builder.form.submission' => array(
+            'title' => 'Form Submission',
+            'path' => '/admin/form-builder/[name:string]/submission',
+            'method' => array('GET', 'POST'),
+            'controller' => array(
+                'class' => FormBuilderController::class,
+                'method' => 'form_submission'
+            ),
+            'access' => array('administrator'),
+            'options' => array()
+        ),
+        'form_builder.form.submission.delete' => array(
+            'title' => 'Form Submission Delete',
+            'path' => '/admin/form-builder/[name:string]/submission/[sid:int]/delete',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => FormBuilderController::class,
+                'method' => 'form_submission_delete'
+            ),
+            'access' => array('administrator'),
+            'options' => array()
+        ),
+        'form_builder.form.submission.edit' => array(
+            'title' => 'Form Submission Edit',
+            'path' => '/admin/form-builder/[name:string]/submission/[sid:int]/edit',
+            'method' => array('GET', 'POST'),
+            'controller' => array(
+                'class' => FormBuilderController::class,
+                'method' => 'form_submission_edit'
+            ),
+            'access' => array('administrator'),
+            'options' => array()
+        ),
+        'form_builder.form.submission.view' => array(
+            'title' => 'Form Submission View',
+            'path' => '/admin/form-builder/[name:string]/submission/[sid:int]/view',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => FormBuilderController::class,
+                'method' => 'form_submission_view'
+            ),
+            'access' => array('administrator'),
+            'options' => array()
         )
     );
 }
@@ -160,12 +204,15 @@ function form_builder_menu_install(array &$menus): void
             $route['route_data']['title'] = $form['title'];
             $ch_menu = new Menu($route);
             if (!empty(Route::fromRouteName('form_builder.form.'.$form['name']))) {
-                $ch_menu->addChild(new Menu('form_builder.form.'.$form['name']));
+                $form_menu = new Menu('form_builder.form.'.$form['name']);
+                $route_submission = Route::fromRouteName('form_builder.form.submission')->toArray();
+                $route_submission['path'] = "/admin/form-builder/{$form['name']}/submission";
+                $route_submission['title'] = "Submissions";
+                $ch_menu->addChild($form_menu);
+                $ch_menu->addChild(new Menu(['route_id' => 'form_builder.form.submission', 'route_data' => $route_submission]));
             }
-
             $list_menu->addChild($ch_menu);
         }
-
         $menu_form_builder->addChild($list_menu);
     }
    // dd($menus);
@@ -182,4 +229,18 @@ function form_builder_database_install()
                embedded LONGTEXT)";
     Database::database()
         ->con()->exec($query);
+
+    $query = "CREATE TABLE IF NOT EXISTS `form_submissions` (
+              `sid` INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+              `webform` VARCHAR(200) NOT NULL,
+              `status` VARCHAR(200) NOT NULL,
+              `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              `ip` VARCHAR(45) NULL,
+              `user_agent` TEXT NULL,
+              `uid` INT NOT NULL)";
+    Database::database()
+        ->con()->exec($query);
+    
+    
 }

@@ -69,7 +69,8 @@ class SubmissionHandler
             $form_base->getFormBase()->setFormAcceptCharset($form_config['attributes']['accept-charset']);
             $form_base->getFormBase()->isFormSilent($form_config['attributes']['is_silent']);
 
-            $content = str_replace('[__form__]',$form_base, $embedded_html);
+            $content = !empty($embedded_html) && strpos($embedded_html, '[__form__]') ? str_replace('[__form__]',$form_base, $embedded_html) : $form_base;
+
             return new Response(View::view('default.view.form_builder.submission.handler',
                 [
                     'embedded' => $content,

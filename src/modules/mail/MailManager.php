@@ -13,7 +13,7 @@ class MailManager
         $config = ConfigManager::config()->getConfigFile("site.smtp.setting");
         $this->mailManager = \Simp\Mail\Mail\MailManager::mailManager(smtp_array: [
             'host' => $config->get('smtp_host'),
-            'port' => $config->get('smtp_port'),
+            'port' => (int) $config->get('smtp_port'),
             'username' => $config->get('smtp_username'),
             'password' => $config->get('smtp_password'),
         ]);

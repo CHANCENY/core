@@ -7,8 +7,10 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\extends\form_builder\src\Form\FormConfigureEditForm;
+use Simp\Core\extends\form_builder\src\Form\SubmissionEditFormHandler;
 use Simp\Core\extends\form_builder\src\Plugin\FormConfigManager;
 use Simp\Core\extends\form_builder\src\Plugin\FormSettings;
+use Simp\Core\extends\form_builder\src\Plugin\Submission;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\messager\Messager;
@@ -139,5 +141,78 @@ class FormBuilderController
             }
         }
         return new Response(View::view('default.view.form_builder.form_settings',['title'=>$form['title'],'form'=>$form, 'settings'=>$settings]));
+    }
+
+    public function form_submission(...$args): Response
+    {
+        extract($args);
+        $form_name = $request->get('name');
+        $form = FormConfigManager::factory()->getForm($form_name);
+        $settings = FormSettings::factory($form_name);
+
+        $submissions = Submission::loadByFormName($form_name);
+        $submissions = Submission::loadMultiple($submissions->getSids());
+
+        return new Response(View::view('default.view.form_builder.submission',['title' => $settings->getTitle(), 'form' => $form,'submissions'=>$submissions, 'form_name'=> $form_name]));
+    }
+
+    public function form_submission_delete(...$args): RedirectResponse {
+        extract($args);
+        $sid = $request->get('sid');
+        $form_name = $request->get('name');
+        $submission = Submission::load($sid);
+        if ($submission->delete()) {
+            Messager::toast()->addMessage("Webform submission deleted successfully");;
+        }
+        else {
+            Messager::toast()->addError("Webform submission not deleted");
+        }
+        return new RedirectResponse("/admin/form-builder/{$form_name}/submission");
+    }
+
+    public function form_submission_view(...$args): Response {
+        extract($args);
+        $sid = $request->get('sid');
+        $form_name = $request->get('name');
+        $submission = Submission::load($sid);
+        $fields = FormConfigManager::factory()->getForm($form_name)['fields'];
+        //dump($submission);
+        return new Response(View::view('default.view.form_builder.submission_view',['submission'=>$submission, 'fields'=>$fields, 'form_name'=>$form_name]));
+    }
+
+    public function form_submission_edit(...$args)
+    {
+        extract($args);
+        $sid = $request->get('sid');
+        $form_name = $request->get('name');
+        $submission = Submission::load($sid);
+        $form_config = FormConfigManager::factory()->getForm($form_name);
+        $form_settings = FormSettings::factory($form_name);
+
+        if (!empty($form_settings) && !empty($form_config)) {
+
+            $embedded_html = $form_settings->getEmbedded();
+
+            $form_base = new FormBuilder(new SubmissionEditFormHandler([
+                'form_id' => $form_config['attributes']['id'],
+                'fields' => $form_config['fields'],
+                'submission' => Submission::load($sid),
+            ]));
+            $form_base->getFormBase()->setFormMethod($form_config['attributes']['method']);
+            $form_base->getFormBase()->setFormAction($form_config['attributes']['action']);
+            $form_base->getFormBase()->setFormEnctype($form_config['attributes']['enctype']);
+            $form_base->getFormBase()->setFormAcceptCharset($form_config['attributes']['accept-charset']);
+            $form_base->getFormBase()->isFormSilent($form_config['attributes']['is_silent']);
+
+            $content = str_replace('[__form__]',$form_base, $embedded_html);
+            return new Response(View::view('default.view.form_builder.submission.handler',
+                [
+                    'embedded' => $content,
+                    'page_title' => $form_settings->getTitle(),
+                ]
+            )
+            );
+        }
+        return new Response("Form submission");
     }
 }

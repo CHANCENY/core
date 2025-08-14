@@ -1,0 +1,59 @@
+{% extends 'default.view.admin_base' %}
+
+
+{% block body %}
+
+    <div>
+        <h3>{{ title }} Submissions</h3>
+        <div>
+            <a href="{{ url('form_builder.form.'~ form_name) }}">+ Add submission</a>
+        </div>
+        <div>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Webform</th>
+                    <th>Status</th>
+                    <th>Submitted By</th>
+                    <th>Submitted On</th>
+                    <th>IP Address</th>
+                    <th>User Agent</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                 {% if submissions %}
+
+                     {% for submission in submissions %}
+
+                         <tr>
+                             <td>{{ submission.sid }}</td>
+                             <td>{{ submission.getFormName }}</td>
+                             <td>{{ submission.status }}</td>
+                             <td>{{ submission.getAuthor }}</td>
+                             <td>{{ submission.created_at|date('d F, Y') }}</td>
+                             <td>{{ submission.ip }}</td>
+                             <td>{{ submission.getUserAgent }}</td>
+                             <td>
+                                 <a href="{{ url('form_builder.form.submission.view',{'name': submission.getFormName, 'sid': submission.sid }) }}">View</a>
+                                  <a href="{{ url('form_builder.form.submission.edit',{'name': submission.getFormName, 'sid': submission.sid }) }}">Edit</a>
+                                 <a href="{{ url('form_builder.form.submission.delete',{'name': submission.getFormName, 'sid': submission.sid }) }}">Delete</a>
+                             </td>
+                         </tr>
+
+                     {% endfor %}
+
+                 {% else %}
+
+                     <tr>
+                         <td colspan="7">No Submissions yet!</td>
+                     </tr>
+
+                 {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

@@ -47,4 +47,31 @@ class FileFunction
     {
         return File::load($fid);
     }
+
+    public static function sizeTransform(int $size): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $i = 0;
+        while ($size >= 1024 && $i < 4) {
+            $size /= 1024;
+            $i++;
+        }
+        return round($size, 2) . ' ' . $units[$i];
+    }
+
+    public static function base64_file(string $file_path): string
+    {
+        if (!file_exists($file_path)) {
+            return '';
+        }
+
+        $file_info = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($file_info, $file_path);
+        finfo_close($file_info);
+
+        $data = file_get_contents($file_path);
+        $base64 = base64_encode($data);
+
+        return "data:$mime_type;base64,$base64";
+    }
 }
