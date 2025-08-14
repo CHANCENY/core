@@ -1,0 +1,5 @@
+name: System
+description: 'this is system module vital for the system'
+type: module
+core_version_requirement: ^1
+enabled: true
