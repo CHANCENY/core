@@ -32,7 +32,7 @@ class ContentDefinitionStorage
                 }
 
             }catch (Throwable $e) {
-                ErrorLogger::logger()->logError($e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().'\n'.PHP_EOL.$e->getTraceAsString());
+                ErrorLogger::logger()->logError($e);
             }
         }
 
@@ -70,7 +70,7 @@ class ContentDefinitionStorage
                }
            }
        }catch (Throwable $e) {
-           ErrorLogger::logger()->logError($e->getMessage().' in '.$e->getFile().' on line '.$e->getLine().'\n'.PHP_EOL.$e->getTraceAsString());
+           ErrorLogger::logger()->logError($e);
        }
        return true;
     }

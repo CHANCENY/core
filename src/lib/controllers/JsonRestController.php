@@ -45,7 +45,7 @@ class JsonRestController
                 }
                 throw new Exception('Handler not found  or handle has not implemented RestDataSourceInterface');
             }catch (Throwable $exception) {
-                ErrorLogger::logger()->logError($exception->getMessage());
+                ErrorLogger::logger()->logError($exception);
             }
 
             return new JsonResponse(['status'=>true]);

@@ -1,13 +1,31 @@
 <?php
+@session_start();
 // install.php
 require_once __DIR__ . "/../../vendor/autoload.php";
+
+if (!isset($_SESSION['install'])) {
+    echo "Access denied";
+    exit;
+}
+
+if ($_SESSION['install'] !== true) {
+    echo "Access denied";
+    exit;
+}
+
+$redirect =  $_GET['dest'] ?? '/core/db-config.php';
+$page_title = $_SESSION['page_title'] ?? 'Installing Your Application';
+unset($_SESSION['install']);
+unset($_SESSION['install_redirect']);
+unset($_SESSION['page_title']);
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Installing Your Site</title>
+    <title><?= $page_title ?></title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
@@ -48,7 +66,7 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 <body>
 
 <div id="installer">
-    <h2>Installing Your Application</h2>
+    <h2><?php echo $page_title ?></h2>
 
     <div class="step" data-step="directories">Moving directories <span class="status">Pending</span></div>
     <div class="step" data-step="modules">Installing modules <span class="status">Pending</span></div>
@@ -86,7 +104,7 @@ require_once __DIR__ . "/../../vendor/autoload.php";
             if (index >= steps.length) {
                 $('#finish').fadeIn();
                 setTimeout(() => {
-                    window.location.href = '/core/db-config.php'; // Change if needed
+                    window.location.href = '<?php echo $redirect; ?>'; // Change if needed
                 }, 3000);
                 return;
             }

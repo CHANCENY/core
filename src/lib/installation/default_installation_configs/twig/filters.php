@@ -60,6 +60,12 @@ function get_filters(): array
     return [
         new TwigFilter('t',function(string $text, ?string $from = null, ?string $to = null){
             return filter_translator($text, $from, $to);
+        }),
+        new TwigFilter('class',function ($object) {
+            if (is_object($object)) {
+                return get_class($object);
+            }
+            return null;
         })
     ];
 }

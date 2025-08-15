@@ -1,6 +1,6 @@
 database.form.route:
-  title: "Database Configuration Form"
-  path: '/admin/configure/database'
+  title: Database Configuration Form
+  path: /admin/configure/database
   method:
     - GET
     - POST
@@ -10,7 +10,7 @@ database.form.route:
     class: Simp\Core\lib\controllers\DatabaseController
     method: database_form
 home.page.route:
-  title: "Home"
+  title: Home
   path: ''
   method:
     - GET
@@ -24,8 +24,8 @@ home.page.route:
     class: Simp\Core\lib\controllers\HomeController
     method: home_controller
 system.reports.errors:
-  title: "Reports"
-  path: '/admin/reports'
+  title: Reports
+  path: /admin/reports
   method:
     - GET
   access:
@@ -34,10 +34,12 @@ system.reports.errors:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_report_site_controller
   options:
-    classes: ['fa', 'fa-chart-bar']
+    classes:
+      - fa
+      - fa-chart-bar
 system.error.page.denied:
-  title: "Access denied"
-  path: '/error/page/access-denied'
+  title: Access denied
+  path: /error/page/access-denied
   method:
     - GET
     - POST
@@ -50,10 +52,13 @@ system.error.page.denied:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: system_error_page_denied
-
+  options:
+    classes:
+      - fa
+      - fa-ban
 system.user.filter.page:
-  title: "User Filter"
-  path: '/user/search/[search:string]/[content_name:string]/auto'
+  title: User Filter
+  path: /user/search/[search:string]/[content_name:string]/auto
   method:
     - GET
     - POST
@@ -66,10 +71,13 @@ system.user.filter.page:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: system_user_filter_auto_page
-
+  options:
+    classes:
+      - fa
+      - fa-users
 system.reference.filter.page:
-  title: "Reference Filter"
-  path: '/reference/field/filter'
+  title: Reference Filter
+  path: /reference/field/filter
   method:
     - POST
   access:
@@ -80,11 +88,13 @@ system.reference.filter.page:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: system_reference_filter
-
-# Account routes.
+  options:
+    classes:
+      - fa
+      - fa-book
 user.account.login.form.route:
-  title: "Login"
-  path: '/user/login'
+  title: Login
+  path: /user/login
   method:
     - GET
     - POST
@@ -93,9 +103,13 @@ user.account.login.form.route:
   controller:
     class: Simp\Core\lib\controllers\UserAccountFormController
     method: user_login_form_controller
+  options:
+    classes:
+      - fa
+      - fa-sign-in-alt
 user.account.google.redirect.route:
-  title: "Google Redirect"
-  path: '/user/oauth/google/access'
+  title: Google Redirect
+  path: /user/oauth/google/access
   method:
     - GET
     - POST
@@ -104,9 +118,13 @@ user.account.google.redirect.route:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: user_login_google_redirect_controller
+  options:
+    classes:
+      - fa
+      - fa-google
 user.account.github.redirect.route:
-  title: "Github Redirect"
-  path: '/user/oauth/github/access'
+  title: Github Redirect
+  path: /user/oauth/github/access
   method:
     - GET
     - POST
@@ -115,9 +133,13 @@ user.account.github.redirect.route:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: user_login_github_redirect_controller
+  options:
+    classes:
+      - fa
+      - fa-github
 user.account.logout.route:
-  title: "Logout"
-  path: '/user/logout'
+  title: Logout
+  path: /user/logout
   method:
     - GET
     - POST
@@ -129,9 +151,13 @@ user.account.logout.route:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: user_logout_controller
+  options:
+    classes:
+      - fa
+      - fa-sign-out-alt
 user.account.form.page.route:
-  title: "Register"
-  path: '/user/register'
+  title: Register
+  path: /user/register
   method:
     - GET
     - POST
@@ -143,9 +169,13 @@ user.account.form.page.route:
   controller:
     class: Simp\Core\lib\controllers\UserAccountFormController
     method: user_account_form_controller
+  options:
+    classes:
+      - fa
+      - fa-user-plus
 user.account.password.forgot:
-  title: "Forgot Password"
-  path: '/user/forgot-password'
+  title: Forgot Password
+  path: /user/forgot-password
   method:
     - GET
     - POST
@@ -157,9 +187,13 @@ user.account.password.forgot:
   controller:
     class: Simp\Core\lib\controllers\UserAccountFormController
     method: user_account_password_form_controller
+  options:
+    classes:
+      - fa
+      - fa-key
 user.account.password.reset:
-  title: "New Password"
-  path: '/user/password/reset/[hash:string]'
+  title: New Password
+  path: /user/password/reset/[hash:string]
   method:
     - GET
     - POST
@@ -171,9 +205,13 @@ user.account.password.reset:
   controller:
     class: Simp\Core\lib\controllers\UserAccountFormController
     method: user_account_password_reset_form_controller
+  options:
+    classes:
+      - fa
+      - fa-lock
 user.account.email.verify:
-  title: "Email Verification"
-  path: '/user/verify/[hash:string]'
+  title: Email Verification
+  path: /user/verify/[hash:string]
   method:
     - GET
     - POST
@@ -186,10 +224,13 @@ user.account.email.verify:
   controller:
     class: Simp\Core\lib\controllers\UserAccountFormController
     method: user_account_email_verify_form_controller
-
+  options:
+    classes:
+      - fa
+      - fa-envelope
 system.messager.toastify:
-  title: "Messages"
-  path: '/system/messages'
+  title: Messages
+  path: /system/messages
   method:
     - GET
     - POST
@@ -201,9 +242,13 @@ system.messager.toastify:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: toastify_controller
+  options:
+    classes:
+      - fa
+      - fa-comment
 system.assets.loader:
-  title: "Assets"
-  path: '/system/assets/file'
+  title: Assets
+  path: /system/assets/file
   method:
     - GET
     - POST
@@ -213,15 +258,16 @@ system.assets.loader:
     - administrator
     - content_creator
     - manager
-
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: assets_loader_controller
-
-# Admin account routes.
+  options:
+    classes:
+      - fa
+      - fa-file-image
 system.people:
-  title: "People"
-  path: '/admin/people'
+  title: People
+  path: /admin/people
   method:
     - GET
     - POST
@@ -233,10 +279,12 @@ system.people:
     class: Simp\Core\lib\controllers\SystemController
     method: people_controller
   options:
-    classes: ['fa', 'fa-users']
+    classes:
+      - fa
+      - fa-users
 system.account.delete:
-  title: "Account Deletion"
-  path: '/user/[uid:int]/delete'
+  title: Account Deletion
+  path: /user/[uid:int]/delete
   method:
     - GET
   access:
@@ -247,9 +295,13 @@ system.account.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: account_delete_controller
+  options:
+    classes:
+      - fa
+      - fa-user-times
 system.account.edit:
-  title: "Account Edit"
-  path: '/user/[uid:int]/edit'
+  title: Account Edit
+  path: /user/[uid:int]/edit
   method:
     - GET
     - POST
@@ -261,9 +313,13 @@ system.account.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: account_edit_controller
+  options:
+    classes:
+      - fa
+      - fa-user-edit
 system.account.view:
-  title: "Account"
-  path: '/user/[uid:int]'
+  title: Account
+  path: /user/[uid:int]
   method:
     - GET
   access:
@@ -274,9 +330,13 @@ system.account.view:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: account_controller
+  options:
+    classes:
+      - fa
+      - fa-user
 system.account.profile.edit:
-  title: "Profile Account Edit"
-  path: '/user/[uid:int]/profile/edit'
+  title: Profile Account Edit
+  path: /user/[uid:int]/profile/edit
   method:
     - GET
     - POST
@@ -288,11 +348,13 @@ system.account.profile.edit:
   controller:
     class: Simp\Core\lib\controllers\UserAccountFormController
     method: account_profile_edit_controller
-
-# configuration routes.
+  options:
+    classes:
+      - fa
+      - fa-id-card
 system.configuration:
-  title: "Configuration"
-  path: '/admin/config'
+  title: Configuration
+  path: /admin/config
   method:
     - GET
     - POST
@@ -302,10 +364,12 @@ system.configuration:
     class: Simp\Core\lib\controllers\SystemController
     method: configuration_controller
   options:
-    classes: ['fa', 'fa-cog']
+    classes:
+      - fa
+      - fa-cog
 system.configuration.basic:
-  title: "Site"
-  path: '/admin/config/system/site-information'
+  title: Site
+  path: /admin/config/system/site-information
   method:
     - GET
     - POST
@@ -314,9 +378,13 @@ system.configuration.basic:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: configuration_basic_site_controller
+  options:
+    classes:
+      - fa
+      - fa-info-circle
 system.configuration.account:
-  title: "Account settings"
-  path: '/admin/config/people/accounts'
+  title: Account settings
+  path: /admin/config/people/accounts
   method:
     - GET
     - POST
@@ -325,9 +393,13 @@ system.configuration.account:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: configuration_account_controller
+  options:
+    classes:
+      - fa
+      - fa-user-cog
 system.configuration.smtp:
-  title: "Site Mail Server"
-  path: '/admin/config/smtp'
+  title: Site Mail Server
+  path: /admin/config/smtp
   method:
     - GET
     - POST
@@ -336,9 +408,13 @@ system.configuration.smtp:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: configuration_smtp_controller
+  options:
+    classes:
+      - fa
+      - fa-envelope-open
 system.configuration.logger:
-  title: "Development"
-  path: '/admin/config/development/settings'
+  title: Development
+  path: /admin/config/development/settings
   method:
     - GET
     - POST
@@ -347,11 +423,13 @@ system.configuration.logger:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: configuration_logger_controller
-
-# system content type.
+  options:
+    classes:
+      - fa
+      - fa-code
 system.structure:
-  title: "Structure"
-  path: '/admin/structure'
+  title: Structure
+  path: /admin/structure
   method:
     - GET
     - POST
@@ -361,10 +439,12 @@ system.structure:
     class: Simp\Core\lib\controllers\SystemController
     method: structure_controller
   options:
-    classes: ['fa', 'fa-sitemap']
+    classes:
+      - fa
+      - fa-sitemap
 system.structure.content-type:
-  title: "Content types"
-  path: '/admin/structure/types'
+  title: Content types
+  path: /admin/structure/types
   method:
     - GET
     - POST
@@ -373,9 +453,13 @@ system.structure.content-type:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: structure_content_type_controller
+  options:
+    classes:
+      - fa
+      - fa-th-list
 system.structure.content-type.form:
-  title: "Add content type"
-  path: '/admin/structure/types/new'
+  title: Add content type
+  path: /admin/structure/types/new
   method:
     - GET
     - POST
@@ -384,9 +468,13 @@ system.structure.content-type.form:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: structure_content_type_form_controller
+  options:
+    classes:
+      - fa
+      - fa-plus
 system.structure.content-type.edit:
-  title: "Content type edit"
-  path: '/admin/structure/content-type/[machine_name:string]/edit'
+  title: Content type edit
+  path: /admin/structure/content-type/[machine_name:string]/edit
   method:
     - GET
     - POST
@@ -395,9 +483,13 @@ system.structure.content-type.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_edit_form_controller
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.structure.content-type.delete:
-  title: "Delete content type"
-  path: '/admin/structure/content-type/[machine_name:string]/delete'
+  title: Delete content type
+  path: /admin/structure/content-type/[machine_name:string]/delete
   method:
     - GET
     - POST
@@ -406,9 +498,13 @@ system.structure.content-type.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_delete_controller
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.structure.content-type.manage:
-  title: "Content type manage"
-  path: '/admin/structure/content-type/[machine_name:string]/manage'
+  title: Content type manage
+  path: /admin/structure/content-type/[machine_name:string]/manage
   method:
     - GET
     - POST
@@ -417,9 +513,13 @@ system.structure.content-type.manage:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_manage_controller
+  options:
+    classes:
+      - fa
+      - fa-cogs
 system.structure.content-type.manage.field.new:
-  title: "Add field"
-  path: '/admin/structure/content-type/[machine_name:string]/field/new'
+  title: Add field
+  path: /admin/structure/content-type/[machine_name:string]/field/new
   method:
     - GET
     - POST
@@ -428,9 +528,13 @@ system.structure.content-type.manage.field.new:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_manage_add_field_controller
+  options:
+    classes:
+      - fa
+      - fa-plus-square
 system.structure.content-type.manage.field.type.new:
-  title: "Field Settings"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[type:string]/new'
+  title: Field Settings
+  path: /admin/structure/content-type/[machine_name:string]/field/[type:string]/new
   method:
     - GET
     - POST
@@ -439,9 +543,14 @@ system.structure.content-type.manage.field.type.new:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_manage_add_field_type_controller
+  options:
+    classes:
+      - fa
+      - fa-sliders-h
 system.structure.content-type.manage.field.edit:
-  title: "Edit field"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/edit'
+  title: Edit field
+  path: >-
+    /admin/structure/content-type/[machine_name:string]/field/[field_name:string]/edit
   method:
     - GET
     - POST
@@ -450,9 +559,14 @@ system.structure.content-type.manage.field.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_manage_edit_field_controller
+  options:
+    classes:
+      - fa
+      - fa-pencil-alt
 system.structure.content-type.manage.field.delete:
-  title: "Delete field"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/delete'
+  title: Delete field
+  path: >-
+    /admin/structure/content-type/[machine_name:string]/field/[field_name:string]/delete
   method:
     - GET
     - POST
@@ -461,9 +575,14 @@ system.structure.content-type.manage.field.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_manage_delete_field_controller
+  options:
+    classes:
+      - fa
+      - fa-times-circle
 system.structure.field.wrapper.field:
-  title: "Inner fields"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/inner-fields'
+  title: Inner fields
+  path: >-
+    /admin/structure/content-type/[machine_name:string]/field/[field_name:string]/inner-fields
   method:
     - GET
     - POST
@@ -472,9 +591,14 @@ system.structure.field.wrapper.field:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_structure_field_inner_manage_controller
+  options:
+    classes:
+      - fa
+      - fa-layer-group
 system.structure.field.wrapper.field.inner.add:
-  title: "Add Inner field"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[field_name:string]/add/inner/new'
+  title: Add Inner field
+  path: >-
+    /admin/structure/content-type/[machine_name:string]/field/[field_name:string]/add/inner/new
   method:
     - GET
     - POST
@@ -483,9 +607,14 @@ system.structure.field.wrapper.field.inner.add:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_structure_field_inner_add_controller
+  options:
+    classes:
+      - fa
+      - fa-plus-circle
 system.structure.field.wrapper.field.inner.edit:
-  title: "Edit Inner field"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[parent_name:string]/[field_name:string]/inner/edit'
+  title: Edit Inner field
+  path: >-
+    /admin/structure/content-type/[machine_name:string]/field/[parent_name:string]/[field_name:string]/inner/edit
   method:
     - GET
     - POST
@@ -494,9 +623,14 @@ system.structure.field.wrapper.field.inner.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_structure_field_inner_edit_controller
+  options:
+    classes:
+      - fa
+      - fa-pen
 system.structure.field.wrapper.field.inner.delete:
-  title: "Delete Inner field"
-  path: '/admin/structure/content-type/[machine_name:string]/field/[parent_name:string]/[field_name:string]/inner/delete'
+  title: Delete Inner field
+  path: >-
+    /admin/structure/content-type/[machine_name:string]/field/[parent_name:string]/[field_name:string]/inner/delete
   method:
     - GET
     - POST
@@ -505,9 +639,13 @@ system.structure.field.wrapper.field.inner.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_type_manage_delete_inner_field_controller
+  options:
+    classes:
+      - fa
+      - fa-trash-alt
 system.structure.content:
-  title: "Content"
-  path: '/admin/content'
+  title: Content
+  path: /admin/content
   method:
     - GET
   access:
@@ -518,10 +656,12 @@ system.structure.content:
     class: Simp\Core\lib\controllers\SystemController
     method: content_content_admin_controller
   options:
-    classes: ['fa', 'fa-file']
+    classes:
+      - fa
+      - fa-file
 system.structure.content.add:
-  title: "Content Selection"
-  path: '/node/add'
+  title: Content Selection
+  path: /node/add
   method:
     - GET
   access:
@@ -531,9 +671,13 @@ system.structure.content.add:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_content_node_add_controller
+  options:
+    classes:
+      - fa
+      - fa-plus-square
 system.structure.content.form:
-  title: "Add Content"
-  path: '/node/add/[content_name:string]'
+  title: Add Content
+  path: /node/add/[content_name:string]
   method:
     - GET
     - POST
@@ -544,9 +688,13 @@ system.structure.content.form:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_node_add_controller
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.structure.content.node:
-  title: "Node page"
-  path: '/node/[nid:int]'
+  title: Node page
+  path: /node/[nid:int]
   method:
     - GET
     - POST
@@ -558,9 +706,13 @@ system.structure.content.node:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_node_controller
+  options:
+    classes:
+      - fa
+      - fa-file-alt
 system.structure.content.form.edit:
-  title: "Edit Node"
-  path: '/node/[nid:int]/edit'
+  title: Edit Node
+  path: /node/[nid:int]/edit
   method:
     - GET
     - POST
@@ -572,9 +724,13 @@ system.structure.content.form.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_node_add_edit_controller
+  options:
+    classes:
+      - fa
+      - fa-pencil-alt
 system.structure.content.form.delete:
-  title: "Delete Node"
-  path: '/node/[nid:int]/delete'
+  title: Delete Node
+  path: /node/[nid:int]/delete
   method:
     - GET
     - POST
@@ -586,11 +742,13 @@ system.structure.content.form.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_node_add_delete_controller
-
-#views admin routes
+  options:
+    classes:
+      - fa
+      - fa-trash-alt
 system.structure.views:
-  title: "Views"
-  path: '/admin/structure/views'
+  title: Views
+  path: /admin/structure/views
   method:
     - GET
     - POST
@@ -599,9 +757,13 @@ system.structure.views:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_views_controller
+  options:
+    classes:
+      - fa
+      - fa-eye
 system.structure.views.add:
-  title: "Add View"
-  path: '/admin/structure/views/add'
+  title: Add View
+  path: /admin/structure/views/add
   method:
     - GET
     - POST
@@ -610,9 +772,13 @@ system.structure.views.add:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_views_add_controller
+  options:
+    classes:
+      - fa
+      - fa-plus
 system.structure.views.delete:
-  title: "Delete View"
-  path: '/admin/structure/views/view/[view_name:string]/delete'
+  title: Delete View
+  path: /admin/structure/views/view/[view_name:string]/delete
   method:
     - GET
     - POST
@@ -621,9 +787,13 @@ system.structure.views.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_views_view_delete_controller
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.structure.views.edit:
-  title: "Edit View"
-  path: '/admin/structure/views/view/[view_name:string]'
+  title: Edit View
+  path: /admin/structure/views/view/[view_name:string]
   method:
     - GET
     - POST
@@ -632,9 +802,13 @@ system.structure.views.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_views_view_edit_controller
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.structure.views.display:
-  title: "Display View"
-  path: '/admin/structure/views/view/[view_name:string]/displays'
+  title: Display View
+  path: /admin/structure/views/view/[view_name:string]/displays
   method:
     - GET
     - POST
@@ -643,10 +817,13 @@ system.structure.views.display:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_views_view_display_controller
-
+  options:
+    classes:
+      - fa
+      - fa-columns
 system.structure.views.display.edit:
-  title: "Display Edit"
-  path: '/admin/structure/views/view/[view_name:string]/display/[display:string]/edit'
+  title: Display Edit
+  path: /admin/structure/views/view/[view_name:string]/display/[display:string]/edit
   method:
     - GET
     - POST
@@ -655,10 +832,13 @@ system.structure.views.display.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_views_view_display_edit_controller
-
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.search.settings:
-  title: "Search Settings"
-  path: '/admin/search/settings'
+  title: Search Settings
+  path: /admin/search/settings
   method:
     - GET
     - POST
@@ -667,9 +847,13 @@ system.search.settings:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_search_settings
+  options:
+    classes:
+      - fa
+      - fa-search
 system.search.setting.add:
-  title: "Add Search Settings"
-  path: '/admin/search/setting/new'
+  title: Add Search Settings
+  path: /admin/search/setting/new
   method:
     - GET
     - POST
@@ -678,9 +862,13 @@ system.search.setting.add:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_search_settings_new
+  options:
+    classes:
+      - fa
+      - fa-plus
 system.search.setting.edit:
-  title: "Edit Search Settings"
-  path: '/admin/search/settings/[key:string]/edit'
+  title: Edit Search Settings
+  path: /admin/search/settings/[key:string]/edit
   method:
     - GET
     - POST
@@ -689,9 +877,13 @@ system.search.setting.edit:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_search_settings_edit
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.search.setting.delete:
-  title: "Delete Search Settings"
-  path: '/admin/search/settings/[key:string]/delete'
+  title: Delete Search Settings
+  path: /admin/search/settings/[key:string]/delete
   method:
     - GET
     - POST
@@ -700,9 +892,13 @@ system.search.setting.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_search_settings_delete
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.search.setting.configure:
-  title: "Configure Search Settings"
-  path: '/admin/search/settings/[key:string]/configure'
+  title: Configure Search Settings
+  path: /admin/search/settings/[key:string]/configure
   method:
     - GET
     - POST
@@ -711,9 +907,13 @@ system.search.setting.configure:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_search_settings_configure
+  options:
+    classes:
+      - fa
+      - fa-cog
 system.search.setting.search:
-  title: "Search"
-  path: '/search/[key:string]'
+  title: Search
+  path: /search/[key:string]
   method:
     - GET
     - POST
@@ -726,11 +926,13 @@ system.search.setting.search:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: admin_search_settings_search_page
-
-#integration routes
+  options:
+    classes:
+      - fa
+      - fa-search
 system.integration.configure.rest:
-  title: "REST"
-  path: '/admin/integration/rest'
+  title: REST
+  path: /admin/integration/rest
   method:
     - GET
     - POST
@@ -739,9 +941,13 @@ system.integration.configure.rest:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: integration_configure_rest
+  options:
+    classes:
+      - fa
+      - fa-plug
 system.integration.configure.rest.version:
-  title: "REST Versions"
-  path: '/admin/integration/rest/version/[version_id:string]'
+  title: REST Versions
+  path: /admin/integration/rest/version/[version_id:string]
   method:
     - GET
     - POST
@@ -751,9 +957,13 @@ system.integration.configure.rest.version:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: integration_configure_rest_version
+  options:
+    classes:
+      - fa
+      - fa-code-branch
 system.integration.configure.rest.version.delete:
-  title: "Delete version"
-  path: '/admin/integration/rest/version/[version_id:string]/delete'
+  title: Delete version
+  path: /admin/integration/rest/version/[version_id:string]/delete
   method:
     - GET
     - POST
@@ -762,11 +972,13 @@ system.integration.configure.rest.version.delete:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: integration_configure_rest_version_delete
-
-# Files routes
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.files.add:
-  title: "Add File"
-  path: '/file/add'
+  title: Add File
+  path: /file/add
   method:
     - GET
     - POST
@@ -775,9 +987,13 @@ system.files.add:
   controller:
     class: Simp\Core\lib\controllers\FileController
     method: add_file
+  options:
+    classes:
+      - fa
+      - fa-file-upload
 system.files.upload.ajax:
-  title: "Ajax Add File"
-  path: '/file/upload/ajax'
+  title: Ajax Add File
+  path: /file/upload/ajax
   method:
     - GET
     - POST
@@ -790,9 +1006,13 @@ system.files.upload.ajax:
   controller:
     class: Simp\Core\lib\controllers\FileController
     method: file_upload
+  options:
+    classes:
+      - fa
+      - fa-file-upload
 system.files.upload.delete.ajax:
-  title: "Ajax Delete File"
-  path: '/file/delete/ajax'
+  title: Ajax Delete File
+  path: /file/delete/ajax
   method:
     - GET
     - POST
@@ -805,10 +1025,13 @@ system.files.upload.delete.ajax:
   controller:
     class: Simp\Core\lib\controllers\FileController
     method: file_delete_ajx
-
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.cron.manage:
-  title: "Cron"
-  path: '/cron/manage'
+  title: Cron
+  path: /cron/manage
   method:
     - GET
     - POST
@@ -817,10 +1040,13 @@ system.cron.manage:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: cron_manage
-
+  options:
+    classes:
+      - fa
+      - fa-clock
 system.cron.add:
-  title: "New Cron"
-  path: '/cron/add'
+  title: New Cron
+  path: /cron/add
   method:
     - GET
     - POST
@@ -829,11 +1055,13 @@ system.cron.add:
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: cron_add
-
-# Extends
+  options:
+    classes:
+      - fa
+      - fa-plus-circle
 system.extends.manage:
-  title: "Extend"
-  path: '/admin/extends'
+  title: Extend
+  path: /admin/extends
   method:
     - GET
     - POST
@@ -843,11 +1071,12 @@ system.extends.manage:
     class: Simp\Core\lib\controllers\ExtendController
     method: extend_manage
   options:
-    classes: ['fa', 'fa-wrench']
-
+    classes:
+      - fa
+      - fa-wrench
 system.extends.manage.add:
-  title: "Upload extension"
-  path: '/admin/extend/add'
+  title: Upload extension
+  path: /admin/extend/add
   method:
     - GET
     - POST
@@ -856,11 +1085,13 @@ system.extends.manage.add:
   controller:
     class: Simp\Core\lib\controllers\ExtendController
     method: extend_manage_add
-
-# Vocabulary and texonomy
+  options:
+    classes:
+      - fa
+      - fa-upload
 system.vocabulary.list:
-  title: "Taxonomy"
-  path: '/admin/structure/taxonomy'
+  title: Taxonomy
+  path: /admin/structure/taxonomy
   method:
     - GET
     - POST
@@ -869,10 +1100,13 @@ system.vocabulary.list:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: manage
-
+  options:
+    classes:
+      - fa
+      - fa-tags
 system.vocabulary.add:
-  title: "Add Vocabulary"
-  path: '/admin/structure/taxonomy/create'
+  title: Add Vocabulary
+  path: /admin/structure/taxonomy/create
   method:
     - GET
     - POST
@@ -881,9 +1115,13 @@ system.vocabulary.add:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: add
+  options:
+    classes:
+      - fa
+      - fa-plus
 system.vocabulary.edit:
-  title: "Edit Vocabulary"
-  path: '/admin/structure/taxonomy/[name:string]/edit'
+  title: Edit Vocabulary
+  path: /admin/structure/taxonomy/[name:string]/edit
   method:
     - GET
     - POST
@@ -892,9 +1130,13 @@ system.vocabulary.edit:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: edit
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.vocabulary.delete:
-  title: "Delete Vocabulary"
-  path: '/admin/structure/taxonomy/[name:string]/delete'
+  title: Delete Vocabulary
+  path: /admin/structure/taxonomy/[name:string]/delete
   method:
     - GET
     - POST
@@ -903,10 +1145,13 @@ system.vocabulary.delete:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: delete
-
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.vocabulary.terms:
-  title: "Vocabulary terms list"
-  path: '/admin/structure/taxonomy/[name:string]/terms'
+  title: Vocabulary terms list
+  path: /admin/structure/taxonomy/[name:string]/terms
   method:
     - GET
     - POST
@@ -915,10 +1160,13 @@ system.vocabulary.terms:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: term_list
-
+  options:
+    classes:
+      - fa
+      - fa-list
 system.vocabulary.term.add:
-  title: "Add Term"
-  path: '/admin/structure/taxonomy/[name:string]/term/add'
+  title: Add Term
+  path: /admin/structure/taxonomy/[name:string]/term/add
   method:
     - GET
     - POST
@@ -927,10 +1175,13 @@ system.vocabulary.term.add:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: term_add
-
+  options:
+    classes:
+      - fa
+      - fa-plus
 system.vocabulary.term.edit:
-  title: "Edit Term"
-  path: '/admin/structure/taxonomy/[name:string]/[tid:int]/edit'
+  title: Edit Term
+  path: /admin/structure/taxonomy/[name:string]/[tid:int]/edit
   method:
     - GET
     - POST
@@ -939,9 +1190,13 @@ system.vocabulary.term.edit:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: term_edit
+  options:
+    classes:
+      - fa
+      - fa-edit
 system.vocabulary.term.delete:
-  title: "Delete Term"
-  path: '/admin/structure/taxonomy/[name:string]/[tid:int]/delete'
+  title: Delete Term
+  path: /admin/structure/taxonomy/[name:string]/[tid:int]/delete
   method:
     - GET
     - POST
@@ -950,9 +1205,13 @@ system.vocabulary.term.delete:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: term_delete
+  options:
+    classes:
+      - fa
+      - fa-trash
 system.vocabulary.term.view:
-  title: "Term"
-  path: '/term/[name:string]'
+  title: Term
+  path: /term/[name:string]
   method:
     - GET
   access:
@@ -964,3 +1223,7 @@ system.vocabulary.term.view:
   controller:
     class: Simp\Core\lib\controllers\VocabularyController
     method: term_view
+  options:
+    classes:
+      - fa
+      - fa-tag

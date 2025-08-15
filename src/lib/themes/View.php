@@ -49,7 +49,7 @@ class View
                 $view = $override_key;
             }
         }catch (Throwable $e) {
-            ErrorLogger::logger()->logError($e->__toString());
+            ErrorLogger::logger()->logError($e);
         }
 
         $string = $this->theme->twig->render($view,$options);

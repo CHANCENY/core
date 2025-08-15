@@ -8,6 +8,7 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
+use Simp\Core\components\request\Request;
 use Simp\Core\lib\app\App;
 use Simp\Core\lib\file\file_system\stream_wrapper\GlobalStreamWrapper;
 use Simp\Core\lib\file\file_system\stream_wrapper\ModuleStreamWrapper;
@@ -19,6 +20,7 @@ use Simp\Core\lib\file\file_system\stream_wrapper\VarStreamWrapper;
 use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\TwigResolver;
+use Simp\Core\modules\database\Database;
 use Simp\Core\modules\theme\ThemeManager;
 use Simp\StreamWrapper\WrapperRegister\WrapperRegister;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -129,7 +131,18 @@ class InstallerValidator extends SystemDirectory
         // Prepare environment
         if (!$this->bootStorage()) {
             // Redirect to core/install.php
-            $url = '/core/install.php';
+            $_SESSION['install'] = false;
+            $redirect = "/core/db-config.php";;
+            try{
+                Database::database()->con();
+                $redirect = \Symfony\Component\HttpFoundation\Request::createFromGlobals()->headers->get('referer');
+                $_SESSION['install'] = true;
+                $_SESSION['page_title'] = "Reboosting System Cache";
+            }catch (\Throwable $e){
+
+            }
+
+            $url = '/core/install.php?dest='.$redirect;
             $response = new RedirectResponse($url);
             $response->send();
             exit;

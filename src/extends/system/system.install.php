@@ -1,5 +1,7 @@
 <?php
 
+use Simp\Core\components\extensions\ModuleHandler;
+use Simp\Core\extends\system\src\Controller\System;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\modules\menu\Menu;
 use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
@@ -12,7 +14,73 @@ use Simp\Core\modules\user\current_user\CurrentUser;
 
 function system_route_install(): array
 {
-    return array();
+    return array(
+        'system.module.rebuild' => array(
+            'title' => 'Rebuild Core',
+            'path' => '/admin/system/module/rebuild',
+            'method' => array('GET', 'POST'),
+            'controller' => array(
+                'class' => System::class,
+                'method' => 'system_rebuild'
+            ),
+            'access' => array('administrator'),
+            'options' => array(
+                'classes' => ['fa','fa-gear']
+            )
+        ),
+        'system.module.system' => array(
+            'title' => 'System',
+            'path' => '/admin/system',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => System::class,
+                'method' => 'system'
+            ),
+            'access' => array('administrator'),
+            'options' => array(
+                'classes' => ['fa','fa-gear']
+            )
+        ),
+        'system.rebuild.cache' => array(
+            'title' => 'Rebuild Cache',
+            'path' => '/admin/system/rebuild/cache',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => System::class,
+                'method' => 'rebuild_cache'
+            ),
+            'access' => array('administrator'),
+            'options' => array(
+                'classes' => ['fa','fa-gear']
+            )
+        ),
+        'system.module.clear.cache' => array(
+            'title' => 'Clear Cache',
+            'path' => '/admin/system/clear/cache',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => System::class,
+                'method' => 'clear_cache'
+            ),
+            'access' => array('administrator'),
+            'options' => array(
+                'classes' => ['fa','fa-gear']
+            )
+        ),
+        'system.module.rebuild.all' => array(
+            'title' => 'Rebuild All',
+            'path' => '/admin/system/rebuild/all',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => System::class,
+                'method' => 'rebuild_all'
+            ),
+            'access' => array('administrator'),
+            'options' => array(
+                'classes' => ['fa','fa-gear']
+            )
+        )
+    );
 }
 
 function system_twig_function_install(): array
@@ -29,7 +97,11 @@ function system_cron_jobs_install(): array
 
 function system_template_install(): array
 {
-    return array();
+    $module = ModuleHandler::factory()->getModule('system');
+    $path = $module['path'] ?? __DIR__;
+    return [
+        $path . DIRECTORY_SEPARATOR . 'templates'
+    ];
 }
 
 function system_cron_subscribers_install(): array
@@ -46,6 +118,16 @@ function system_cron_subscribers_install(): array
 function system_menu_install(array &$menus): void
 {
     if (CurrentUser::currentUser()->isIsAdmin()) {
+
+        // append System menu
+        $system_menu = new Menu('system.module.system');
+        $system_menu->addChild(new Menu('system.module.rebuild'));
+        $system_menu->addChild(new Menu('system.rebuild.cache'));
+        $system_menu->addChild(new Menu('system.module.clear.cache'));
+        $system_menu->addChild(new Menu('system.module.rebuild.all'));
+
+
+        $menus = ['system.module' => $system_menu, ...$menus];
 
         //system.structure
         $content_types = new Menu('system.structure.content-type');

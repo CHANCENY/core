@@ -176,7 +176,7 @@ class InstallerValidatorOld extends SystemDirectory {
                     }
 
                 }catch(Throwable $e){
-                    ErrorLogger::logger()->logError($e->getMessage()."\n".$e->getTraceAsString());
+                    ErrorLogger::logger()->logError($e);
                 }
             }
             }

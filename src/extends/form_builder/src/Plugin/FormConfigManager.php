@@ -125,7 +125,7 @@ class FormConfigManager
                 }
             }
         }catch (\Throwable $exception) {
-            ErrorLogger::logger()->logError($exception->__toString());
+            ErrorLogger::logger()->logError($exception);
         }
 
     }
@@ -141,7 +141,7 @@ class FormConfigManager
                 Database::database()->con()->exec("DROP TABLE IF EXISTS `{$table_name}`");
             }
         }catch (\Throwable $e) {
-            ErrorLogger::logger()->logError($e->__toString());
+            ErrorLogger::logger()->logError($e);
         }
     }
 

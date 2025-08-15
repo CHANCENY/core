@@ -63,16 +63,7 @@
             <div>
                 {% for log in errors %}
                     <div class="column column-100" style="margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">
-                        <div>
-                            <p><strong>{{ "Level"|t }}</strong>&nbsp;{{ log.LEVEL }}</p>
-                        </div>
-                        <div>
-                            <p><strong>{{ "Severity"|t }}</strong>&nbsp;{{ log.Severity }}</p>
-                        </div>
-                        <div>
-                            <p><strong>{{ "Message"|t }}</strong></p>
-                            <pre><code>{{ br(log.MESSAGE,300)|raw }}</code></pre>
-                        </div>
+                       {{ log|raw }}
                     </div>
                     <div class="clearfix"></div>
 

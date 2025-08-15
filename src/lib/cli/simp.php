@@ -65,5 +65,5 @@ try{
     extracted($argv);
 }catch (Throwable $e){
     echo PHP_EOL . "sorry console not working properly" . PHP_EOL;
-    \Simp\Core\modules\logger\ErrorLogger::logger()->logError($e->__toString());
+    \Simp\Core\modules\logger\ErrorLogger::logger()->logError($e);
 }

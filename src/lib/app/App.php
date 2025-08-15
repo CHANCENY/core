@@ -2,6 +2,7 @@
 
 namespace Simp\Core\lib\app;
 
+use ErrorException;
 use ReflectionClass;
 use Exception;
 use Phpfastcache\Drivers\Files\Driver;
@@ -20,6 +21,8 @@ use Simp\Core\lib\installation\InstallerValidator;
 use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\lib\routes\Route;
+use Simp\Core\lib\themes\View;
+use Simp\Core\modules\config\config\ConfigReadOnly;
 use Simp\Core\modules\config\ConfigManager;
 use Simp\Core\modules\event_subscriber\EventSubscriber;
 use Simp\Core\modules\logger\ErrorLogger;
@@ -31,30 +34,105 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Yaml;
 use Throwable;
 
-
 class App
 {
     protected $currentRoute = null;
     /**
      * @throws PhpfastcacheDriverNotFoundException
-     * @throws PhpfastcacheInvalidConfigurationException
      * @throws PhpfastcacheExtensionNotInstalledException
      * @throws PhpfastcacheDriverCheckException
      * @throws PhpfastcacheLogicException
-     * @throws PhpfastcacheInvalidTypeException
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      * @throws Exception
      */
     public function __construct()
     {
-
         if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
             $this->optionRequestHandler();
         }
 
-        $response = new Response();
+        $development = ConfigManager::config()->getConfigFile('development.setting');
+        if ($development instanceof ConfigReadOnly) {
+
+            $error = $development->get('logger');
+            if (!empty($error['enabled']) && $error['enabled'] === 'yes') {
+                // add error handlers
+                set_exception_handler([$this, 'exceptionHandler']);
+                set_error_handler([$this, 'errorHandler']);
+            }
+
+            else {
+
+                // Set handlers what response error page
+                set_exception_handler([$this, 'exceptionHandlerResponse']);
+                set_error_handler([$this, 'errorHandler']);
+            }
+
+        }
+
+        // Start app now.
         $response = $this->mapRouteListeners();
+    }
+
+    public function exceptionHandlerResponse($exception): void
+    {
+        $content = View::view('default.view.system.error.front',['throwable' => $exception]);
+        $response = new Response($content, 500);
+        $response->headers->set('Content-Type', 'text/html');
+        $response->send();
+    }
+
+    public function exceptionHandler(\Throwable $exception): void
+    {
+        $error_handler = ErrorLogger::logger();
+
+        if ($exception instanceof \ErrorException) {
+            // Only ErrorException has getSeverity()
+            switch ($exception->getSeverity()) {
+                case E_NOTICE:
+                    $error_handler->logInfo($exception);
+                    break;
+                case E_WARNING:
+                    $error_handler->logWarning($exception);
+                    break;
+                case E_ERROR:
+                    $error_handler->logError($exception);
+                    break;
+                default:
+                    $error_handler->logDebug($exception);
+                    break;
+            }
+        } else {
+            // For ParseError, TypeError, generic Error, Exception, etc.
+            $error_handler->logError($exception);
+            echo "we have encountered unexpected error";
+            exit;
+        }
+    }
+
+    public function errorHandler(int $errno, string $errstr, string $errfile, int $errline): bool
+    {
+        // Define "serious" error levels
+        $seriousErrors = [
+            E_ERROR,
+            E_CORE_ERROR,
+            E_COMPILE_ERROR,
+            E_USER_ERROR,
+            E_RECOVERABLE_ERROR,
+            E_PARSE,
+        ];
+
+        if (in_array($errno, $seriousErrors, true)) {
+            // Throw exception for serious errors
+            throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+        }
+
+        // For non-serious errors, log or display as needed
+        error_log("Non-serious error [$errno]: $errstr in $errfile on line $errline");
+
+        // Return true to prevent PHP's default handler
+        return true;
     }
 
     public static function runApp(): App

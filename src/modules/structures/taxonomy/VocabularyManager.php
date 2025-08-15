@@ -52,7 +52,7 @@ class VocabularyManager
         return new self();
     }
 
-    public function removeVocabulary(string $vid): false
+    public function removeVocabulary(string $vid): bool
     {
         if (isset($this->vocabularies[$vid])) {
             unset($this->vocabularies[$vid]);

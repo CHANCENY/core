@@ -239,6 +239,7 @@ class SystemController
         extract($args);
         $name = $request->get('name');
         $file_path = (new AssetsManager())->getAssetsFile($name,false);
+
         if (!empty($file_path) && file_exists($file_path)) {
             $mime_type = mime_content_type($file_path);
             $mime_type = str_ends_with($name, '.js') ? 'application/javascript' : $mime_type;
