@@ -150,7 +150,9 @@ class SystemAction
             'db-config.php',
             'mongodb-config.php',
             'rebuild.php',
-            'InstallTasks.php'
+            'InstallTasks.php',
+            'upload.php',
+            'remove.php',
         ];
 
         $destinationDir = $system->webroot_dir . DIRECTORY_SEPARATOR . 'core';

@@ -272,4 +272,23 @@ class Database
         return $this->log;
     }
 
+    public function isTableExist(string $table): bool
+    {
+        $con = $this->con();
+
+        try {
+            $stmt = $con->prepare("
+            SELECT COUNT(*) 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_SCHEMA = DATABASE() 
+              AND TABLE_NAME = :table
+        ");
+            $stmt->execute([':table' => $table]);
+
+            return (bool)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            return false;
+        }
+    }
+
 }

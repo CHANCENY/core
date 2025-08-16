@@ -164,7 +164,10 @@ class ContentTypeDefinitionForm extends FormBase
 
             elseif ($inner_field['type'] === 'file') {
                 $files = $data_all[$parent_key][$k] ?? [];
+                $files = is_string($files) ? json_decode($files,true) : $files;
                 $processed_files = [];
+                $file_fids = [];
+
                 if (isset($files['name']) && is_array($files['name'])) {
                     $count = count($files['name']);
                     for ($i = 0; $i < $count; $i++) {
@@ -177,11 +180,15 @@ class ContentTypeDefinitionForm extends FormBase
                             'error' => $files['error'][$i],
                         ];
                     }
-                } elseif (isset($files['name']) && is_string($files['name'])) {
+                }
+                elseif (isset($files['name']) && is_string($files['name'])) {
                     $processed_files[] = $files;
                 }
+                else {
+                    $file_fids[] = $files;
+                }
 
-                $file_fids = [];
+
                 foreach ($processed_files as $file) {
 
                     $form = new FormUpload();
@@ -268,6 +275,9 @@ class ContentTypeDefinitionForm extends FormBase
                     if (isset($field) && $field['type'] === 'file') {
                         $files = $data_all[$key] ?? [];
                         $processed_files = [];
+                        $files = is_string($files) ? json_decode($files,true) : $files;
+                        $file_fids = [];
+
                         if ( !empty($files['name']) && is_array($files['name'])) {
                             $count = count($files['name']);
                             for ($i = 0; $i < $count; $i++) {
@@ -284,8 +294,10 @@ class ContentTypeDefinitionForm extends FormBase
                         elseif (!empty( $files['name']) && is_string($files['name'])) {
                             $processed_files[] = $files;
                         }
+                        else {
+                            $file_fids = $files;
+                        }
 
-                        $file_fids = [];
                         foreach ($processed_files as $file) {
 
                             $form = new FormUpload();
@@ -345,4 +357,6 @@ class ContentTypeDefinitionForm extends FormBase
             }
         }
     }
+
+
 }

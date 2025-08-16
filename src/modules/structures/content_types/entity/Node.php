@@ -265,45 +265,31 @@ class Node
 
     public function updateFieldData(string $field_name,  $values): bool
     {
-        $storage_query = ContentDefinitionStorage::contentDefinitionStorage($this->bundle)
-            ->getStorageUpdateStatement($field_name);
-
-        $storage_query1 = ContentDefinitionStorage::contentDefinitionStorage($this->bundle)
-            ->getStorageSelectStatement($field_name);
-
-        $storage_query2 = ContentDefinitionStorage::contentDefinitionStorage($this->bundle)
-            ->getStorageInsertStatement($field_name);
-
-        if (!empty($storage_query) && !empty($storage_query1) && !empty($storage_query2)) {
-
-            if (!is_array($values)) {
-                $values = [$values];
-            }
-
-            $flags = [];
-            foreach ($values as $value) {
-
-                // First check if we have data.
-                $query = Database::database()->con()->prepare($storage_query1);
-                $query->bindParam(':nid', $this->nid);
-                $query->bindParam(':field_value', $value);
-                $query->execute();
-                $data = $query->fetch();
-                if (!empty($data)) {
-                    $query = Database::database()->con()->prepare($storage_query);
-                }
-                else {
-                   $query = Database::database()->con()->prepare($storage_query2);
-                }
-                $query->bindParam(':nid', $this->nid);
-                $query->bindParam(':field_value', $value);
-                $flags[]= $query->execute();
-
-            }
-            return !in_array(false, $flags);
-
+        if (!is_array($values)) {
+            $values = [$values];
         }
-        return false;
+
+        $table = "node__{$field_name}";
+        $flags = [];
+
+        if (Database::database()->isTableExist($table)) {
+            $delete_query = "DELETE FROM {$table} WHERE nid = :nid";
+            $statement = Database::database()->con()->prepare($delete_query);
+            $statement->bindParam(':nid', $this->nid);
+            $statement->execute();
+
+            foreach ($values as $value) {
+                if (Database::database()->isTableExist($table)) {
+                    $insert = ContentDefinitionStorage::contentDefinitionStorage($this->bundle)->getStorageInsertStatement($field_name);
+                    $query = Database::database()->con()->prepare($insert);
+                    $query->bindParam(':nid', $this->nid);
+                    $query->bindValue(':field_value', $value);
+                    $flags[] = $query->execute();
+                }
+
+            }
+        }
+        return !in_array(false, $flags);
     }
 
     public static function load(int $nid): ?Node {

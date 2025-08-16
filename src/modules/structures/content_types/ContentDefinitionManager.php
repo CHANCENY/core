@@ -174,4 +174,20 @@ class ContentDefinitionManager extends SystemDirectory
     {
         return new self();
     }
+
+    public function getFieldByName(int|string|null $field)
+    {
+        if (empty($field)) {
+            return [];
+        }
+
+        $field_found = [];
+        foreach ($this->content_types as $content_t=>$content_type) {
+            $field_found = $this->getField($content_t, $field);
+            if (!empty($field_found)) {
+                return $field_found;
+            }
+        }
+        return [];
+    }
 }

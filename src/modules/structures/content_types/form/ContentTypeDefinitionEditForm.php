@@ -97,7 +97,13 @@ class ContentTypeDefinitionEditForm extends FormBase
 
             if (!isset($field['inner_field'])) {
                 $value =  $this->node->get($k);
-                $field['default_value'] = is_array($value) ? reset($value) : $value;
+
+                if ($field['type'] == 'file') {
+                    $field['default_value'] = $value;
+                }
+                else {
+                    $field['default_value'] = is_array($value) ? reset($value) : $value;
+                }
             }
             if (isset($field['inner_field'])) {
                 $this->recursive_populate($field['inner_field']);
@@ -175,7 +181,9 @@ class ContentTypeDefinitionEditForm extends FormBase
 
             elseif ($inner_field['type'] === 'file') {
                 $files = $data_all[$parent_key][$k] ?? [];
+                $files = is_string($files) ? json_decode($files,true) : $files;
                 $processed_files = [];
+                $file_fids = [];
 
                 if (!empty($files['name']) && is_array($files['name'])) {
                     $count = count($files['name']);
@@ -193,8 +201,10 @@ class ContentTypeDefinitionEditForm extends FormBase
                 elseif (!empty($files['name']) && is_string($files['name'])) {
                     $processed_files[] = $files;
                 }
+                else {
+                    $file_fids = $files;
+                }
 
-                $file_fids = [];
                 foreach ($processed_files as $file) {
 
                     $form = new FormUpload();
@@ -281,7 +291,10 @@ class ContentTypeDefinitionEditForm extends FormBase
 
                     if (isset($field) && $field['type'] === 'file') {
                         $files = $data_all[$key] ?? [];
+                        $files = is_string($files) ? json_decode($files,true) : $files;
+                        $file_fids = $this->node->get($key);
                         $processed_files = [];
+
                         if (!empty($files['name']) && is_array($files['name'])) {
                             $count = count($files['name']);
                             for ($i = 0; $i < $count; $i++) {
@@ -299,12 +312,13 @@ class ContentTypeDefinitionEditForm extends FormBase
                         elseif (!empty($files['name']) && is_string($files['name'])) {
                             $processed_files[] = $files;
                         }
-                        elseif(empty($files['name'])) {
-                            $node_data[$key] = $this->node->get($key);
+                        else {
+                            $file_fids = $files;
+                            $node_data[$key] = $file_fids;
                         }
 
                         if (!empty($processed_files)) {
-                            $file_fids = [];
+
                             foreach ($processed_files as $file) {
 
                                 $form = new FormUpload();
@@ -341,8 +355,8 @@ class ContentTypeDefinitionEditForm extends FormBase
                                     }
                                 }
                             }
-                            $node_data[$key] = $file_fids;
                         }
+
                     }
 
                     elseif (isset($field) && in_array($field['type'], ['fieldset', 'details', 'conditional']))
@@ -351,6 +365,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                         unset($node_data[$key]);
                     }
                 }
+
                 $node_data = array_merge($node_data, $temp);
                 // now insert in other tables.
                 $this->node->update($node_data);
