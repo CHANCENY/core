@@ -101,6 +101,9 @@ class FormConfigureEditForm extends FormBase
     {
         if ($this->validated) {
             $this->options = Yaml::parse($form['configuration']->getValue());
+            foreach ($this->options['fields'] as $key=>&$field) {
+                $field['name'] = $key;
+            }
             if (FormConfigManager::factory()->updateForm($this->options['name'], $this->options)) {
                 $redirect = new RedirectResponse(Route::fromRouteName('form_builder.list')->route_path);
                 $redirect->setStatusCode(302);

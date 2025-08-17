@@ -105,6 +105,14 @@ if ($field_settings) {
 
             $uploaded[] = $file_entity;
         }
+        else {
+            $json = new JsonResponse([
+                'success' => false,
+                'error' => 'Invalid file. allowed file types: ' . implode(', ', $upload->getAllowedExtensions())
+            ]);
+            $json->setStatusCode(200)->send();
+            exit;
+        }
     }
 
     (new JsonResponse($uploaded, 200))->send();

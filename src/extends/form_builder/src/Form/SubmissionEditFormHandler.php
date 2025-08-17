@@ -46,13 +46,13 @@ class SubmissionEditFormHandler extends FormBase
             $form[$e]['handler'] = str_replace('\\\\', '\\', $field['handler']);
             $form[$e]['default_value'] = $this->submission->get($e)[0]['value'];
         }
-        $form['submit'] = [
-            'type' => 'submit',
-            'name' => 'submit',
-            'default_value' => 'Submit',
-            'class' => ['btn btn-primary'],
-            'id' => 'submit_button',
-        ];
+//        $form['submit'] = [
+//            'type' => 'submit',
+//            'name' => 'submit',
+//            'default_value' => 'Submit',
+//            'class' => ['btn btn-primary'],
+//            'id' => 'submit_button',
+//        ];
         return $form;
     }
 

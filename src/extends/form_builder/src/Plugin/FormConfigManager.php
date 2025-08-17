@@ -153,37 +153,8 @@ class FormConfigManager
      */
     protected function dbActions(string $form_name, array $fields, int $action = 1): void
     {
-        if ($action === 1) {
+        if ($action === 1 || $action === 2) {
             $this->createStorages($form_name, $fields);
-        }
-        if ($action === 2) {
-            $fields_old = $this->getForm($form_name);
-            if (!empty($fields_old)) {
-                $keys_old = array_keys($fields_old['fields']);
-                $keys_new = array_keys($fields);
-
-                // find missing keys in $key_new from $key_old
-                $missing_keys = array_diff($keys_old,$keys_new);
-                $deletable = [];
-                foreach ($missing_keys as $key) {
-                    $deletable[] = $fields[$key];
-                }
-
-                if (!empty($missing_keys)) {
-                    $this->deleteStorage($form_name, $deletable);
-                }
-
-                // find extra keys in $key_old from $key_new
-                $extra_keys = array_diff($keys_old, $keys_new);
-                $creatable = [];
-                foreach ($extra_keys as $key) {
-                    $creatable[] = $fields['fields'][$key];
-                }
-                if (!empty($extra_keys)) {
-                    $this->createStorages($form_name, $creatable);
-                }
-
-            }
         }
 
         if ($action === 3) {

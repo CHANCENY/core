@@ -52,8 +52,8 @@ class ProfileEditForm extends FormBase
 
             $fid = $profile->getProfileImage();
             if ($fid) {
-                $image = File::load($fid)->toArray();
-                $image['uri'] = FileFunction::reserve_uri($image['uri']);
+                $image = File::load($fid)?->toArray() ?? [];
+                $image['uri'] = FileFunction::reserve_uri($image['uri'] ?? '');
                 $form['profile_image']['default_value'] = [$image];
             }
 
@@ -82,7 +82,6 @@ class ProfileEditForm extends FormBase
         //TODO: upload image here if exist.
         $image = $form['profile_image']->getValue();
         $image = is_string($image) ? json_decode($image, true) : $image;
-
         if (!empty($image) && !empty($image['name'])) {
 
             if (!is_dir("public://profiles")) {
@@ -115,7 +114,7 @@ class ProfileEditForm extends FormBase
             $fid = $profile->getProfileImage();
             if ($fid){
                 $file_old = File::load($fid);
-                $file_old->delete();
+                $file_old?->delete();
             }
             $profile->setProfileImage(reset($image));
         }

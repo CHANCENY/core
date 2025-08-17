@@ -45,13 +45,13 @@ class SubmissionFormHandler extends FormBase
         foreach ($form as $e=>$field) {
             $form[$e]['handler'] = str_replace('\\\\', '\\', $field['handler']);
         }
-        $form['submit'] = [
-            'type' => 'submit',
-            'name' => 'submit',
-            'default_value' => 'Submit',
-            'class' => ['btn btn-primary'],
-            'id' => 'submit_button',
-        ];
+//        $form['submit'] = [
+//            'type' => 'submit',
+//            'name' => 'submit',
+//            'default_value' => 'Submit',
+//            'class' => ['btn btn-primary'],
+//            'id' => 'submit_button',
+//        ];
         return $form;
     }
 
