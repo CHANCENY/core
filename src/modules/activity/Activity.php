@@ -52,4 +52,9 @@ class Activity implements EventSubscriber
            }
        }catch (Throwable){}
     }
+
+    public static function factory(): EventSubscriber
+    {
+        return new Activity();
+    }
 }

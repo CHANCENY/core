@@ -22,6 +22,12 @@ fields:
     id: profile_image
     class: [form-control]
     handler: Simp\Default\FileField
+    limit: 1
+    settings:
+      allowed_file_types:
+        - 'image/*'
+      allowed_file_size: '6000000'
+
 
   translations:
     label: Translations

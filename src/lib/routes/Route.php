@@ -39,6 +39,13 @@ class Route
         $this->options = $route_data['options'] ?? [];
     }
 
+    public static function getCurrentRoute(): Route|array
+    {
+        $request = \Simp\Core\components\request\Request::createFromGlobals();
+        return $request->server->get('ROUTE_ATTRIBUTES')['route'] ?? [];
+
+    }
+
     public function getRouteId(): string
     {
         return $this->route_id;

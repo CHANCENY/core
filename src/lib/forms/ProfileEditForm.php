@@ -8,6 +8,7 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\modules\files\entity\File;
+use Simp\Core\modules\files\helpers\FileFunction;
 use Simp\Core\modules\files\uploads\FormUpload;
 use Simp\Core\modules\messager\Messager;
 use Simp\Core\modules\user\entity\User;
@@ -43,10 +44,18 @@ class ProfileEditForm extends FormBase
             if ($profile->isTranslationEnabled()) {
                 $checked['checked'] = $checked;
             }
+
             $form['translations']['inner_field']['enable_translation']['default_value'] =  $profile->isTranslationEnabled() ? 'yes' : 'no';
             $form['translations']['inner_field']['language']['option_values'] = LanguageManager::manager()->getLanguages();
             $form['translations']['inner_field']['language']['default_value'] =  $profile->getTranslationCode();
             $form['description']['default_value'] = $profile->getDescription();
+
+            $fid = $profile->getProfileImage();
+            if ($fid) {
+                $image = File::load($fid)->toArray();
+                $image['uri'] = FileFunction::reserve_uri($image['uri']);
+                $form['profile_image']['default_value'] = [$image];
+            }
 
         }
 
@@ -72,6 +81,8 @@ class ProfileEditForm extends FormBase
         $profile = $user->getProfile();
         //TODO: upload image here if exist.
         $image = $form['profile_image']->getValue();
+        $image = is_string($image) ? json_decode($image, true) : $image;
+
         if (!empty($image) && !empty($image['name'])) {
 
             if (!is_dir("public://profiles")) {
@@ -98,6 +109,15 @@ class ProfileEditForm extends FormBase
                 }
             }
 
+        }
+
+        elseif (!empty($image)) {
+            $fid = $profile->getProfileImage();
+            if ($fid){
+                $file_old = File::load($fid);
+                $file_old->delete();
+            }
+            $profile->setProfileImage(reset($image));
         }
         if (!empty($form['first_name']->getValue())) {
             $profile->setFirstName( $form['first_name']->getValue() );

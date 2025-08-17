@@ -28,4 +28,9 @@ class MailQueueActivity implements EventSubscriber
         MailQueueManager::factory()->send();
 
     }
+
+    public static function factory(): EventSubscriber
+    {
+        return new MailQueueActivity();
+    }
 }

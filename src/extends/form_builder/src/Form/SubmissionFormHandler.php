@@ -9,6 +9,7 @@ use Simp\Core\modules\files\entity\File;
 use Simp\Core\modules\files\helpers\FileFunction;
 use Simp\Core\modules\files\uploads\FormUpload;
 use Simp\Core\modules\mail\MailManager;
+use Simp\Core\modules\mail\MailQueueManager;
 use Simp\Core\modules\messager\Messager;
 use Simp\Core\modules\services\Service;
 use Simp\Core\modules\user\current_user\CurrentUser;
@@ -91,36 +92,46 @@ class SubmissionFormHandler extends FormBase
 
                 if ($fields[$key]['type'] === 'file') {
 
-                    $upload = new FormUpload();
-                    foreach ($fields[$key]['settings']['allowed_file_types'] as $extension) {
-                        $upload->addAllowedExtension($extension);
-                    }
-                    $upload->addAllowedMaxSize($fields[$key]['settings']['allowed_file_size']);
-                    $upload->addFileObject($value);
-                    $upload->validate();
+                     if (!empty($value['name'])) {
 
-                    if (!$upload->isValidated()) {
-                        $types = "File type allowed: ".implode(', ', $fields[$key]['settings']['allowed_file_types'])."<br>";
-                        $types .= "Max size allowed: ".FileFunction::sizeTransform($fields[$key]['settings']['allowed_file_size']) ." Bytes<br>";
-                        $form[$key]->setError("<br>Failed to upload file. please check that the file is valid and try again.".$types);
-                        return;
-                    }
+                         $upload = new FormUpload();
+                         foreach ($fields[$key]['settings']['allowed_file_types'] as $extension) {
+                             $upload->addAllowedExtension($extension);
+                         }
+                         $upload->addAllowedMaxSize($fields[$key]['settings']['allowed_file_size']);
+                         $upload->addFileObject($value);
+                         $upload->validate();
 
-                    if (!is_dir("public://forms-uploads")) {
-                        @mkdir("public://forms-uploads", 0777, true);
-                    }
+                         if (!$upload->isValidated()) {
+                             $types = "File type allowed: ".implode(', ', $fields[$key]['settings']['allowed_file_types'])."<br>";
+                             $types .= "Max size allowed: ".FileFunction::sizeTransform($fields[$key]['settings']['allowed_file_size']) ." Bytes<br>";
+                             $form[$key]->setError("<br>Failed to upload file. please check that the file is valid and try again.".$types);
+                             return;
+                         }
 
-                    $filename = "public://forms-uploads/". $upload->getParseFilename();
-                    $upload->moveFileUpload($filename);
+                         if (!is_dir("public://forms-uploads")) {
+                             @mkdir("public://forms-uploads", 0777, true);
+                         }
 
-                    $files = $upload->getFileObject();
-                    $files['uid'] = CurrentUser::currentUser()->getUser()->getUid();
-                    $files['uri'] = $files['file_path'];
+                         $filename = "public://forms-uploads/". $upload->getParseFilename();
+                         $upload->moveFileUpload($filename);
 
-                    $file = File::create($files);
-                    if ($file) {
-                        $values[$key] = [$file->getFid()];
-                    }
+                         $files = $upload->getFileObject();
+                         $files['uid'] = CurrentUser::currentUser()->getUser()->getUid();
+                         $files['uri'] = $files['file_path'];
+
+                         $file = File::create($files);
+                         if ($file) {
+                             $values[$key] = [$file->getFid()];
+                         }
+
+                     }
+                     else {
+                         $value = is_array($value) ? reset($value): $value;
+                         $value = is_string($value) ? json_decode($value, true) : $value;
+                         $values[$key] = $value;
+                     }
+
                 }
 
                 else {
@@ -141,11 +152,10 @@ class SubmissionFormHandler extends FormBase
             if (!empty($setting->getNotify())) {
                 $submission = Submission::load($submission->getSid());
                 $message = View::view('default.view.form_builder.submission_view.email',['submission'=>$submission, 'fields'=>$fields, 'form_name'=>$this->form_id]);
-                MailManager::mailManager()->addEnvelope((new Envelope())->addToAddresses([
+                MailQueueManager::factory()->add((new Envelope())->addToAddresses([
                     $setting->getNotify()
                 ])->addParam('subject' , 'Form Submission - '. $setting->getFormName())
-                ->addParam('body' , $message))
-                ->send();
+                ->addParam('body' , $message));
             }
 
             $redirect = new RedirectResponse(Service::serviceManager()->request->getRequestUri());

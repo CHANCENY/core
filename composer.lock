@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b3760e80e9fa2d8e83acbf836f2a0d34",
+    "content-hash": "b5aa54c35cfd6b1359b30eaf74decf29",
     "packages": [
         {
             "name": "catfan/medoo",
@@ -279,7 +279,7 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.405.0",
+            "version": "v0.407.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
@@ -317,7 +317,7 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.405.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.407.0"
             },
             "time": "2025-06-04T17:28:44+00:00"
         },
@@ -840,16 +840,16 @@
         },
         {
             "name": "mongodb/mongodb",
-            "version": "2.1.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mongodb/mongo-php-library.git",
-                "reference": "3bbe7ba9578724c7e1f47fcd17c881c0995baaad"
+                "reference": "f399d24905dd42f97dfe0af9706129743ef247ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/3bbe7ba9578724c7e1f47fcd17c881c0995baaad",
-                "reference": "3bbe7ba9578724c7e1f47fcd17c881c0995baaad",
+                "url": "https://api.github.com/repos/mongodb/mongo-php-library/zipball/f399d24905dd42f97dfe0af9706129743ef247ac",
+                "reference": "f399d24905dd42f97dfe0af9706129743ef247ac",
                 "shasum": ""
             },
             "require": {
@@ -911,9 +911,9 @@
             ],
             "support": {
                 "issues": "https://github.com/mongodb/mongo-php-library/issues",
-                "source": "https://github.com/mongodb/mongo-php-library/tree/2.1.0"
+                "source": "https://github.com/mongodb/mongo-php-library/tree/2.1.1"
             },
-            "time": "2025-05-23T10:48:05+00:00"
+            "time": "2025-08-13T20:50:05+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -1911,16 +1911,16 @@
         },
         {
             "name": "simp/forms",
-            "version": "v1.1.1-alpha",
+            "version": "v1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CHANCENY/forms.git",
-                "reference": "cd50aaaaaf2d254afe29b57147ee0367e2d1de38"
+                "reference": "2f029447ae94e9aa983a4356be8deaae0b313c3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CHANCENY/forms/zipball/cd50aaaaaf2d254afe29b57147ee0367e2d1de38",
-                "reference": "cd50aaaaaf2d254afe29b57147ee0367e2d1de38",
+                "url": "https://api.github.com/repos/CHANCENY/forms/zipball/2f029447ae94e9aa983a4356be8deaae0b313c3f",
+                "reference": "2f029447ae94e9aa983a4356be8deaae0b313c3f",
                 "shasum": ""
             },
             "require": {
@@ -1945,9 +1945,9 @@
             "description": "This is form builder library",
             "support": {
                 "issues": "https://github.com/CHANCENY/forms/issues",
-                "source": "https://github.com/CHANCENY/forms/tree/v1.1.1-alpha"
+                "source": "https://github.com/CHANCENY/forms/tree/v1.1.3"
             },
-            "time": "2025-08-02T12:49:56+00:00"
+            "time": "2025-08-16T12:42:25+00:00"
         },
         {
             "name": "simp/mail",
@@ -2074,16 +2074,16 @@
         },
         {
             "name": "simp/translate",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CHANCENY/translate.git",
-                "reference": "b8179764280601f59a7886cafe7700d26d09f45f"
+                "reference": "8df8831e2fd4879870a77d527d9e270361e7c381"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CHANCENY/translate/zipball/b8179764280601f59a7886cafe7700d26d09f45f",
-                "reference": "b8179764280601f59a7886cafe7700d26d09f45f",
+                "url": "https://api.github.com/repos/CHANCENY/translate/zipball/8df8831e2fd4879870a77d527d9e270361e7c381",
+                "reference": "8df8831e2fd4879870a77d527d9e270361e7c381",
                 "shasum": ""
             },
             "require": {
@@ -2114,9 +2114,9 @@
             "description": "This is packages of simp content manager for translation",
             "support": {
                 "issues": "https://github.com/CHANCENY/translate/issues",
-                "source": "https://github.com/CHANCENY/translate/tree/v1.0.1"
+                "source": "https://github.com/CHANCENY/translate/tree/v1.0.2"
             },
-            "time": "2025-05-15T07:06:41+00:00"
+            "time": "2025-08-16T16:08:53+00:00"
         },
         {
             "name": "simp/uploader",
@@ -2294,6 +2294,74 @@
                 }
             ],
             "time": "2024-09-25T14:21:43+00:00"
+        },
+        {
+            "name": "symfony/finder",
+            "version": "v7.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "2a6614966ba1074fa93dae0bc804227422df4dfe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/2a6614966ba1074fa93dae0bc804227422df4dfe",
+                "reference": "2a6614966ba1074fa93dae0bc804227422df4dfe",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "symfony/filesystem": "^6.4|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Finder\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Finds files and directories via an intuitive fluent interface",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/finder/tree/v7.3.2"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2025-07-15T13:41:35+00:00"
         },
         {
             "name": "symfony/http-foundation",

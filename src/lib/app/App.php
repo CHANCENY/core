@@ -2,10 +2,7 @@
 
 namespace Simp\Core\lib\app;
 
-use ErrorException;
-use ReflectionClass;
 use Exception;
-use Phpfastcache\Drivers\Files\Driver;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverCheckException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -16,26 +13,32 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidConfigurationException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidTypeException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
+use Simp\Core\components\request\Request;
 use Simp\Core\extends\auto_path\src\path\AutoPathAlias;
 use Simp\Core\lib\installation\InstallerValidator;
 use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\View;
+use Simp\Core\modules\activity\Activity;
+use Simp\Core\modules\activity\DatabaseActivity;
+use Simp\Core\modules\activity\MailQueueActivity;
 use Simp\Core\modules\config\config\ConfigReadOnly;
 use Simp\Core\modules\config\ConfigManager;
-use Simp\Core\modules\event_subscriber\EventSubscriber;
 use Simp\Core\modules\logger\ErrorLogger;
-use Simp\Core\modules\services\Service;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Simp\Router\Route as Router;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Yaml\Yaml;
 use Throwable;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class App
 {
+    protected Response|JsonResponse|RedirectResponse $response;
+
     protected $currentRoute = null;
     /**
      * @throws PhpfastcacheDriverNotFoundException
@@ -71,15 +74,27 @@ class App
 
         }
 
+        register_shutdown_function([$this, 'shutdownHandler']);
+
         // Start app now.
-        $response = $this->mapRouteListeners();
+        $this->response = $this->mapRouteListeners();
     }
 
+    /**
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws SyntaxError
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
     public function exceptionHandlerResponse($exception): void
     {
         $content = View::view('default.view.system.error.front',['throwable' => $exception]);
         $response = new Response($content, 500);
         $response->headers->set('Content-Type', 'text/html');
+        $this->response = $response;
         $response->send();
     }
 
@@ -239,10 +254,7 @@ class App
     }
 
     /**
-     * @throws PhpfastcacheExtensionNotInstalledException
-     * @throws PhpfastcacheDriverCheckException
      * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheInvalidTypeException
      * @throws PhpfastcacheDriverNotFoundException
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
@@ -283,5 +295,15 @@ class App
         exit();
     }
 
+    public function shutdownHandler(): void
+    {
+       try{
+           $request = Request::createFromGlobals();
+           $route = $request->server->get('ROUTE_ATTRIBUTES')['route'] ?? [];
+           Activity::factory()->listeners($request,$route, $this->response);
+           MailQueueActivity::factory()->listeners($request,$route, $this->response);
+           DatabaseActivity::factory()->listeners($request,$route, $this->response);
+       }catch (Throwable $exception){}
+    }
 
 }

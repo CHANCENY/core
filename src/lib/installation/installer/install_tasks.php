@@ -23,7 +23,6 @@ switch ($action) {
     default:
         http_response_code(400);
         echo "Invalid action.";
-        exit;
 }
 
 echo "OK";

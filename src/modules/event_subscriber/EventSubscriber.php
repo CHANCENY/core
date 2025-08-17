@@ -33,4 +33,9 @@ interface EventSubscriber
      * @return void
      */
     public function listeners(Request $request, Route $route, ?Response $response): void;
+
+    /**
+     * @return EventSubscriber
+     */
+    public static function factory(): EventSubscriber;
 }

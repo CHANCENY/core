@@ -35,6 +35,7 @@
         "simp/translate": "^1.0",
         "ext-zip": "*",
         "ext-intl": "*",
-        "mongodb/mongodb": "^2.1"
+        "mongodb/mongodb": "^2.1",
+        "symfony/finder": "^7.3"
     }
 }

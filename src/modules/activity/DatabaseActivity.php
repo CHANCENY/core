@@ -15,7 +15,8 @@ final class DatabaseActivity implements EventSubscriber
     {
         try{
             $current_uri = $request->getRequestUri();
-            $records = DatabaseRecorder::factory('',0)->getActivity($current_uri);
+            $records = DatabaseRecorder::getActivity($current_uri);
+
             if($records) {
                 foreach($records as $record) {
 
@@ -28,5 +29,10 @@ final class DatabaseActivity implements EventSubscriber
                 }
             }
         }catch(Throwable) {}
+    }
+
+    public static function factory(): EventSubscriber
+    {
+        return new DatabaseActivity();
     }
 }

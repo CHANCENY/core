@@ -2,6 +2,12 @@
 
 namespace Simp\Core\modules\database;
 
+use Phpfastcache\Exceptions\PhpfastcacheCoreException;
+use Phpfastcache\Exceptions\PhpfastcacheDriverException;
+use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
+use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Psr\Cache\InvalidArgumentException;
+use Simp\Core\lib\memory\cache\Caching;
 use Symfony\Component\HttpFoundation\Request;
 use Simp\Core\modules\services\Service; // Assuming this provides the Request object
 use Throwable;
@@ -43,19 +49,22 @@ class DatabaseRecorder
                 $uri = $request->getRequestUri();
             }
 
+            $token = md5($uri);
             // Initialize log array for the URI if it doesn't exist
             if (!isset(self::$queryLog[$uri])) {
-                self::$queryLog[$uri] = [];
+                self::$queryLog = Caching::init()->get($token) ?? [];
             }
 
             // Add the log entry
-            self::$queryLog[$uri][] = [
+            self::$queryLog[] = [
                 'query' => $query,
                 'params' => $params, // Store parameters
                 'execute_time' => $time,
                 'timestamp' => microtime(true) // Add timestamp for context
             ];
 
+
+            Caching::init()->set($token, self::$queryLog);
         } catch (Throwable $e) {
             // Log error if recording fails, using the static logger from the refined Database class
             Database::staticLogger("DatabaseRecorder Error: Failed to record query for URI [{$uri}]: " . $e->getMessage());
@@ -68,13 +77,21 @@ class DatabaseRecorder
      *
      * @param string|null $uri The request URI to get logs for. If null, returns logs for all URIs recorded in this request.
      * @return array The query log data (empty array if no logs for the URI).
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     * @throws PhpfastcacheLogicException
+     * @throws InvalidArgumentException
      */
     public static function getActivity(?string $uri = null): array
     {
         if ($uri === null) {
             return self::$queryLog; // Return all logs for the current request
         }
-        return self::$queryLog[$uri] ?? []; // Return logs for specific URI or empty array
+        $token = md5($uri);
+        $list = Caching::init()->get($token) ?? [];
+        Caching::init()->deleteAll([$token]);
+        return $list;
     }
 
     /**

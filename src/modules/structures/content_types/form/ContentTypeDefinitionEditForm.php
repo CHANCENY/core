@@ -8,6 +8,7 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\modules\files\entity\File;
+use Simp\Core\modules\files\helpers\FileFunction;
 use Simp\Core\modules\files\uploads\FormUpload;
 use Simp\Core\modules\messager\Messager;
 use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
@@ -69,7 +70,25 @@ class ContentTypeDefinitionEditForm extends FormBase
         foreach ($fields as $k => &$field) {
             if (!isset($field['inner_field'])) {
                 $value =  $this->node->get($k);
-                $field['default_value'] = is_array($value) ? reset($value) : $value;
+
+                if ($field['type'] === 'file') {
+                    $value = is_array($value) ? $value : [$value];
+                    $value = array_map(function ($file) {
+                        $file = File::load($file);
+                        if ($file) {
+                            $file = $file->toArray();
+                            $file['uri'] = FileFunction::reserve_uri($file['uri']);
+                            return $file;
+                        }
+                        return null;
+                    }, $value);
+                    $value = array_filter($value);
+                    $field['default_value'] = $value;
+                }
+                else {
+                    $field['default_value'] = is_array($value) ? reset($value) : $value;
+                }
+
             }
             if (isset($field['inner_field'])) {
                 $this->recursive_populate($field['inner_field']);
@@ -99,6 +118,17 @@ class ContentTypeDefinitionEditForm extends FormBase
                 $value =  $this->node->get($k);
 
                 if ($field['type'] == 'file') {
+                    $value = is_array($value) ? $value : [$value];
+                    $value = array_map(function ($file) {
+                        $file = File::load($file);
+                        if ($file) {
+                            $file = $file->toArray();
+                            $file['uri'] = FileFunction::reserve_uri($file['uri']);
+                            return $file;
+                        }
+                        return null;
+                    }, $value);
+                    $value = array_filter($value);
                     $field['default_value'] = $value;
                 }
                 else {
