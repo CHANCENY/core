@@ -75,6 +75,7 @@ class View
      */
     public static function view(string $view, array $data = []): string
     {
+        $data = ['options'=>$data,...$data];
         return (new self())->render($view, $data);
     }
 }

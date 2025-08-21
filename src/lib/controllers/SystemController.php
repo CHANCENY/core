@@ -18,10 +18,14 @@ use Simp\Core\modules\logger\DatabaseLogger;
 use Simp\Core\modules\logger\ErrorLogger;
 use Simp\Core\modules\logger\ServerLogger;
 use Simp\Core\modules\search\SearchManager;
+use Simp\Core\modules\services\Service;
 use Simp\Core\modules\structures\content_types\field\FieldManager;
 use Simp\Core\modules\structures\content_types\form\ContentTypeDefinitionEditForm;
 use Simp\Core\modules\structures\taxonomy\Term;
 use Simp\Core\modules\structures\views\ViewsManager;
+use Simp\Default\BasicField;
+use Simp\Fields\FieldBase;
+use Simp\Fields\FieldInterface;
 use Throwable;
 use Twig\Error\LoaderError;
 use Twig\Error\SyntaxError;
@@ -266,15 +270,21 @@ class SystemController
     }
 
     /**
-     * @throws SyntaxError
-     * @throws RuntimeError
+     * @param mixed ...$args
+     * @return RedirectResponse|Response
      * @throws LoaderError
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     * @throws PhpfastcacheLogicException
+     * @throws RuntimeError
+     * @throws SyntaxError
      */
     public function account_controller(...$args): RedirectResponse|Response
     {
         extract($args);
         $user = User::load($request->get('uid'));
-        return new Response(View::view('default.view.view.account', ['user'=>$user]),200);
+        return new Response(View::view('default.view.view.account', ['account'=>$user]),200);
     }
 
    
@@ -825,7 +835,30 @@ class SystemController
             $definitions = [];
             foreach ($entity['storage'] as $field) {
                 $name = substr($field,6,strlen($field));
-                $definitions[$name] = Node::findField($entity['fields'], $name);
+                $field = Node::findField($entity['fields'], $name);
+                if (!empty($field['handler'])) {
+                    $handler = $field['handler'];
+
+                    $handler_class = new \ReflectionClass($handler);
+
+                    /**@var FieldBase $handler_instance**/
+                    $definitions[$name] = $handler_class->newInstance(
+                        $field,
+                        Service::serviceManager()->request->getMethod(),
+                        Service::serviceManager()->request->request->all(),
+                        $_GET,
+                        Service::serviceManager()->request->files->all()
+                    );
+                }
+                else {
+                    $definitions[$name] = new BasicField(
+                        $field,
+                        Service::serviceManager()->request->getMethod(),
+                        Service::serviceManager()->request->request->all(),
+                        $_GET,
+                        Service::serviceManager()->request->files->all()
+                    );
+                }
             }
             $content_definitions = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
             return new Response(View::view('default.view.content_node_controller',[

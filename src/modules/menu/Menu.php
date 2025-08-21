@@ -10,7 +10,7 @@ use Simp\Core\lib\routes\Route;
 
 class Menu
 {
-    private Route $menu;
+    private ?Route $menu;
 
     /** @var Menu[] */
     protected array $children = [];
@@ -41,7 +41,7 @@ class Menu
         return !empty($this->children);
     }
 
-    public function getMenu(): Route
+    public function getMenu(): ?Route
     {
         return $this->menu;
     }

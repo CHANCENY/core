@@ -2,12 +2,12 @@
 
 namespace Simp\Core\modules\structures\content_types\field\fields;
 
+use Simp\Core\components\basic_fields\ConditionalField;
+use Simp\Core\components\basic_fields\DetailWrapperField;
+use Simp\Core\components\basic_fields\FieldSetField;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\structures\content_types\field\FieldBuilderInterface;
 use Simp\Core\modules\structures\content_types\field\FieldManager;
-use Simp\Default\ConditionalField;
-use Simp\Default\DetailWrapperField;
-use Simp\Default\FieldSetField;
 use Symfony\Component\HttpFoundation\Request;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;

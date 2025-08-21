@@ -7,9 +7,19 @@
     <meta name="description" content="{{ page_description }}">
     <meta name="robots" content="noindex, nofollow">
     <meta name="keywords" content="{{ page_keywords }}">
+
     {% if theme.admin.admin_assets_head is defined %}
         {% include (theme.admin.admin_assets_head) %}
     {% endif %}
+
+    {% if theme.assets.head is defined %}
+        {% for file_asset in theme.assets.head %}
+
+            {{ file_asset|raw }}
+
+        {% endfor %}
+    {% endif %}
+
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -24,6 +34,14 @@
 
 {% if theme.admin.admin_assets_footer is defined and theme.admin.admin_assets_footer %}
     {% include (theme.admin.admin_assets_footer) %}
+{% endif %}
+
+{% if theme.assets.footer is defined %}
+    {% for file_assetf in theme.assets.footer %}
+
+        {{ file_assetf|raw }}
+
+    {% endfor %}
 {% endif %}
 
 {% block footer %}{% endblock %}

@@ -1,0 +1,7 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Allow access to index.php
+<Files "index.php">
+    Require all granted
+</Files>

@@ -33,7 +33,7 @@ fields:
     option_values: {}
     handler: Simp\Default\SelectField
   roles:
-    name: roles
+    name: "roles[]"
     type: select
     id: roles
     label: "User Roles"
@@ -47,6 +47,8 @@ fields:
       authenticated: "Authenticated"
     handler: Simp\Default\SelectField
     default_value: authenticated
+    options:
+      multiple: "multiple"
 
   cond_password:
     name: cond_password

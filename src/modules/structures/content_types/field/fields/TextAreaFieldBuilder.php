@@ -2,10 +2,10 @@
 
 namespace Simp\Core\modules\structures\content_types\field\fields;
 
+use Simp\Core\components\basic_fields\TextAreaField;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\structures\content_types\field\FieldBuilderInterface;
 use Simp\Core\modules\structures\content_types\field\FieldManager;
-use Simp\Default\TextAreaField;
 use Symfony\Component\HttpFoundation\Request;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;

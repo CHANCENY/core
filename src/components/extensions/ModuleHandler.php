@@ -183,6 +183,13 @@ class ModuleHandler extends SystemDirectory
         return \array_unique($templates);
     }
 
+    /**
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheIOException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
     public function moduleEnable(string $name): bool {
         $module = $this->modules[$name] ?? [];
         if (!empty($module)) {
@@ -190,6 +197,7 @@ class ModuleHandler extends SystemDirectory
             $path = $module['path']. \DIRECTORY_SEPARATOR . $name . '.info.yml';
             unset($module['path']);
             if (\file_exists($path)) {
+                $this->installModule($name);
                 return !empty(\file_put_contents($path, Yaml::dump($module, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
             }
         }
@@ -248,62 +256,26 @@ class ModuleHandler extends SystemDirectory
             $library_install = $module . '_library_install';
             if (\function_exists($library_install)) {
                 $assets =$library_install($library_name);
-
                 foreach ($assets as $key=>$asset) {
 
                    foreach ($asset as $file) {
-
+                       $extension = pathinfo($file, PATHINFO_EXTENSION);
                        if ($key === 'head') {
-
-                           if (str_starts_with($file, '/core/extends')) {
-                               $file = $this->root_dir . DIRECTORY_SEPARATOR . $file;
-
-                               $extension = pathinfo($file, PATHINFO_EXTENSION);
-                               if (file_exists($file) && $extension === 'css') {
-                                   $content = file_get_contents($file);
-                                   $GLOBALS['theme']['head'][] = "<style>{$content}</style>\n";
-                               }
-                               elseif (file_exists($file) && $extension === 'js') {
-                                   $content = file_get_contents($file);
-                                   $GLOBALS['theme']['head'][] = "<script>{$content}</script>\n";
-                               }
+                           if ($extension === 'css') {
+                               $GLOBALS['theme']['head'][] = "<link rel='stylesheet' href='{$file}'>\n";
                            }
-                           elseif (str_starts_with($file, '/module')) {
-                               $file = $this->module_dir . $file;
-                               $extension = pathinfo($file, PATHINFO_EXTENSION);
-                               if (file_exists($file) && $extension === 'css') {
-                                   $GLOBALS['theme']['head'][] = "link rel='stylesheet' href='{$file}'\n";
-                               }
-                               elseif (file_exists($file) && $extension === 'js') {
-                                   $GLOBALS['theme']['head'][] = "<script src='{$file}'></script>\n";
-                               }
+                           elseif ($extension === 'js') {
+                               $GLOBALS['theme']['head'][] = "<script src='{$file}'></script>\n";
                            }
-
                        }
 
                        elseif ($key === 'footer') {
 
-                           if (str_starts_with($file, '/core/extends')) {
-                               $file = $this->root_dir . DIRECTORY_SEPARATOR . $file;
-                               $extension = pathinfo($file, PATHINFO_EXTENSION);
-                               if (file_exists($file) && $extension === 'css') {
-                                   $content = file_get_contents($file);
-                                   $GLOBALS['theme']['footer'][] = "<style>{$content}</style>\n";
-                               }
-                               elseif (file_exists($file) && $extension === 'js') {
-                                   $content = file_get_contents($file);
-                                   $GLOBALS['theme']['footer'][] = "<script>{$content}</script>\n";
-                               }
+                           if ( $extension === 'css') {
+                               $GLOBALS['theme']['footer'][] = "<link rel='stylesheet' href='{$file}'>\n";
                            }
-                           elseif (str_starts_with($file, '/module')) {
-                               $file = $this->module_dir . $file;
-                               $extension = pathinfo($file, PATHINFO_EXTENSION);
-                               if (file_exists($file) && $extension === 'css') {
-                                   $GLOBALS['theme']['footer'][] = "link rel='stylesheet' href='{$file}'\n";
-                               }
-                               elseif (file_exists($file) && $extension === 'js') {
-                                   $GLOBALS['theme']['footer'][] = "<script src='{$file}'></script>\n";
-                               }
+                           elseif ( $extension === 'js') {
+                               $GLOBALS['theme']['footer'][] = "<script src='{$file}'></script>\n";
                            }
 
                        }

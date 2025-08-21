@@ -1,0 +1,55 @@
+<form method="post" class="form">
+    <input type="hidden" name="type" value="{{ field.type }}">
+    <div class="field-wrapper">
+        <!-- Field Label and Name -->
+        <div class="form-group">
+            <label for="field-name">Label</label>
+            <input type="text" name="title" id="field-name" class="form-control" placeholder="Enter field label" value="{{ definition.label }}">
+        </div>
+
+        <!-- Allowed Number of Values -->
+        <div class="form-group">
+            <label for="storage-limit">Allowed number of values</label>
+            <input type="number" name="limit" min="1" id="storage-limit" class="form-control" placeholder="e.g., 1 or unlimited" value="{{ defintion.limit }}">
+        </div>
+
+        <!-- Field Settings -->
+        <fieldset class="form-control">
+            <legend>Field Settings</legend>
+
+            <!-- Required Checkbox -->
+            <div class="form-group">
+                <label for="field-required">
+                    <input type="checkbox" name="required" id="field-required" {{ definition.required ? 'checked' : '' }}>
+                    Required
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="show">Show Content As</label>
+                <select name="show" id="show" class="form-control">
+                    <option value="">Select...</option>
+                    {% for show_type in definition.show_types %}
+                        <option value="{{ show_type }}">{{ show_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="class">Css Classes (optional)</label>
+                <input type="text" name="class" id="class" class="form-control" value="{{ definition.class|join(' ')}}">
+                <small>Separate classes with a space</small>
+            </div>
+            <div class="form-group">
+                <label for="default-value">Html ID (optional)</label>
+                <input type="text" name="id" id="default-value" class="form-control" value="{{ definition.id }}">
+            </div>
+        </fieldset>
+        {% if definition.index is empty %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary w-25">Save</button>
+            </div>
+        {% endif %}
+    </div>
+
+</form>

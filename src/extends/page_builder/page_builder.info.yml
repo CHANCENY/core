@@ -1,0 +1,5 @@
+name: Page Builder
+description: 'This is module is coming soon'
+type: module
+core_version_requirement: ^1
+enabled: true

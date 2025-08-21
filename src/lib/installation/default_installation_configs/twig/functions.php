@@ -371,6 +371,10 @@ function file_size_format(int|float $size): string
     return round($size, 2) . ' ' . $units[$i];
 }
 
+function fieldDisplaySettingsHandler(string $field_type, \Simp\Fields\FieldBase $field, array $context): string
+{
+    return $field->display($field_type, $field, $context);
+}
 
 /**
  * @return array
@@ -445,6 +449,9 @@ function get_functions(): array
         }),
         new TwigFunction('base64',function(string $file_path){
             return FileFunction::base64_file($file_path);
+        }),
+        new TwigFunction('field_display_settings',function(string $field_type, \Simp\Fields\FieldBase $field, array $context){
+            return fieldDisplaySettingsHandler($field_type, $field, $context);
         })
     );
 }

@@ -17,6 +17,7 @@ use Simp\Core\modules\tokens\TokenManager;
 use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\profiles\Profile;
 use Simp\Core\modules\user\roles\Role;
+use Simp\Core\modules\user\roles\RoleManager;
 use Simp\Core\modules\user\trait\StaticHelperTrait;
 use Simp\Mail\Mail\Envelope;
 
@@ -31,7 +32,7 @@ class User
     {
         $query = "SELECT * FROM `users` WHERE `uid` = :uid";
         $query = Database::database()->con()->prepare($query);
-        $query->bindParam(':uid', $uid, PDO::PARAM_INT);
+        $query->bindValue('uid', $uid, PDO::PARAM_INT);
         $query->execute();
         $result = $query->fetch(PDO::FETCH_ASSOC);
         if (empty($result)) {
@@ -228,15 +229,7 @@ class User
                 new Role(0, 'anonymous', 0,'anonymous', 'anonymous'),
             ];
         }
-        $query = "SELECT * FROM `user_roles` WHERE `uid` = :uid";
-        $query = Database::database()->con()->prepare($query);
-        $query->bindParam(':uid', $this->uid, PDO::PARAM_INT);
-        $query->execute();
-        $result = $query->fetchAll(PDO::FETCH_ASSOC);
-        if (empty($result)) {
-            return [];
-        }
-        return array_map(fn($item) => new Role(...$item), $result);
+        return $this->roleManager()->getRoles();
     }
 
     public function getProfile(): ?Profile
@@ -397,5 +390,10 @@ class User
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':uid', $this->uid, PDO::PARAM_INT);
         return $query->execute();
+    }
+
+    public function roleManager(): RoleManager
+    {
+        return new RoleManager($this->uid);
     }
 }

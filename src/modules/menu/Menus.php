@@ -10,13 +10,12 @@ use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\user\current_user\CurrentUser;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
+use Simp\Core\modules\user\roles\RoleManager;
 
 class Menus
 {
     protected array $menus = [];
+    protected RoleManager $roleManager;
 
     /**
      * @throws PhpfastcacheCoreException
@@ -26,6 +25,7 @@ class Menus
      */
     public function __construct()
     {
+        $this->roleManager = CurrentUser::currentUser()->getUser()->roleManager();
         $main_menu = [];
 
         $current_user = CurrentUser::currentUser();
@@ -97,6 +97,22 @@ class Menus
             $account->addChild(new Menu(['route_id' => 'system.account.profile.edit', 'route_data' => $route]));
             $account->addChild(new Menu('user.account.password.forgot'));
             $account->addChild(new Menu('user.account.logout.route'));
+        }
+
+        // now let's remove menu parent based on current user roles
+        foreach ($this->menus as $key => $menu) {
+            $access_roles = $menu->getMenu()->access;
+            $flag = false;
+            foreach ($access_roles as $access_role) {
+                if ($this->roleManager->isRoleExist($access_role)) {
+                    $flag = true;
+                    break;
+                }
+            }
+
+            if (!$flag) {
+                unset($this->menus[$key]);
+            }
         }
     }
 

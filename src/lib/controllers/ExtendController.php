@@ -54,6 +54,7 @@ class ExtendController
             Messager::toast()->addMessage("Updates save successfully.");
             return new RedirectResponse('/admin/extends');
         }
+
         $modules = ModuleHandler::factory()->getModules();
         $enabled_modules = [];
         $un_enabled_modules = [];

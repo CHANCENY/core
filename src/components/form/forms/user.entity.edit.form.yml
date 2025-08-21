@@ -33,7 +33,7 @@ fields:
     option_values: {}
     handler: Simp\Default\SelectField
   roles:
-    name: roles
+    name: "roles[]"
     type: select
     id: roles
     label: "User Roles"
@@ -47,6 +47,17 @@ fields:
       authenticated: "Authenticated"
     handler: Simp\Default\SelectField
     default_value: authenticated
+  status:
+    type: select
+    name: status
+    id: status
+    label: "Status"
+    class:
+      - form-control
+    handler: Simp\Default\SelectField
+    option_values:
+      1: Active
+      0: Inactive
 
   cond_password:
     name: cond_password
@@ -57,10 +68,19 @@ fields:
       - form-control
     handler: Simp\Default\FieldSetField
     inner_field:
+      old_password:
+        name: old_password
+        type: password
+        required: false
+        id: old_password
+        label: Old Password
+        class:
+          - form-control
+        handler: Simp\Core\components\password\PasswordField
       password:
         name: password
         type: password
-        required: true
+        required: false
         id: password
         label: Password
         class:
@@ -69,7 +89,7 @@ fields:
       password_confirm:
         name: password_confirm
         type: password
-        required: true
+        required: false
         id: mail
         label: Confirm Password
         class:

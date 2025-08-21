@@ -1,38 +1,40 @@
+{% set content = node.nodeFileContent(node.get(definition.name)) %}
+{% set display = display[definition.name] %}
 {% if content %}
-       {% if display.display_enabled == '1' %}
 
-    <div class="field">
-        {% if content is iterable %}
+    {% if display.display_enabled == '1' %}
+        <div class="field">
+            {% if content is iterable %}
 
-            {% if display.display_label == '1' %}
-            {% if definition.label %}
-                <strong class="field-label">{{ definition.label }}</strong>
-            {% endif %}
-                {% endif %}
-            <div class="row">
-                {% for item in content %}
-
-                    {% if display.display_as == 'image' %}
-                        <div class="col-md-6">
-                            <img src="{{ item.uri }}" alt="{{ item.name }}" class="node-image field-image field--file-image field-view-{{ definition.name|replace({'_':'-'}) }}"/>
-                        </div>
-                    {% else %}
-                        <a href="{{ item.uri }}" target="_blank" class="field-file-link field-view-{{ definition.name|replace({'_':'-'}) }}">{{ item.name  }}</a>
+                {% if display.display_label == '1' %}
+                    {% if definition.label %}
+                        <strong class="field-label">{{ definition.label }}</strong>
                     {% endif %}
-                {% endfor %}
-            </div>
+                {% endif %}
+                <div class="row">
+                    {% for item in content %}
 
-        {%  else %}
-            <div class='row'>
-                {% if display.display_as == 'image' %}
+                        {% if display.display_as == 'image' %}
+                            <div class="col-md-6">
+                                <img src="{{ item.uri }}" alt="{{ item.name }}" class="node-image field-image field--file-image field-view-{{ definition.name|replace({'_':'-'}) }}"/>
+                            </div>
+                        {% else %}
+                            <a href="{{ item.uri }}" target="_blank" class="field-file-link field-view-{{ definition.name|replace({'_':'-'}) }}">{{ item.name  }}</a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            {%  else %}
+                <div class='row'>
+                    {% if display.display_as == 'image' %}
                         <div class="col-md-6">
                             <img src="{{ content.uri }}" alt="{{ content.name }}" class="node-image field-image field--file-image field-view-{{ definition.name|replace({'_':'-'}) }}"/>
                         </div>
-                {% else %}
+                    {% else %}
                         <a href="{{ content.uri }}" target="_blank" class="field-file-link field-view-{{ definition.name|replace({'_':'-'}) }}">{{ content.name  }}</a>
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
-           {% endif %}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endif %}

@@ -2,17 +2,17 @@
 
 {% block body %}
 
-    {% set profile = user.getProfile() %}
-    {% set roles = user.getRoles() %}
+    {% set profile = account.getProfile() %}
+    {% set roles = account.getRoles() %}
 
     <!-- Profile Header -->
     <div class="profile-header">
         <img src="{{ profile.getImage|default('https://placehold.co/400') }}" alt="Profile Image" class="profile-img">
         <div class="profile-info">
             <h2>{{ profile.getFirstName }} {{ profile.getLastName|default('No profile name') }}</h2>
-            <p><i class="fas fa-envelope"></i> {{ user.mail }}</p>
+            <p><i class="fas fa-envelope"></i> {{ account.mail }}</p>
             <p>
-                {% if user.status %}
+                {% if account.status %}
                     <span class="status-badge status-active">Active</span>
                 {% else %}
                     <span class="status-badge status-inactive">Blocked</span>
@@ -23,9 +23,9 @@
 
     <!-- Profile Details -->
     <div class="profile-content">
-        <div class="profile-item"><i class="fas fa-calendar-alt"></i> Created: {{ user.created }}</div>
-        <div class="profile-item"><i class="fas fa-edit"></i> Updated: {{ user.updated }}</div>
-        <div class="profile-item"><i class="fas fa-sign-in-alt"></i> Last Login: {{ user.login }}</div>
+        <div class="profile-item"><i class="fas fa-calendar-alt"></i> Created: {{ account.created }}</div>
+        <div class="profile-item"><i class="fas fa-edit"></i> Updated: {{ account.updated }}</div>
+        <div class="profile-item"><i class="fas fa-sign-in-alt"></i> Last Login: {{ account.login }}</div>
         <div class="profile-item"><i class="fas fa-clock"></i> Timezone: {{ profile.timeZoneEntity().getLabel() }}</div>
         <div class="profile-item"><i class="fas fa-user-shield"></i> Role: {{ roles|join(',') }}</div>
         <div class="profile-item"><i class="fas fa-user"></i> First Name: {{ profile.getFirstName }}</div>
@@ -37,9 +37,9 @@
 
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <a href="/user/{{ user.uid }}/profile/edit"><i class="fas fa-user-edit"></i> Edit Profile</a>
-        <a href="/user/{{ user.uid }}/edit"><i class="fas fa-cog"></i> Edit Account</a>
-        <a href="/user/{{ user.uid }}/delete"><i class="fas fa-trash"></i> Delete Account</a>
+        <a href="/user/{{ account.uid }}/profile/edit"><i class="fas fa-user-edit"></i> Edit Profile</a>
+        <a href="/user/{{ account.uid }}/edit"><i class="fas fa-cog"></i> Edit Account</a>
+        <a href="/user/{{ account.uid }}/delete"><i class="fas fa-trash"></i> Delete Account</a>
     </div>
 
 {% endblock %}

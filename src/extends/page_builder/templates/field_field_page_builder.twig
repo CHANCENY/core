@@ -1,0 +1,30 @@
+<div id="{{ wrapper_id }}" class="field-wrapper field-field-wrapper-{{ field.getName }}" style="position:relative; max-width:400px;">
+    <label for="page-search">{{ field.getLabel }}</label>
+    <input value="{{ line|length > 0 ? line : '' }}" type="text" id="{{ field.getId }}" name="{{ field.getName }}" autocomplete="off" placeholder="Type to search..." />
+    <input type="hidden" id="{{ field.getId }}_hidden" name="{{ field.getName }}_hidden_pids" value="{{ field.getValue }}" />
+
+    <!-- Spinner -->
+    <div class="search-spinner" style="display:none; position:absolute; right:10px; top:50%; transform:translateY(-50%);">
+        <div style="width:16px; height:16px; border:2px solid #ccc; border-top:2px solid #333; border-radius:50%; animation:spin 0.6s linear infinite;"></div>
+    </div>
+
+    <ul class="search-results"
+        style="position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #ccc; list-style:none; margin:0; padding:0; max-height:200px; overflow-y:auto; display:none; z-index:1000;">
+    </ul>
+</div>
+
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+    (function (){
+        document.addEventListener('DOMContentLoaded', function(){
+            var wrapper = document.querySelector('#{{ wrapper_id }}');
+            initPageSearch(wrapper);
+        })
+    })()
+</script>

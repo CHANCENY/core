@@ -12,50 +12,9 @@
     <div>
         {% for definition in definitions %}
 
-            {% if definition.type == 'file' %}
-                {%
-                    set file_values = {
-                    'content': node.nodeFileContent(node.get(definition.name)),
-                    'definition': definition,
-                    'display': display[definition.name]
-                }
-                %}
-                {% include 'default.view.node.field.file' with file_values %}
+            {% set rendered = field_display_settings(definition.type, definition, options) %}
 
-            {% elseif definition.type == 'url' %}
-                {% set url_value = {'content': {
-                    'name': node.get(definition.name),
-                    'url': node.get(definition.name),
-                    'definition': definition,
-                    'display': display[definition.name]
-                }} %}
-                {% include 'default.view.node.field.url' with url_value %}
-
-            {% elseif definition.type == 'textarea' %}
-                {% set content = {'content': {
-                    'data': node.get(definition.name),
-                    'definition': definition,
-                    'display': display[definition.name]
-                }} %}
-                {% include 'default.view.node.field.textarea' with content %}
-
-            {% elseif definition.type == 'reference' or definition.type == 'drag_and_drop' %}
-
-                {% set url_value = {'content': {
-                    'data': reference_link(node.get(definition.name), definition),
-                    'definition': definition,
-                    'display': display[definition.name]
-                }} %}
-                {% include 'default.view.node.reference.link' with url_value %}
-
-            {% else %}
-                {% set content = {'content': {
-                    'data': node.get(definition.name),
-                    'definition': definition,
-                    'display': display[definition.name]
-                }} %}
-                {% include 'default.view.node.field.field.all' with content %}
-            {% endif %}
+            {{ rendered|raw }}
 
         {% endfor %}
     </div>

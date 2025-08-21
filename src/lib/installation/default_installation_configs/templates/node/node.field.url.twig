@@ -1,3 +1,9 @@
+{% set content = {
+    'name': node.get(definition.name),
+    'url': node.get(definition.name)
+}
+
+%}
 {% if content %}
 
     {% set settings = display[definition.name] %}

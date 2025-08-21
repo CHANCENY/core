@@ -750,3 +750,19 @@ fieldset input[type="radio"] {
     background-color: #e1f5fe;
     color: #0288d1;
 }
+
+.iframe-wrapper {
+    width: 100%;
+}
+
+.iframe-wrapper iframe {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border: none;
+}
+
+.iframe-wrapper embed {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+    border: none;
+}

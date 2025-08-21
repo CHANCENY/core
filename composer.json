@@ -36,6 +36,7 @@
         "ext-zip": "*",
         "ext-intl": "*",
         "mongodb/mongodb": "^2.1",
-        "symfony/finder": "^7.3"
+        "symfony/finder": "^7.3",
+        "mpdf/mpdf": "^8.2"
     }
 }

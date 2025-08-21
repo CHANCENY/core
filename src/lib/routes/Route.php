@@ -8,6 +8,8 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use ReflectionClass;
 use ReflectionException;
+use Simp\Core\components\extensions\ModuleHandler;
+use Simp\Core\extends\auto_path\src\path\AutoPathAlias;
 use Simp\Core\lib\memory\cache\Caching;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -193,7 +195,7 @@ class Route
                 if ($route instanceof Route) {
                     $pattern = $route->getRoutePath();
                     $generatePath = function (string $pattern, array $values): string {
-                        return getStr($pattern, $values);
+                        return self::getStr($pattern, $values);
                     };
                     $with_value_pattern = $generatePath($pattern, $options);
 
@@ -204,6 +206,27 @@ class Route
             return null;
         };
         return $builder($route_name, $options, $params);
+    }
+
+    protected static function getStr(string $pattern, array $values): string
+    {
+        $segments = explode('/', $pattern);
+
+        foreach ($segments as &$segment) {
+            if (str_starts_with($segment, '[') && str_ends_with($segment, ']')) {
+                // Trim the square brackets
+                $placeholder = trim($segment, '[]');
+
+                // Handle possible type e.g., id:int
+                $parts = explode(':', $placeholder);
+                $key = $parts[0];
+
+                if (isset($values[$key])) {
+                    $segment = $values[$key];
+                }
+            }
+        }
+        return implode('/', $segments);
     }
 
 }

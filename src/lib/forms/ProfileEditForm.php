@@ -12,15 +12,9 @@ use Simp\Core\modules\files\helpers\FileFunction;
 use Simp\Core\modules\files\uploads\FormUpload;
 use Simp\Core\modules\messager\Messager;
 use Simp\Core\modules\user\entity\User;
-use Simp\Default\ConditionalField;
-use Simp\Default\FieldSetField;
-use Simp\Default\FileField;
-use Simp\Default\SelectField;
-use Simp\Default\TextAreaField;
 use Simp\FormBuilder\FormBase;
 use Simp\Translate\lang\LanguageManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Simp\Core\modules\services\Service;
 
 class ProfileEditForm extends FormBase
