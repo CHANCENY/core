@@ -1,7 +1,19 @@
 <?php
-// install_tasks.php
-require_once __DIR__. '/../../vendor/autoload.php';
+@session_start();
+// install.php
+require_once __DIR__ . "/../../vendor/autoload.php";
 require_once __DIR__ . '/InstallTasks.php';
+
+if (!isset($_SESSION['install'])) {
+    echo "Access denied";
+    exit;
+}
+
+if ($_SESSION['install'] !== true) {
+    echo "Access denied";
+    exit;
+}
+
 
 
 $action = $_POST['action'] ?? null;

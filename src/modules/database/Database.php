@@ -107,13 +107,16 @@ class Database
                     // Handle case where YAML parsing fails or returns non-array
                     self::staticLogger("Error: Failed to parse database settings or invalid format in {$database_setting_file}");
                     // Optionally throw an exception here to
-                    // throw new RuntimeException("Invalid database configuration.");
+                     throw new RuntimeException("Invalid database configuration.", 6070);
                     return null; // Or handle as appropriate
                 }
             } else {
                 self::staticLogger("Error: Database configuration file not found at {$database_setting_file}");
                 // Optionally, throw an exception
-                // throw new RuntimeException("Database configuration file not found.");
+
+                if ($_SESSION['install'] === false){
+                    throw new RuntimeException("Database configuration file not found.",5555);
+                }
                 return null; // Configuration missing
             }
         }

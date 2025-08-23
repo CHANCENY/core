@@ -1,6 +1,17 @@
 <?php
-
+@session_start();
+// install.php
 require_once __DIR__ . "/../../vendor/autoload.php";
+
+if (!isset($_SESSION['install'])) {
+    echo "Access denied";
+    exit;
+}
+
+if ($_SESSION['install'] !== true) {
+    echo "Access denied";
+    exit;
+}
 
 $database_form = \Simp\Core\components\form\FormDefinitionBuilder::factory()->getForm('mongodb.configuration.form');
 

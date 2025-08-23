@@ -15,7 +15,6 @@ if ($_SESSION['install'] !== true) {
 
 $redirect =  $_GET['dest'] ?? '/core/db-config.php';
 $page_title = $_SESSION['page_title'] ?? 'Installing Your Application';
-unset($_SESSION['install']);
 unset($_SESSION['install_redirect']);
 unset($_SESSION['page_title']);
 

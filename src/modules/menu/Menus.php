@@ -101,7 +101,7 @@ class Menus
 
         // now let's remove menu parent based on current user roles
         foreach ($this->menus as $key => $menu) {
-            $access_roles = $menu->getMenu()->access;
+            $access_roles = $menu->getMenu()?->access ?? [];
             $flag = false;
             foreach ($access_roles as $access_role) {
                 if ($this->roleManager->isRoleExist($access_role)) {

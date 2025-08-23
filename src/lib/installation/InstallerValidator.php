@@ -139,7 +139,10 @@ class InstallerValidator extends SystemDirectory
                 $_SESSION['install'] = true;
                 $_SESSION['page_title'] = "Reboosting System Cache";
             }catch (\Throwable $e){
-
+                if ($e->getCode() === 5555 || $e->getCode() === 6070) {
+                    $_SESSION['install'] = true;
+                    $_SESSION['page_title'] = "Installing Simple CMS";
+                }
             }
 
             $url = '/core/install.php?dest='.$redirect;
@@ -148,6 +151,7 @@ class InstallerValidator extends SystemDirectory
             exit;
         }
         else {
+            $_SESSION['install'] = false;
             App::runApp();
         }
 
