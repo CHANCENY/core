@@ -8,11 +8,13 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\form\FormDefinitionBuilder;
 use Simp\Core\extends\form_builder\src\Form\SubmissionFormHandler;
+use Simp\Core\extends\form_builder\src\Form\SubmissionNodeHandler;
 use Simp\Core\extends\form_builder\src\Plugin\FormConfigManager;
 use Simp\Core\extends\form_builder\src\Plugin\FormSettings;
 use Simp\Core\lib\themes\View;
 use Simp\Default\BasicField;
 use Simp\FormBuilder\FormBuilder;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -80,8 +82,59 @@ class SubmissionHandler
             );
         }
 
-
-
         return new Response("Form submission");
+    }
+
+    /**
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws SyntaxError
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
+    public function form_submission_node(...$args): JsonResponse|Response
+    {
+        extract($args);
+
+        $form_name = $request->get('name');
+        $nid = $request->get('nid');
+        $field_name = $request->get('field');
+        $form_config = FormConfigManager::factory()->getForm($form_name);
+        $form_settings = FormSettings::factory($form_name);
+
+
+
+        if ($form_name && $nid && $field_name && $form_config && $form_settings) {
+
+            $embedded_html = $form_settings->getEmbedded();
+
+            $form_base = new FormBuilder(new SubmissionNodeHandler([
+                'form_id' => $form_config['attributes']['id'],
+                'fields' => $form_config['fields'],
+                'nid' => $nid,
+                'node_field' => $field_name,
+
+            ]));
+            $form_base->getFormBase()->setFormMethod($form_config['attributes']['method']);
+            $form_base->getFormBase()->setFormAction($form_config['attributes']['action']);
+            $form_base->getFormBase()->setFormEnctype($form_config['attributes']['enctype']);
+            $form_base->getFormBase()->setFormAcceptCharset($form_config['attributes']['accept-charset']);
+            $form_base->getFormBase()->isFormSilent($form_config['attributes']['is_silent']);
+
+            $content = !empty($embedded_html) && strpos($embedded_html, '[__form__]') ? str_replace('[__form__]',$form_base, $embedded_html) : $form_base;
+
+            return new Response(View::view('default.view.form_builder.submission.handler',
+                [
+                    'embedded' => $content,
+                    'page_title' => $form_settings->getTitle(),
+                ]
+            )
+            );
+
+        }
+
+        return new JsonResponse(['success' => true, 'message' => 'Form submission']);
     }
 }

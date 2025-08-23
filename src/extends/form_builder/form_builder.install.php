@@ -8,6 +8,8 @@ use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\extends\form_builder\src\Controller\FormBuilderController;
 use Simp\Core\extends\form_builder\src\Controller\SubmissionHandler;
+use Simp\Core\extends\form_builder\src\Field\FormBuilderField;
+use Simp\Core\extends\form_builder\src\Field\FormBuilderFieldBuilder;
 use Simp\Core\extends\form_builder\src\Plugin\FormConfigManager;
 use Simp\Core\extends\form_builder\src\Plugin\FormSettings;
 use Simp\Core\lib\routes\Route;
@@ -160,6 +162,22 @@ function form_builder_route_install(): array
             ),
             'access' => array('administrator'),
             'options' => array()
+        ),
+        'form_builder.form.submission.node' => array(
+            'title' => 'Form Submission Node',
+            'path' => '/admin/form-builder/[name:string]/submission/node/[nid:int]/field/[field:string]',
+            'method' => array('GET', 'POST'),
+            'controller' => array(
+                'class' => SubmissionHandler::class,
+                'method' => 'form_submission_node'
+            ),
+            'access' => array(
+                'administrator',
+                'authenticated',
+                'content_creator',
+                'manager',
+                'anonymous'
+            ),
         )
     );
 }
@@ -243,4 +261,27 @@ function form_builder_database_install()
         ->con()->exec($query);
     
     
+}
+
+
+function form_builder_field_install(): array
+{
+    return array(
+        'form_builder' => FormBuilderFieldBuilder::class,
+    );
+}
+
+function form_builder_library_install(string $library_name): array
+{
+    $library = [
+        'form.builder.library' => [
+            'head' => [
+                '/core/modules/form_builder/assets/nod-submission-view.css'
+            ],
+            'footer' => [
+                '/core/modules/form_builder/assets/node-submission-form.js',
+            ]
+        ]
+    ];
+    return $library[$library_name] ?? [];
 }

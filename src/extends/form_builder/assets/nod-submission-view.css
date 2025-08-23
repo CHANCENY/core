@@ -1,0 +1,175 @@
+:root {
+    --bg: #f9fafb;
+    --card-bg: #fff;
+    --border: #e5e7eb;
+    --primary: #2563eb;
+    --text: #374151;
+    --muted: #6b7280;
+}
+
+/* Wrapper for one submission */
+.submission-wrapper {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem auto;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Submission title */
+.submission-wrapper h3 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Fields container */
+.submission-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Individual field (Name, Document, Message) */
+.field-card {
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.field-card:last-child {
+    border-bottom: none;
+}
+
+.field-name {
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.field-value {
+    color: var(--text);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Empty state */
+.empty {
+    text-align: center;
+    padding: 2rem;
+    background: var(--card-bg);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+}
+
+/* Images inside submission */
+img,
+a img,
+span img {
+    max-width: 300px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    object-fit: cover;
+    vertical-align: middle;
+    border-radius: 6px;
+}
+:root {
+    --bg: #f9fafb;
+    --card-bg: #fff;
+    --border: #e5e7eb;
+    --primary: #2563eb;
+    --text: #374151;
+    --muted: #6b7280;
+}
+
+/* Main wrapper */
+.form-wrapper-node-view {
+    max-width: 40%;
+    padding: 2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Title */
+.form-wrapper-node-view .form-title {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Form container */
+.form-fields-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Field wrapper (group spacing) */
+.form-fields-form .field-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+.form-fields-form label {
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+    color: var(--muted);
+}
+
+/* Input fields */
+.form-fields-form input,
+.form-fields-form textarea,
+.form-fields-form select {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.form-fields-form input:focus,
+.form-fields-form textarea:focus,
+.form-fields-form select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* File preview */
+.form-fields-form .preview {
+    margin-top: 0.5rem;
+}
+.form-fields-form .file-entry {
+    margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.form-fields-form button,
+.form-fields-form input[type="submit"] {
+    align-self: flex-start;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.6rem 1.25rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.form-fields-form button:hover,
+.form-fields-form input[type="submit"]:hover {
+    background: #1e4ed8;
+}

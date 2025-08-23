@@ -1,11 +1,13 @@
 <?php
 
-namespace Simp\Core\extends\page_builder\src\Field;
+namespace Simp\Core\extends\form_builder\src\Field;
 
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Simp\Core\extends\form_builder\src\Plugin\FormConfigManager;
+use Simp\Core\extends\page_builder\src\Field\PageFieldBuilderField;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\structures\content_types\field\FieldBuilderInterface;
 use Simp\Core\modules\structures\content_types\field\FieldManager;
@@ -14,7 +16,7 @@ use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
 
-class PageBuilderFieldBuilder implements FieldBuilderInterface
+class FormBuilderFieldBuilder implements FieldBuilderInterface
 {
 
     private string $field_type;
@@ -36,21 +38,20 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
     {
         $this->field_type = $field_type;
         $field = self::extensionInfo($field_type);
-        $options['show_types'] = [
-          'Iframe',
-          'Embedded',
-           "Page-link",
-           "Pdf-link",
-          'Normal',
-        ];
-        return View::view('default.view.field_page_builder', ['definition'=>$options, 'field'=> $field]);
+        $forms = FormConfigManager::factory()->getForms();
+        $options['form_names'] = [];
+        foreach ($forms as $form) {
+            $options['form_names'][$form['name']] = $form['title'];
+        }
+
+        return View::view('default.view.field_form_builder', ['definition'=>$options, 'field'=> $field]);
     }
 
     public function fieldArray(Request $request, string $field_type, string $entity_type): array
     {
         $this->field_type = $field_type;
         return match ($field_type) {
-            'page_builder' => $this->parseFileInputFieldSetting($request, $entity_type)
+            'form_builder' => $this->parseFileInputFieldSetting($request, $entity_type)
         };
     }
 
@@ -58,13 +59,13 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
     {
         $this->field_type = $type;
         return match ($type) {
-            'page_builder' => ['title' => 'Page Contents', 'description' => 'Field takes data from page builder','type' => 'page_builder'],
+            'form_builder' => ['title' => 'Form Submission', 'description' => 'Field takes data from page submission','type' => 'form_builder'],
         };
     }
 
     public function getFieldHandler(): string
     {
-        return PageFieldBuilderField::class;
+        return FormBuilderField::class;
     }
 
     private function parseFileInputFieldSetting(Request $request, string $entity): array
@@ -84,6 +85,7 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
             $field_data['limit'] = (int)($data['limit'] ?? 1);
             $field_data['settings'] = [
                 'show_as' =>$data['show'] ?? "normal",
+                'form_visible' => $data['form_visible'] == "on",
             ];
         }
         return $field_data;

@@ -30,7 +30,12 @@ class SubmissionFormHandler extends FormBase
         parent::__construct($options);
 
         $this->fields = $options['fields'] ?? [];
-        $this->form_id = $options['form_id'] ?? '';
+        $this->form_id = $options['form_id'] ?? $options['name'] ?? '';
+    }
+
+    public function getSubmission(): Submission|null
+    {
+        return $this->options['submission'] ?? null;
     }
 
     public function getFormId(): string
@@ -45,13 +50,6 @@ class SubmissionFormHandler extends FormBase
         foreach ($form as $e=>$field) {
             $form[$e]['handler'] = str_replace('\\\\', '\\', $field['handler']);
         }
-//        $form['submit'] = [
-//            'type' => 'submit',
-//            'name' => 'submit',
-//            'default_value' => 'Submit',
-//            'class' => ['btn btn-primary'],
-//            'id' => 'submit_button',
-//        ];
         return $form;
     }
 
@@ -141,6 +139,7 @@ class SubmissionFormHandler extends FormBase
 
             $submission = $submission->create($values);
             $setting = FormSettings::factory($this->form_id);
+            $this->options['submission'] = $submission;
 
             if (!empty($submission->getCreatedAt())) {
 
@@ -151,15 +150,13 @@ class SubmissionFormHandler extends FormBase
 
             if (!empty($setting->getNotify())) {
                 $submission = Submission::load($submission->getSid());
+                $fields = $submission->getFields();
                 $message = View::view('default.view.form_builder.submission_view.email',['submission'=>$submission, 'fields'=>$fields, 'form_name'=>$this->form_id]);
                 MailQueueManager::factory()->add((new Envelope())->addToAddresses([
                     $setting->getNotify()
                 ])->addParam('subject' , 'Form Submission - '. $setting->getFormName())
                 ->addParam('body' , $message));
             }
-
-            $redirect = new RedirectResponse(Service::serviceManager()->request->getRequestUri());
-            $redirect->send();
         }
 
     }

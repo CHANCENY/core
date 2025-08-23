@@ -867,7 +867,8 @@ class SystemController
                 'display' => $content_definitions['display_setting'] ?? []
             ]));
         }catch (Throwable $exception){
-            return new RedirectResponse('/');
+            ErrorLogger::logger()->logError($exception);
+            return new Response("<h1>Error</h1><p> sorry website couldn't process your request at the moment.</p>", 500);
         }
     }
 

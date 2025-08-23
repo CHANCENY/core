@@ -105,7 +105,7 @@ unset($_SESSION['page_title']);
                 $('#finish').fadeIn();
                 setTimeout(() => {
                     window.location.href = '<?php echo $redirect; ?>'; // Change if needed
-                }, 3000);
+                }, 1000);
                 return;
             }
 

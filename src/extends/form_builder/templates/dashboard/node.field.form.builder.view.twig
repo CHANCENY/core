@@ -1,0 +1,36 @@
+<div class="submission-wrapper">
+    <div class="submission-fields">
+        {% if submission %}
+            {% for key,field in fields %}
+                <div class="field-card">
+                    <div class="field-name">{{ field.label }}</div>
+                    <div class="field-value">
+                        {% if field.type == 'file'%}
+
+                            {% for item in submission.get(key) %}
+                                {% set file = file(item.value) %}
+                                {% if file %}
+                                    {% if 'image' in file.getMimeType()  %}
+                                        <img src="{{ request.http.getSchemeAndHttpHost() }}{{ file_uri(file.getFid()) }}" alt="{{ file.getName }}">
+                                    {% else %}
+                                        <a href="{{ request.http.getSchemeAndHttpHost() }}{{ file_uri(file.getFid()) }}" target="_blank">{{ file.getName }}</a>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                        {% else %}
+
+                            {% for item in submission.get(key) %}
+                                <div>{{ item.value }}</div>
+                            {% endfor %}
+
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">No data submitted found.</div>
+        {% endif %}
+    </div>
+</div>
+

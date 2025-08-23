@@ -1,0 +1,38 @@
+{% if submissions %}
+    <div class="field">
+        {% if submissions is iterable %}
+
+            {% if display[definition.name].display_label == '1' %}
+                {% if definition.label %}
+                    <strong class="field-label">{{ definition.label }}</strong>
+                {% endif %}
+            {% endif %}
+
+            {%  for item in submissions %}
+
+                {% if display[definition.name].display_enabled %}
+                    <div class="field--{{ definition.name|replace({'_':'-'}) }} field-text-{{ definition.name|replace({'_':'-'}) }} margin-top-field">
+
+                        {% set vars = {'submission': item, 'fields': fields} %}
+                        {% include 'default.view.node.field.form.builder.view' with vars %}
+
+                    </div>
+                {% endif %}
+
+            {% endfor %}
+
+        {% endif %}
+    </div>
+
+{% endif %}
+
+{% if form_visible %}
+
+    <div class="form-wrapper-node-view">
+        <div class="form-title">{{ __form_title }}</div>
+        <div class="form-fields-form" data-submission="{{ __form_submission_allowed }}">
+            {{ __form_base|raw }}
+        </div>
+    </div>
+
+{% endif %}

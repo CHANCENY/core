@@ -697,16 +697,16 @@ class FormBuilder {
     
     getHandler(type) {
         const handlers = {
-            text: 'Simp\\\\Default\\\\BasicField',
-            number: 'Simp\\\\Default\\\\BasicField',
-            date: 'Simp\\\\Default\\\\BasicField',
-            file: 'Simp\\\\Default\\\\FileField',
-            textarea: 'Simp\\\\Default\\\\TextAreaField',
-            select: 'Simp\\\\Default\\\\SelectField',
-            checkbox: 'Simp\\\\Default\\\\CheckboxField',
+            text: 'Simp\\Core\\components\\basic_fields\\BasicField',
+            number: 'Simp\\Core\\components\\basic_fields\\BasicField',
+            date: 'Simp\\Core\\components\\basic_fields\\BasicField',
+            file: 'Simp\\Core\\components\\basic_fields\\FileField',
+            textarea: 'Simp\\Core\\components\\basic_fields\\TextAreaField',
+            select: 'Simp\\Core\\components\\basic_fields\\SelectField',
+            checkbox: 'Simp\\Core\\components\\basic_fields\\CheckboxField',
             reference: 'Simp\\\\Core\\\\components\\\\reference_field\\\\ReferenceField'
         };
-        return handlers[type] || 'Simp\\\\Default\\\\BasicField';
+        return handlers[type] || 'Simp\\Core\\components\\basic_fields\\BasicField';
     }
     
     getDisplayAs(type) {

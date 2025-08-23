@@ -36,9 +36,9 @@ class FormConfigManager
         $file = $this->forms_dir . DIRECTORY_SEPARATOR . $name . '.yml';
 
         foreach ($config['fields'] as $key => $field) {
-
-            //remove //// replace with \
-           // $config['fields'][$key]['handler'] = str_replace('//', '\\', $field['handler'] ?? BasicField::class);
+            if ($field['type'] === 'submit' || $field['type'] === 'reset' || $field['type'] === 'button') {
+               $config['fields'][$key]['default_value'] = $config['fields'][$key]['default_value'] ?? $config['fields'][$key]['label'] ?? 'Submit';
+            }
         }
 
         $config['name'] = $name;

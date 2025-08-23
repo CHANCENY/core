@@ -268,7 +268,6 @@ class Node
         if (!is_array($values)) {
             $values = [$values];
         }
-
         $table = "node__{$field_name}";
         $flags = [];
 
