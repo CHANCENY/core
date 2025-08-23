@@ -131,11 +131,11 @@ class Cron
     {
         $system = new SystemDirectory;
         $root = getcwd();
-        $script = $system->root_dir . DIRECTORY_SEPARATOR .'vendor' . DIRECTORY_SEPARATOR .
-            'bin' . DIRECTORY_SEPARATOR . 'cron.php';
+        $script = $system->root_dir . DIRECTORY_SEPARATOR .'public' . DIRECTORY_SEPARATOR .
+            'core' . DIRECTORY_SEPARATOR . 'cron.php';
 
-        $script2 = $system->root_dir . DIRECTORY_SEPARATOR .'vendor' . DIRECTORY_SEPARATOR .
-            'bin' . DIRECTORY_SEPARATOR . 'cron';
+        $script2 = $system->root_dir . DIRECTORY_SEPARATOR .'public' . DIRECTORY_SEPARATOR .
+            'core' . DIRECTORY_SEPARATOR . 'cron';
 
         $runnable = [];
 

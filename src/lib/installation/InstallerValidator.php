@@ -58,7 +58,6 @@ class InstallerValidator extends SystemDirectory
         ];
     }
 
-
     public function validate(): array
     {
         $results = [];
@@ -203,7 +202,10 @@ class InstallerValidator extends SystemDirectory
             'rebuild.php',
             'InstallTasks.php',
             'upload.php',
-            'remove.php'
+            'remove.php',
+            'cron.php',
+            'simp.php',
+            'cron_executor.php',
         ];
 
         $destinationDir = $this->webroot_dir . DIRECTORY_SEPARATOR . 'core';

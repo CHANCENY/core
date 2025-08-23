@@ -1,5 +1,7 @@
 <?php
 
+$vendor = __DIR__. "/../../vendor/autoload.php";
+
 use Simp\Core\lib\app\App;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverCheckException;
@@ -11,10 +13,6 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidConfigurationException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidTypeException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\lib\cli\CliManager;
-
-$root = getcwd();
-
-$vendor = $root.'/vendor/autoload.php';
 
 if (!file_exists($vendor)) {
     die("run this script on root directory of your project");

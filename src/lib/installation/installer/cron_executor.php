@@ -1,18 +1,16 @@
 <?php
 
+$vendor = __DIR__. "/../../vendor/autoload.php";
+
 use Simp\Core\modules\database\Database;
 use Simp\Core\lib\app\App;
 use Simp\Core\modules\cron\CronHandler;
 
-$root = getcwd();
-
-$vendor = $root.'/vendor/autoload.php';
 if (!file_exists($vendor)) {
     die("run this script on root directory of your project");
 }
 
 require_once $vendor;
-
 
 try{
 

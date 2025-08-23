@@ -1,12 +1,11 @@
 <?php
 
+$vendor = __DIR__. "/../../vendor/autoload.php";
+
 use Simp\Core\lib\app\App;
+use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\modules\cron\Cron;
 use Simp\Core\modules\cron\CronHandler;
-
-$root = getcwd();
-
-$vendor = $root.'/vendor/autoload.php';
 
 if (!file_exists($vendor)) {
     die("run this script on root directory of your project");
@@ -19,11 +18,9 @@ try {
     App::consoleApp();
 
     $cron_manager = new Cron;
-    $system = new \Simp\Core\lib\installation\SystemDirectory();
+    $system = new SystemDirectory();
 
-    $executor = $root . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR. 'simp' . DIRECTORY_SEPARATOR . 'core' .
-        DIRECTORY_SEPARATOR. 'src' . DIRECTORY_SEPARATOR . 'lib'
-       . DIRECTORY_SEPARATOR . 'cli' . DIRECTORY_SEPARATOR . 'cron_executor.php';
+    $executor = $system->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'cron_executor.php';
 
     $list = $cron_manager->getCrons();
 
