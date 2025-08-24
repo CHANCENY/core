@@ -3,6 +3,7 @@
 namespace Simp\Core\components\reference_field;
 
 use Exception;
+use Simp\Core\lib\themes\View;
 use Simp\Core\modules\structures\content_types\field\FieldManager;
 use Simp\Fields\FieldBase;
 use Simp\Fields\FieldRequiredException;
@@ -201,5 +202,11 @@ FIELD. $script;
     public function getField(): array
     {
         return $this->field;
+    }
+
+    public function display(string $field_type, FieldBase $field, array $context): string
+    {
+        $context['definition'] = $field;
+        return trim(View::view("default.view.node.reference.link", $context));
     }
 }

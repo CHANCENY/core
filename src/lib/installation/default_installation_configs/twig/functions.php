@@ -172,13 +172,15 @@ function getStr(string $pattern, array $values): string
     return implode('/', $segments);
 }
 
-function buildReferenceLink(int|string|array $value, array $field_definition): array
+function buildReferenceLink(int|string|array $value, \Simp\Fields\FieldBase $field_definition): array
 {
     $html = [];
 
     if (!is_array($value)) {
         $value = [$value];
     }
+
+    $field_definition = $field_definition->getField();
 
     foreach ($value as $v) {
 
@@ -424,7 +426,7 @@ function get_functions(): array
         new TwigFunction('tokens_floating_window',function(){
             return TokenManager::token()->getFloatingWindow();
         }),
-        new TwigFunction('reference_link',function(int|string|array $value, array $field_definition){
+        new TwigFunction('reference_link',function(int|string|array $value, \Simp\Fields\FieldBase $field_definition){
             return buildReferenceLink($value, $field_definition);
         }),
         new TwigFunction('size_format',function(int|float $size){
