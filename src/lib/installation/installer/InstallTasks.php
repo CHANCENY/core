@@ -1,6 +1,8 @@
 <?php
 
 
+use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
+
 require_once __DIR__. '/../../vendor/autoload.php';
 
 class InstallTasks
@@ -103,5 +105,6 @@ class InstallTasks
             }
         }
     }
+
 
 }

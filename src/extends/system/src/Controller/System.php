@@ -66,4 +66,11 @@ class System
         return new RedirectResponse($request->headers->get('referer') ?? '/');
     }
 
+    public function content_types(...$args)
+    {
+        extract($args);
+        SystemAction::persistContentTypes();
+        return new RedirectResponse($request->headers->get('referer') ?? '/');
+    }
+
 }

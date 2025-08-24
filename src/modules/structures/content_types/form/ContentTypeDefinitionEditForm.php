@@ -116,7 +116,6 @@ class ContentTypeDefinitionEditForm extends FormBase
 
             if (!isset($field['inner_field'])) {
                 $value =  $this->node->get($k);
-
                 if ($field['type'] == 'file') {
                     $value = is_array($value) ? $value : [$value];
                     $value = array_map(function ($file) {
@@ -129,6 +128,10 @@ class ContentTypeDefinitionEditForm extends FormBase
                         return null;
                     }, $value);
                     $value = array_filter($value);
+                    $field['default_value'] = $value;
+                }
+
+                elseif ($field['type'] === 'reference') {
                     $field['default_value'] = $value;
                 }
                 else {

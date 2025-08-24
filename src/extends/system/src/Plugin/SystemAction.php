@@ -5,6 +5,8 @@ namespace Simp\Core\extends\system\src\Plugin;
 use ReflectionClass;
 use Simp\Core\lib\installation\InstallerValidator;
 use Simp\Core\lib\installation\SystemDirectory;
+use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
+use Simp\Core\modules\structures\content_types\storage\ContentDefinitionStorage;
 use Simp\FormBuilder\FormBase;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Yaml\Yaml;
@@ -197,5 +199,16 @@ class SystemAction
         self::rebuildCore();
         self::moveModules();
         self::clearCache();
+    }
+
+    public static function persistContentTypes()
+    {
+        $content_types = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
+
+        foreach ($content_types as $key=>$content_type) {
+            $storage_manager = ContentDefinitionStorage::contentDefinitionStorage($key);
+            $storage_manager->storageDefinitionsPersistent();
+        }
+
     }
 }

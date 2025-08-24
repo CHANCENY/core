@@ -4,7 +4,11 @@ namespace Simp\Core\components\reference_field;
 
 use Exception;
 use Simp\Core\lib\themes\View;
+use Simp\Core\modules\files\entity\File;
+use Simp\Core\modules\structures\content_types\entity\Node;
 use Simp\Core\modules\structures\content_types\field\FieldManager;
+use Simp\Core\modules\structures\taxonomy\Term;
+use Simp\Core\modules\user\entity\User;
 use Simp\Fields\FieldBase;
 use Simp\Fields\FieldRequiredException;
 use Simp\Fields\FieldTypeSupportException;
@@ -63,6 +67,10 @@ class ReferenceField extends FieldBase
                 $this->submission['value'] = $value;
             }
 
+            if (isset($post[$field['name'] . '_hidden'])) {
+                $this->submission['value'] = json_decode($post[$field['name'] . '_hidden'], true);
+            }
+
         }
 
         if ($request_method === 'GET' && !empty($params)) {
@@ -112,16 +120,14 @@ class ReferenceField extends FieldBase
 
     public function getDefaultValue(): string|int|float|null|array|bool
     {
-        return $this->field['default_value'] ?? '';
+        return $this->getValue();
     }
 
     public function getValue(): string|int|float|null|array|bool
     {
-        $data = !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
-        if (str_ends_with($data, ')')) {
-            $value = explode('(', $data);
-            $value = end($value);
-            return substr($value, 0, -1);
+        $data = !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? [];
+        if (!empty($this->field['limit']) && $this->field['limit'] == 1) {
+            return $data[0];
         }
         return $data;
     }
@@ -131,6 +137,58 @@ class ReferenceField extends FieldBase
         return $this->getValue();
     }
 
+    private function getItems(array $data): array
+    {
+        $items = [];
+        if (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'node') {
+
+            foreach ($data as $item) {
+                $node = Node::load($item);
+                if ($node) {
+                    $items[] = [
+                        'id' => $node->getNid(),
+                        'title' => $node->getTitle()
+                    ];
+                }
+            }
+
+        }
+
+        elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'user') {
+            foreach ($data as $item) {
+                $user = User::load($item);
+                if ($user) {
+                    $items[] = [
+                        'id' => $user->getUid(),
+                        'title' => $user->getName()
+                    ];
+                }
+            }
+        }
+        elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'term') {
+            foreach ($data as $item) {
+                $term = Term::load($item);
+                if ($term) {
+                    $items[] = [
+                        'id' => $term['id'],
+                        'title' => $term['label']
+                    ];
+                }
+            }
+        }
+        elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'file') {
+            foreach ($data as $item) {
+                $file = File::load($item);
+                if ($file) {
+                    $items[] = [
+                        'id' => $file->getFid(),
+                        'title' => $file->getName()
+                    ];
+                }
+            }
+        }
+        return $items;
+    }
     public function getBuildField(bool $wrapper = true): string
     {
         $class = implode(' ', $this->getClassList());
@@ -139,49 +197,147 @@ class ReferenceField extends FieldBase
             $options .= $key . '="' . $option . '" ';
         }
 
+        $default_values = $this->getDefaultValue();
+        $default_values = $this->getItems($default_values);
+        $default_values = json_encode($default_values);
+
          $id = $this->getId();
+        $wrapper_id = "wrapper-".uniqid();
          $callable = json_encode($this->field['reference'], JSON_PRETTY_PRINT);
 
          $script = <<<SCRIPT
 <script>
-  (function(){
-      const field_id = '$id';
-      const settings = JSON.parse(JSON.stringify($callable)); 
-      const appender_element = document.querySelector('#{$id}_filter_append');
-      window.reference_caller(field_id, settings, appender_element);
-  })();
+ (function(){
+  'use strict';
+
+  var wrapper = $(`#{$wrapper_id}`);
+
+  if (wrapper.length > 0) {
+    const settings = JSON.parse(JSON.stringify($callable)); 
+    const default_values = JSON.parse(JSON.stringify($default_values)); // [{id, title}, ...]
+    
+    var input = wrapper.find(`#{$id}`);
+    var suggestionsBox = wrapper.find(".suggestions");
+    var selectedItemsDiv = wrapper.find("#selectedItems");
+    var hiddenField = wrapper.find(`input[name="{$this->getName()}_hidden"]`);
+
+    // Keep selected IDs here
+    let selected = [];
+
+    // Global cache of reference data for rendering
+    window.__reference_data = [];
+
+    function updateHiddenField() {
+      hiddenField.val(JSON.stringify(selected));
+    }
+
+    function renderSelectedItems() {
+      selectedItemsDiv.empty();
+      selected.forEach(itemId => {
+        const item = window.__reference_data.find(d => d.id === itemId);
+        if (item) {
+          const tag = $(
+            '<div class="tag">'+item.title+'<span data-id="'+ item.id+'">&times;</span></div>'
+          );
+          // Remove on click
+          tag.find("span").on("click", function(){
+            const id = parseInt($(this).data("id"));
+            selected = selected.filter(v => v !== id);
+            renderSelectedItems();
+            updateHiddenField();
+          });
+          selectedItemsDiv.append(tag);
+        }
+      });
+    }
+
+    function showSuggestions(results) {
+      window.__reference_data = window.__reference_data.concat(results)
+        .filter((v,i,self) => self.findIndex(x => x.id === v.id) === i); 
+      // ^ merge & dedupe
+
+      suggestionsBox.empty();
+      if (results.length === 0) {
+        suggestionsBox.hide();
+        return;
+      }
+      results.forEach(item => {
+        if (!selected.includes(item.id)) {
+          const div = $('<div class="suggestion-item">'+ item.title +'</div>');
+          div.on("click", function(){
+            selected.push(item.id);
+            renderSelectedItems();
+            updateHiddenField();
+            suggestionsBox.hide();
+            input.val("");
+          });
+          suggestionsBox.append(div);
+        }
+      });
+      suggestionsBox.show();
+    }
+
+    // Input typing
+    input.on("input", async function() {
+      const typedValue = $(this).val().trim();
+      if (typedValue.length > 0) {
+        try {
+          const results = await window.reference_caller(typedValue, settings);
+          showSuggestions(results);
+        } catch (err) {
+          console.error("reference_caller failed:", err);
+        }
+      } else {
+        suggestionsBox.hide().empty();
+      }
+    });
+
+    // Click outside → close
+    $(document).on("click", function(e) {
+      if (!$(e.target).closest(wrapper).length) {
+        suggestionsBox.hide();
+      }
+    });
+
+    // ✅ Handle default values
+    if (Array.isArray(default_values) && default_values.length > 0) {
+      // Add defaults to selected IDs
+      selected = default_values.map(v => v.id);
+
+      // Store default data in cache for rendering
+      window.__reference_data = default_values;
+
+      // Render tags + update hidden field
+      renderSelectedItems();
+      updateHiddenField();
+    }
+  }
+})();
 </script>
 SCRIPT;
 
-
-        if ($wrapper) {
-            return <<<FIELD
-<div class="field-wrapper field--{$this->getName()} js-form-field-{$this->getName()}">
-    <label for="{$this->getId()}">{$this->getLabel()}</label>
-    <input type="search" 
-    name="{$this->getName()}" 
-    id="{$this->getId()}" 
-    class="{$class} js-form-field-{$this->getName()} field-field--{$this->getName()} js-form-field-{$this->getName()}"
-     value="{$this->getValue()}" {$options}/>
-     <span class="field-description">{$this->getDescription()}</span>
-     <span class="field-message message-{$this->getName()}">{$this->validation_message}</span>
-     <div id="{$id}_filter_append" class="filter-append"></div>
+         return <<<HTML
+<div id="{$wrapper_id}" class="reference-field-wrapper">
+<label for="{$id}">{$this->getLabel()}</label>
+  <div id="selectedItems" class="selected-items"></div>
+  <input 
+    type="text"
+    id="{$id}"
+    class="suggest-input {$class} js-form-field-{$this->getName()} field-field--{$this->getName()} js-form-field-{$this->getName()} password"
+    name="{$this->getName()}"  
+    placeholder="Type to search..."
+  >
+  
+  <span class="field-description">{$this->getDescription()}</span>
+  <span class="field-message message-{$this->getName()}">{$this->validation_message}</span>
+  
+  <div class="suggestions"></div>
+  
+  <input type="hidden" name="{$this->getName()}_hidden" value="[]">
 </div>
-FIELD . $script;
-        }
+{$script}
+HTML;
 
-        return <<<FIELD
-<label for="{$this->getId()}">{$this->getLabel()}
- <input type="search" 
-    name="{$this->getName()}" 
-    id="{$this->getId()}" 
-    class="{$class} js-form-field-{$this->getName()} field-field--{$this->getName()} js-form-field-{$this->getName()}"
-     value="{$this->getValue()}" {$options}/>
-     <span class="field-description">{$this->getDescription()}</span>
-     <span class="field-message message-{$this->getName()}">{$this->validation_message}</span>
-</label>
-<div id="{$id}_filter_append" class="filter-append"></div>
-FIELD. $script;
     }
 
     public function __toString(): string

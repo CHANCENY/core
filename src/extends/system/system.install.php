@@ -79,6 +79,19 @@ function system_route_install(): array
             'options' => array(
                 'classes' => ['fa','fa-gear']
             )
+        ),
+        'system.structure.content-type' => array(
+            'title' => 'Rebuild Types Store',
+            'path' => '/admin/system/structure/content-type/rebuild',
+            'method' => array('GET'),
+            'controller' => array(
+                'class' => System::class,
+                'method' => 'content_types'
+            ),
+            'access' => array('administrator'),
+            'options' => array(
+                'classes' => ['fa','fa-gear']
+            )
         )
     );
 }
@@ -124,6 +137,7 @@ function system_menu_install(array &$menus): void
         $system_menu->addChild(new Menu('system.module.rebuild'));
         $system_menu->addChild(new Menu('system.rebuild.cache'));
         $system_menu->addChild(new Menu('system.module.clear.cache'));
+        $system_menu->addChild(new Menu('system.structure.content-type'));
         $system_menu->addChild(new Menu('system.module.rebuild.all'));
 
 

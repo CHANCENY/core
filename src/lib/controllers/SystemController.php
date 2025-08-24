@@ -144,19 +144,36 @@ class SystemController
                         unset($users[$key]);
                     }
                 }
-                return new JsonResponse(['result'=> array_values($users)], 200);
+                $users = array_values($users);
+                $lists = [];
+                foreach ($users as $user) {
+                    $lists[] = ['id'=>$user['uid'], 'title'=>$user['name']];
+                }
+
+                return new JsonResponse(['result'=> $lists], 200);
             }
+
             elseif(isset($content->settings->type) && !empty($content->settings->reference_entity) && $content->settings->type === 'node') {
                 $content_type = $content->settings->reference_entity;
                 $nodes = Node::filter($content->value, $content_type);
                 $nodes = array_map(function ($node) { return $node->toArray(); }, $nodes);
-                return new JsonResponse(['result'=> array_values($nodes)], 200);
+                $nodes = array_values($nodes);
+                $lists = [];
+                foreach ($nodes as $node) {
+                    $lists[] = ['id'=>$node['nid'], 'title'=>$node['title']];
+                }
+                return new JsonResponse(['result'=> $lists], 200);
             }
 
             elseif (isset($content->settings->type) && $content->settings->type === 'file') {
                 $files = File::search($content->value);
                 $files = array_map(function ($file) { return $file->toArray(); }, $files);
-                return new JsonResponse(['result'=> array_values($files)], 200);
+                $files = array_values($files);
+                $lists = [];
+                foreach ($files as $file) {
+                    $lists[] = ['id'=>$file['fid'], 'title'=>$file['name']];
+                }
+                return new JsonResponse(['result'=> $lists], 200);
             }
 
             elseif (isset($content->settings->type) && $content->settings->type === 'term') {
