@@ -120,7 +120,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                 if ($field['type'] == 'file') {
                     $value = is_array($value) ? $value : [$value];
                     $value = array_map(function ($file) {
-                        $file = File::load($file);
+                        $file = File::load($file ?? 0);
                         if ($file) {
                             $file = $file->toArray();
                             $file['uri'] = FileFunction::reserve_uri($file['uri']);
