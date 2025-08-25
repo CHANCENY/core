@@ -90,6 +90,25 @@ class Term
         return $this->PDO->prepare("DELETE FROM `term_data` WHERE `id` = :tid")->execute(['tid' => $tid]);
     }
 
+    public function getTermsByTid(array $tids)
+    {
+        // Create placeholders like :id0, :id1, ...
+        $placeholders = [];
+        $params = [];
+        foreach ($tids as $i => $tid) {
+            $placeholder = ":id{$i}";
+            $placeholders[] = $placeholder;
+            $params[$placeholder] = $tid;
+        }
+
+        $sql = "SELECT * FROM `term_data` WHERE `id` IN (" . implode(',', $placeholders) . ")";
+        $query = $this->PDO->prepare($sql);
+        $query->execute($params);
+
+        return $query->fetchAll();
+    }
+
+
     public static function factory(): Term
     {
         return new Term(Database::database()->con());

@@ -256,19 +256,19 @@ class FormBuilderField extends FieldBase
         $submissions = [];
 
         foreach ($sids as $sid) {
-            $submissions[] = Submission::load($sid);
+            if (!empty($sid)) {
+                $submissions[] = Submission::load($sid);
+            }
         }
 
-        if (empty($submissions)) {
-            return "<p>No submissions found</p>";
-        }
-        $settings = FormSettings::factory($submissions[0]->form_name);
-        $form = FormConfigManager::factory()->getForm($submissions[0]->form_name);
-        $form_name = $submissions[0]->getFormName();
-
+        $field_array = $field->getField();
+        $form_name = $field_array['settings']['show_as'];
+        $settings = FormSettings::factory($form_name);
+        $form = FormConfigManager::factory()->getForm($form_name);
         $data = ['title' => $settings->getTitle(), 'form' => $form,'submissions'=>$submissions, 'form_name'=> $form_name];
         $data['fields'] = $data['form']['fields'] ?? [];
         $context = ['definition' => $field, ...$context, ...$data];
+
 
         ModuleHandler::factory()->attachLibrary('form_builder', 'form.builder.library');
 

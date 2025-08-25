@@ -32,6 +32,7 @@ trait DefaultDisplaySetting
             'url' => 'default.view.node.field.url',
             'file' => 'default.view.node.field.file',
             'reference', 'drag_and_drop' => 'default.view.node.reference.link',
+            'checkbox' => 'default.view.node.field.checkbox',
         };
         $context = ['definition'=>$field, ...$context];
         return trim(View::view($template, $context));

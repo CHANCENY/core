@@ -22,6 +22,7 @@ class Node
     protected ?array $entity_types = [];
     protected array $values = [];
 
+
     public function __construct(
         protected ?int $nid,
         protected ?string $title,
@@ -403,4 +404,8 @@ class Node
         return $query->execute();
     }
 
+    public static function nodeStorage(string $bundle): NodeStorageEntity
+    {
+        return new NodeStorageEntity($bundle);
+    }
 }

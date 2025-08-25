@@ -59,7 +59,9 @@ body {
     border-radius: 3px;
     width: auto;}
 /* Main Menu Bar */
-.main-menu {
+
+.admin-admin-nav {
+
     background-color: #f2fcfc;
     position: fixed;
     top: 35px;
@@ -67,20 +69,28 @@ body {
     z-index: 1030;
     display: flex;
     padding: 5px 0;
-    border-bottom: 1px solid #ddd;}
-.main-menu a {
-    background-color: #edf7f7;
-    color: #000;
-    padding: 10px 15px;
-    margin: 5px 0 0;
-    border-right: 1px solid #ddd;
-    text-decoration: none;
-    display: flex;
-    align-items: center;}
-.main-menu a:hover {
-    background-color: #d8efef;}
-.main-menu i {
-    margin-right: 5px;}
+    border-bottom: 1px solid #ddd;
+
+    a {
+        background-color: #edf7f7;
+        color: #000;
+        padding: 10px 15px;
+        margin: 5px 0 0;
+        border-right: 1px solid #ddd;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+    a:hover {
+        background-color: #d8efef;
+    }
+
+    i {
+        margin-right: 5px;
+    }
+
+}
+
 /* General styles */
 body {
     font-family: 'Inter', 'Open Sans', Arial, sans-serif;
