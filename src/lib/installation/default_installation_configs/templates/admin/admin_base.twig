@@ -32,9 +32,13 @@
 
 {% endif %}
 
+{% block navigation %}{% endblock %}
+
 <div class="container main-content">
     {% block body %}{% endblock %}
 </div>
+
+{% block bottom %}{% endif %}
 
 {% if request.user.isIsAdmin or request.user.isIsManager or request.user.isIsContentCreator %}
 
