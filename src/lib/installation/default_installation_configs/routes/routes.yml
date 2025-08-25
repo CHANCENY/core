@@ -703,6 +703,8 @@ system.structure.content.node:
     - content_creator
     - authenticated
     - manager
+    - anonymous
+    - authenticated
   controller:
     class: Simp\Core\lib\controllers\SystemController
     method: content_node_controller

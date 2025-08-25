@@ -40,22 +40,37 @@ class View
      */
     public function render(string $view, array $data = []): string {
         $currentTheme = ThemeManager::manager()->getCurrentTheme();
-        $view_key = str_starts_with($view, 'default') ? substr($view, 7) : $view;
-        $view_key = trim($view_key, '.');
-        $override_key = $currentTheme. ".".$view_key;
-        $options = [...$this->theme->getOptions(), ...$data];
-        try{
-            if (Caching::init()->has($override_key)) {
-                $view = $override_key;
+
+        // from string $view remove default.view
+        $override_key = trim(str_replace('default.view.','',$view));
+
+        $suggestions = $this->suggestTwigTemplates($override_key);
+
+        foreach ($suggestions as $suggestion) {
+
+            // from string $suggestion remove .html.twig
+            $purified_suggestion = trim(str_replace('.html.twig','',$suggestion));
+            $normalized_suggestion = !empty($currentTheme) ? $currentTheme. '.view.'. $purified_suggestion : $purified_suggestion;
+            if (Caching::init()->has($normalized_suggestion)) {
+                $view = $normalized_suggestion;
+                break;
             }
-        }catch (Throwable $e) {
-            ErrorLogger::logger()->logError($e);
         }
 
+        $options = [...$this->theme->getOptions(), ...$data];
         $string = $this->theme->twig->render($view,$options);
+        $currentTheme = empty($currentTheme) ? 'default' : $currentTheme;
         if (CurrentUser::currentUser()?->isIsAdmin()) {
-            $string .= "<!-- Current Theme: {$currentTheme} -->";
-            $string .= "<!-- override suggestion: {$override_key} -->";
+            $string .= "<!-- Current Theme: {$currentTheme} \n";
+            $string .= "used:  {$view}\n";
+            $string .= "suggestions: \n";
+            $string .= "------------------------------------\n";
+            $string .= "Please create one in your theme from the following \n\n";
+            $string .= implode("\n", $suggestions);
+
+            $string .= "\n------------------------------------\n\n";
+            $string .= "Note: To use the template alway prrefix with theme name them .view. then template name without .twig \n";
+            $string .= "-->";
         }
 
         return $string;
@@ -78,4 +93,41 @@ class View
         $data = ['options'=>$data,...$data];
         return (new self())->render($view, $data);
     }
+
+
+    function suggestTwigTemplates(string $baseName, int $count = 10): array
+    {
+        // Normalize name
+        $name = strtolower(trim($baseName));
+
+        // Split by both . and _
+        $parts = preg_split('/[._]+/', $name);
+
+        $suggestions = [];
+
+        // 1. Full base name, dot style
+        $suggestions[] = implode('.', $parts) . '.html.twig';
+
+        // 2. Full base name, underscore style
+        $suggestions[] = implode('_', $parts) . '.html.twig';
+
+        // 3. Progressive dotted prefixes
+        for ($i = 1; $i <= count($parts); $i++) {
+            $suggestions[] = implode('.', array_slice($parts, 0, $i)) . '.html.twig';
+        }
+
+        // 4. Progressive underscored prefixes
+        for ($i = 1; $i <= count($parts); $i++) {
+            $suggestions[] = implode('_', array_slice($parts, 0, $i)) . '.html.twig';
+        }
+
+        // 5. Reversed order
+        $suggestions[] = implode('.', array_reverse($parts)) . '.html.twig';
+        $suggestions[] = implode('_', array_reverse($parts)) . '.html.twig';
+
+        // Make unique & trim to requested count
+        $suggestions = array_values(array_unique($suggestions));
+        return array_slice($suggestions, 0, $count);
+    }
+
 }

@@ -838,6 +838,27 @@ class SystemController
 
         try{
             $node = Node::load($nid);
+
+            // Check permissions
+            if ($node instanceof Node) {
+
+                $content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
+
+                $permission = $content_type['permission'] ?? [
+                    'administrator'
+                ];
+
+                $roles = array_map(function ($role) {
+                    return $role->getName();
+                },CurrentUser::currentUser()->getUser()->roleManager()->getRoles());
+
+                // Check if current user has permissions which are in the permission list
+                if (empty(array_intersect($roles, $permission))) {
+                    return new RedirectResponse(Route::url('system.error.page.denied'));
+                }
+            }
+
+
             $entity = $node->getEntityArray();
             $options['route']->route_title = $node->getTitle();
             $definitions = [];
