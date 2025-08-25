@@ -24,16 +24,24 @@
 </head>
 <body>
 
-{% if theme.admin.navigation is defined and theme.admin.navigation %}
-    {% include (theme.admin.navigation) %}
+{% if request.user.isIsAdmin or request.user.isIsManager or request.user.isIsContentCreator %}
+
+    {% if theme.admin.navigation is defined and theme.admin.navigation %}
+        {% include (theme.admin.navigation) %}
+    {% endif %}
+
 {% endif %}
 
 <div class="container main-content">
     {% block body %}{% endblock %}
 </div>
 
-{% if theme.admin.admin_assets_footer is defined and theme.admin.admin_assets_footer %}
-    {% include (theme.admin.admin_assets_footer) %}
+{% if request.user.isIsAdmin or request.user.isIsManager or request.user.isIsContentCreator %}
+
+    {% if theme.admin.admin_assets_footer is defined and theme.admin.admin_assets_footer %}
+        {% include (theme.admin.admin_assets_footer) %}
+    {% endif %}
+
 {% endif %}
 
 {% if theme.assets.footer is defined %}
