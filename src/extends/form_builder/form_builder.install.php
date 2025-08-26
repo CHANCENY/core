@@ -281,6 +281,18 @@ function form_builder_library_install(string $library_name): array
             'footer' => [
                 '/core/modules/form_builder/assets/node-submission-form.js',
             ]
+        ],
+        'form.builder.library.js' => [
+            'head' => [
+                '/core/modules/form_builder/assets/node-submission-form.js'
+            ],
+            'footer' => []
+        ],
+        'form.builder.library.css' => [
+            'head' => [
+                '/core/modules/form_builder/assets/nod-submission-view.css'
+            ],
+            'footer' => []
         ]
     ];
     return $library[$library_name] ?? [];

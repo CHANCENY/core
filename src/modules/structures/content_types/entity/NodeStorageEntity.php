@@ -21,6 +21,8 @@ class NodeStorageEntity implements IteratorAggregate
      */
     protected array $entities = [];
 
+    protected array $results = [];
+
     /**
      * @var string The final SQL query.
      */
@@ -154,7 +156,7 @@ class NodeStorageEntity implements IteratorAggregate
 
         // Bind ONLY placeholders that actually exist in the SQL.
         foreach ($this->parameters as $key => $value) {
-            $placeholder = ':' . ltrim((string)$key, ':$'); // normalize (avoid `$field_count`/`field_count` issues)
+            $placeholder = ':' . ltrim((string)$key, ':$');
             if (strpos($this->sql, $placeholder) === false) {
                 continue; // skip params not present in SQL
             }
@@ -174,7 +176,19 @@ class NodeStorageEntity implements IteratorAggregate
         $stmt->execute();
 
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $this->entities = array_map(fn(array $row) => new Node(...$row), $rows);
+
+        $this->results = $rows;
+
+        $expected_columns = ['title','bundle','uid', 'nid', 'created', 'updated','lang', 'status'];
+        $this->entities = array_filter(array_map(function ($row) use ($expected_columns) {
+            $keys = array_keys($row);
+            $diff = array_diff($keys, $expected_columns);
+            if (!empty($diff)) {
+                return null;
+            }
+            return new Node(...$row);
+        },$rows));
+
 
         return $this;
     }
@@ -478,5 +492,56 @@ class NodeStorageEntity implements IteratorAggregate
         return $this;
     }
 
+    public function orderByFieldCount(string $table, string $field, string $direction = 'DESC'): static
+    {
+        // Alias for the subquery
+        $alias = $table . '_cnt';
+
+        // Build subquery to count the field per node, with proper alias
+        $subquery = "(SELECT nid, COUNT($field) AS field_count FROM $table GROUP BY nid) AS $alias";
+
+        // Add LEFT JOIN with the subquery
+        $this->nodeStorageQuery['joins'][] = "LEFT JOIN $subquery ON $alias.nid = node_data.nid";
+
+        // Update SELECT to include all node_data fields plus the count from subquery
+        $this->nodeStorageQuery['start'] = "SELECT node_data.*, $alias.field_count FROM node_data";
+
+        // Order by the counted field
+        $this->nodeStorageQuery['order'] = "ORDER BY $alias.field_count $direction";
+
+        return $this;
+    }
+
+    /**
+     * Apply pagination to the query.
+     *
+     * @param int $page   Current page number (1-based).
+     */
+    public function paginate(int $page): array
+    {
+        // Step 1: Get total rows
+        $this->nodeStorageQuery['start'] = "SELECT COUNT(nid) AS total FROM node_data";
+        $limit = !empty($this->nodeStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->nodeStorageQuery['limit']) : 20;
+        $this->nodeStorageQuery['limit'] = "";
+        $this->execute();
+
+        $total = $this->results[0]['total'] ?? 0;
+
+        // Step 2: Calculate total pages
+        $totalPages = (int) ceil($total / $limit);
+
+        // Step 3: Calculate offset
+        $offset = ($page - 1) * $limit;
+
+        $this->execute();
+
+        // Step 5: Return data with pagination info
+        return [
+            'current_page' => $page,
+            'per_page' => $limit,
+            'total_pages' => $totalPages,
+            'total_items' => $total,
+        ];
+    }
 
 }

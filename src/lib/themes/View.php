@@ -2,6 +2,7 @@
 
 namespace Simp\Core\lib\themes;
 
+use Simp\Core\modules\structures\views\Display;
 use Throwable;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -41,10 +42,18 @@ class View
     public function render(string $view, array $data = []): string {
         $currentTheme = ThemeManager::manager()->getCurrentTheme();
 
+        // body css name
+        $data['body_class'] = $this->cssClassFriendlyName($view);
+
         // from string $view remove default.view
         $override_key = trim(str_replace('default.view.','',$view));
 
         $suggestions = $this->suggestTwigTemplates($override_key);
+
+        if (!empty($data['display']) && $data['display'] instanceof Display) {
+            $display_name = $data['display']->getDisplayId();
+            $suggestions[] = "views.{$display_name}.results.rows";
+        }
 
         foreach ($suggestions as $suggestion) {
 
@@ -58,6 +67,7 @@ class View
         }
 
         $options = [...$this->theme->getOptions(), ...$data];
+
         $string = $this->theme->twig->render($view,$options);
         $currentTheme = empty($currentTheme) ? 'default' : $currentTheme;
         if (CurrentUser::currentUser()?->isIsAdmin()) {
@@ -130,4 +140,27 @@ class View
         return array_slice($suggestions, 0, $count);
     }
 
+    function cssClassFriendlyName(string $str): string {
+        // Convert to lowercase
+        $str = strtolower($str);
+
+        // Replace spaces and underscores with dashes
+        $str = preg_replace('/[\s_]+/', '-', $str);
+
+        // Remove all characters that are not a-z, 0-9, or dash
+        $str = preg_replace('/[^a-z0-9-]/', '-', $str);
+
+        // Remove consecutive dashes
+        $str = preg_replace('/-+/', '-', $str);
+
+        // Trim dashes from the start and end
+        $str = trim($str, '-');
+
+        // Ensure it doesn't start with a number (CSS class cannot start with number)
+        if (preg_match('/^\d/', $str)) {
+            $str = 'cls-' . $str;
+        }
+
+        return $str;
+    }
 }

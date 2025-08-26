@@ -821,6 +821,18 @@ class SystemController
         /**@var Route|null $route**/
         $route = $options['route'] ?? null;
 
+        $options = $route->getOptions();
+
+        if (!empty($options['default']) && !empty($options['node'])) {
+
+            if (str_starts_with($route->route_id,'auto.path.route')) {
+                $actual_route = Route::fromRouteName($options['default']);
+                if (!empty($actual_route)) {
+                    return Route::getControllerResponse($actual_route, $args);
+                }
+            }
+        }
+
         if (empty($nid)) {
             if (!empty($route)) {
                 $route_option = $route->options['node'] ?? null;
@@ -1092,6 +1104,8 @@ class SystemController
         $view_name = $request->get('view_name');
         $content_field = json_decode($request->getContent(), true);
 
+
+
         if (!empty($content_field['delete_field_setting']) && $content_field['delete_field_setting'] === true) {
             $content_field = $content_field['data'] ?? [];
             $list = explode('|', $content_field['field']);
@@ -1124,6 +1138,7 @@ class SystemController
         }
 
         if (!empty($content_field['reorder'])) {
+
             $data = $content_field['reorder'];
             $fields = $data['fields'] ?? [];
             $sort_fields = $data['sort_criteria'] ?? [];

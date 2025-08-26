@@ -4,6 +4,7 @@ namespace Simp\Core\lib\themes;
 
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\components\request\Request;
+use Simp\Core\components\site\SiteManager;
 use Simp\Core\modules\menu\Menus;
 use Twig\Loader\ArrayLoader;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
@@ -93,7 +94,8 @@ class Theme extends SystemDirectory
                     'footer' => $GLOBALS['theme']['footer'] ?? [],
                 ],
                 'menus' => $menus,
-            ]
+            ],
+            'site' => SiteManager::factory()
         ];
         $twig_views = [];
         $theme_keys = Caching::init()->get("system.theme.keys") ?? [];

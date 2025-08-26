@@ -81,7 +81,7 @@ class DisplayEditForm extends FormBase
                     'label'=> 'Permission',
                     'required' => true,
                     'id'=> 'permission',
-                    'name'=> 'permission',
+                    'name'=> 'permission[]',
                     'class' => ['form-control'],
                     'default_value' => $display['permission'],
                     'handler' => SelectField::class,

@@ -105,7 +105,7 @@ class ViewAddForm extends FormBase
                     'required' => true,
                     'id' => 'permission',
                     'class' => ['form-control'],
-                    'name' => 'permission',
+                    'name' => 'permission[]',
                     'option_values' => [
                         'administrator' => 'Administrator',
                         'content_creator' => 'Content Creator',
@@ -189,18 +189,24 @@ class ViewAddForm extends FormBase
             $view = ViewsManager::viewsManager()->getView($request->get('view_name', ''));
             $message = "Views successfully created!";
             $name = null;
+
             if (empty($view)) {
+
                 $name = $view_data['name'] ?? '';
                 if (!empty($name)) {
                     $name = str_replace(' ', '_', $name);
                     $name = 'view_'.strtolower($name);
                 }
+
             }
             else {
+
                 $view_data = array_merge($view, $view_data);
+                $view_data['displays'] = $view['displays'];
                 $name = $view['machine_name'];
                 $message = "View successfully updated!";
             }
+
             if (ViewsManager::viewsManager()->addView($name, $view_data)) {
                 Messager::toast()->addMessage("$message");
                 $redirect->send();

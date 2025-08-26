@@ -116,6 +116,7 @@ class ContentTypeDefinitionEditForm extends FormBase
 
             if (!isset($field['inner_field'])) {
                 $value =  $this->node->get($k);
+
                 if ($field['type'] == 'file') {
                     $value = is_array($value) ? $value : [$value];
                     $value = array_map(function ($file) {
@@ -138,6 +139,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                     $field['default_value'] = is_array($value) ? reset($value) : $value;
                 }
             }
+
             if (isset($field['inner_field'])) {
                 $this->recursive_populate($field['inner_field']);
             }
@@ -396,6 +398,9 @@ class ContentTypeDefinitionEditForm extends FormBase
                     {
                         $this->submit_recursive($field, $temp, $request, $node_data, $key);
                         unset($node_data[$key]);
+                    }
+                    elseif (isset($field) && $field['type'] === 'form_builder') {
+                        $node_data[$field['name']] = $this->node->get($field['name']);
                     }
                 }
 
