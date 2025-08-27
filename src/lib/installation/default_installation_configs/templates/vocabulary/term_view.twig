@@ -1,0 +1,31 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    {% if nodes %}
+
+        <div>
+            <ul>
+                {% for node in nodes %}
+
+                    {% set uri = url('system.structure.content.node',{nid: node.nid}) %}
+
+                    <li>
+                       <div>
+                           <a href="{{ uri }}">{{ node.title }}</a>
+                       </div>
+                    </li>
+
+                {% endfor %}
+            </ul>
+        </div>
+
+    {% else %}
+
+        <div>
+            <p>No content found!</p>
+        </div>
+
+    {% endif %}
+
+{% endblock %}

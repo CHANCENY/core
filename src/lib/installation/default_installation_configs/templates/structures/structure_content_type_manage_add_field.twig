@@ -1,0 +1,40 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Content field type selection"|t }}</h3>
+    <div class="container">
+        <div class="row">
+            {% if field_types is iterable %}
+            {% set counter = 0 %}
+            {% for field in field_types %}
+            {% if counter % 2 == 0 %}
+        </div><div class="row">  <!-- Start a new row after every two tables -->
+            {% endif %}
+
+            <div class="column" style="margin-bottom: 20px;">
+                <table class="field-table">
+                    <tr style="display: flex; align-items: center; border-bottom: 1px solid #e0e0e0;">
+                        <td style="width: 80px; padding-right: 15px;">
+                            <img src="/system/assets/file?name=extension_icon_image.png" alt="...">
+                        </td>
+                        <td style="flex: 1;">
+                            {% set type = getFieldTypeInfo(field) %}
+                            <h5>{{ type.title }}</h5>
+                            <p>{{ type.description }}</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <a href="/admin/structure/content-type/{{ request.http.get('machine_name') }}/field/{{ field }}/new" class="create-link">Create</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            {% set counter = counter + 1 %}
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+	<h3>{{ "Extensions Manage"|t }}</h3>
+	<div>
+		<a href="/admin/extend/add">+ install extension</a>
+	</div>
+
+	<div>
+		<p>manage your module below. you can enable and disable these modules</p>
+	</div>
+
+	<div class="tabs">
+		<div class="tab active" onclick="showTab('unabled')">{{ "Install"|t }}</div>
+		<div class="tab" onclick="showTab('enabled')">{{ "Uninstall"|t }}</div>
+	</div>
+
+	<div id="unabled" class="tab-content active">
+		<form method="post">
+			<table id="install">
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Version</th>
+					<th><input type="checkbox" id="all"/></th>
+				</tr>
+				</thead>
+				<tbody>
+				{% if lists %}
+					{% for key,item in lists %}
+						<tr>
+							<td>{{ item.name }}</td>
+							<td>{{ item.description|raw }}</td>
+							<td>{{ item.core_version_requirement}}</td>
+							<td><input {{ item.enabled ? 'checked' : '' }} type="checkbox" name="module[]" value="{{ key }}"/></td>
+						</tr>
+					{% endfor %}
+				{% else %}
+					<tr>
+						<td colspan="4">
+							<p>No module found</p>
+						</td>
+					</tr>
+				{% endif %}
+				</tbody>
+			</table>
+			<div>
+				<button type="submit" name="enabled_module" value="enabled_module" class="button">Save</button>
+			</div>
+		</form>
+	</div>
+	<div id="enabled" class="tab-content">
+		<form method="post">
+			<table id="uninstall">
+				<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Version</th>
+					<th><input type="checkbox" id="all"/></th>
+				</tr>
+				</thead>
+				<tbody>
+				{% if enabled_modules %}
+					{% for key,item in enabled_modules %}
+						<tr>
+							<td>{{ item.name }}</td>
+							<td>{{ item.description }}</td>
+							<td>{{ item.core_version_requirement}}</td>
+							<td><input {{ item.enabled ? 'checked' : '' }} type="checkbox" name="module[]" value="{{ key }}"/></td>
+						</tr>
+					{% endfor %}
+				{% else %}
+					<tr>
+						<td colspan="4">
+							<p>No module found</p>
+						</td>
+					</tr>
+				{% endif %}
+				</tbody>
+			</table>
+			<div>
+				<button type="submit" name="unabled_module" value="unabled_module" class="button">Save</button>
+			</div>
+		</form>
+	</div>
+	<script>
+		(function ($) {
+			let allCheckbox = $("#install").find("#all");
+			if (allCheckbox.length > 0) {
+				allCheckbox.on('change', function () {
+					const table = $("table");
+					if (table.length > 0) {
+						let checkboxes = table.find("input[type='checkbox']");
+						checkboxes.prop('checked', $(this).is(':checked'));
+					}
+				});
+			}
+
+			allCheckbox = $("#uninstall").find("#all");
+			if (allCheckbox.length > 0) {
+				allCheckbox.on('change', function () {
+					const table = $("table");
+					if (table.length > 0) {
+						let checkboxes = table.find("input[type='checkbox']");
+						checkboxes.prop('checked', $(this).is(':checked'));
+					}
+				});
+			}
+		})(jQuery);
+	</script>
+{% endblock %}
+

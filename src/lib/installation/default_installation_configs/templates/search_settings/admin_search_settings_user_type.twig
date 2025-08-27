@@ -1,0 +1,153 @@
+<div class="content-type-search">
+    <div class="search-settings">
+        <div class="form">
+            <fieldset>
+                <legend>Selections</legend>
+                <div class="form-group">
+                    <label class="content_type">Source Type</label>
+                    <select name="content_type" id="content_type">
+                        <option value="users">Users</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="content_type_field">User Type Fields</label>
+                    <select name="content_type_fields" id="content_type_fields">
+                        <option value="">None</option>
+                        {% for index, item in searchable_fields %}
+                            <option value="{{ index }}">{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="searchable-settings">
+        <div class="table-responsive">
+            <table class="table table-stripped">
+                <thead>
+                <tr>
+                    <th colspan="2">Content Types</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in search_setting.sources %}
+                    <tr>
+                        <td>{{ item }}</td>
+                        <td><a class="remove" data-type="{{ item }}" href="#">remove</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-stripped">
+                <thead>
+                <tr>
+                    <th colspan="4">Searchable Fields</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in search_setting.fields %}
+                    <tr>
+                        <td>{{ item }}</td>
+                        <td><a href="#" class="exposed" data-expose="{{ item }}"><em>{{ search_setting.exposed[item] == true ? 'Exposed' : 'Not Exposed' }}</em></a></td>
+                        <td>
+                            <select data-type="{{ item }}" name="field-search-type-setting" class="field-search-type-setting">
+                                <option value="">None</option>
+                                <option {{ search_setting.filter_definitions[item] == 'contains' ? 'selected' : '' }} value="contains">Contains</option>
+                                <option {{ search_setting.filter_definitions[item] == 'starts_with' ? 'selected' : '' }} value="start_with">Start With</option>
+                                <option {{ search_setting.filter_definitions[item] == 'ends_with' ? 'selected' : '' }} value="end_with">End With</option>
+                                <option {{ search_setting.filter_definitions[item] == 'equals' ? 'selected' : '' }} value="equals">Equal</option>
+                                <option {{ search_setting.filter_definitions[item] == 'not_equals' ? 'selected' : '' }} value="not_equals">Not Equal</option>
+                            </select>
+                        </td>
+                        <td>
+                            <div>
+                                <a class="button remove" data-type="{{ item }}" href="#">remove</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    (function() {
+
+        const content_type = document.getElementById('content_type');
+        if (content_type) {
+            content_type.addEventListener('change',(e)=>{
+                const content_type_value = e.target.value;
+                if (content_type_value) {
+                    const data = {
+                        action: 'content_type_new',
+                        data: content_type_value
+                    };
+                    sendChanges(data);
+                }
+            })
+        }
+
+        const content_type_fields = document.getElementById('content_type_fields');
+        if (content_type_fields) {
+            content_type_fields.addEventListener('change',(e)=>{
+                const content_type_value = e.target.value;
+                if (content_type_value) {
+                    const data = {
+                        action: 'content_type_field_new',
+                        data: content_type_value
+                    }
+                    sendChanges(data);
+                }
+            });
+        }
+
+        const field_search_type_setting = document.querySelectorAll('.field-search-type-setting');
+        if (field_search_type_setting) {
+            Array.from(field_search_type_setting).forEach((item) => {
+                item.addEventListener('change',(e)=>{
+                    const value = e.target.value;
+                    const data_for = e.target.dataset.type;
+                    const data = {
+                        action: 'filter_type',
+                        value: value,
+                        data_for: data_for
+                    }
+                    sendChanges(data);
+                });
+            })
+        }
+
+        const exposed = document.querySelectorAll('.exposed');
+        if (exposed) {
+            Array.from(exposed).forEach((item) => {
+                item.addEventListener('click',(e)=>{
+                    const value = item.dataset.expose;
+                    sendChanges({
+                        action: 'exposed',
+                        value: value,
+                    })
+                })
+            })
+        }
+
+        const sendChanges = async (data)=>{
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }
+            const response = await fetch(window.location.href, requestOptions);
+            const json = await response.json();
+
+            if (json.success) {
+                window.location.reload();
+            }
+        }
+
+    })()
+</script>

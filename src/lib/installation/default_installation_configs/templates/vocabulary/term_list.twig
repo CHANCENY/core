@@ -1,0 +1,49 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <h3>{{ "Terms"|t }}</h3>
+
+    <div>
+        <a href="/admin/structure/taxonomy/{{ request.http.get('name') }}/term/add">+add term</a>
+    </div>
+
+    <div>
+        <table>
+            <thead>
+              <tr>
+                  <th>TID</th>
+                  <th>Label</th>
+                  <th>Value</th>
+                  <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+             {% if terms %}
+
+                 {% for term in terms %}
+
+                     <tr>
+                         <td>{{ term.id }}</td>
+                         <td>{{ term.label }}</td>
+                         <td>{{ term.name }}</td>
+                         <td>
+                             <a href="/admin/structure/taxonomy/{{ request.http.get('name') }}/{{ term.id }}/edit">Edit</a>
+                             <a href="/admin/structure/taxonomy/{{ request.http.get('name') }}/{{ term.id }}/delete">Delete</a>
+                         </td>
+                     </tr>
+
+                 {% endfor %}
+
+             {% else %}
+
+                 <tr>
+                     <td colspan="4">No terms created!</td>
+                 </tr>
+
+             {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+<div class="d-flex justify-content-center mt-5">
+    <nav>
+        <ul class="pagination">
+            {% if pagination_data.pagination.has_previous %}
+                {% set values = {} %}
+                {% if display.getDisplayParams() %}
+                    {% for param in display.getDisplayParams() %}
+                        {% set _ = values|merge({ (param): request.http.get(param) }) %}
+                        {% set values = _ %}
+                    {% endfor %}
+                {% endif %}
+
+                <li class="page-item"><a class="page-link" href="{{ url(route_key, values) }}">« First</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ pagination_data.pagination.current_page - 1 }}">‹ Previous</a></li>
+            {% endif %}
+
+            {% if (pagination_data.pagination.total_pages - pagination_data.pagination.current_page) > 1 %}
+                {% for number in range((pagination_data.pagination.current_page < 1 ? 1 : pagination_data.pagination.current_page - 1), pagination_data.pagination.current_page + 1) %}
+
+                    {% if pagination_data.pagination.current_page == number %}
+                        <li class="page-item active"><a class="page-link" href="?page={{ number }}">{{ number }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ number }}">{{ number }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+            {% endif %}
+
+            {% if pagination_data.pagination.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ pagination_data.pagination.current_page + 1 }}">Next ›</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ pagination_data.pagination.total_pages }}">Last »</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>

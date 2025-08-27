@@ -1,0 +1,57 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <div class="login-header">{{ t("People")  }}</div>
+    <div>
+      <a href="/user/register">+ {{ "New User"|t }}</a>
+    </div>
+    {% include 'default.view.filter.form' ignore missing  %}
+    <div class="table">
+        <table>
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if users is not empty %}
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.uid }}</td>
+                    <td><a href="/user/{{ user.uid }}">{{ user.name }}</a></td>
+                    <td>{{ user.mail }}</td>
+                    {% set roles = user.getRoles() %}
+                    <td>
+                        {% for role in roles %}
+                            <span>{{ role.getRoleName() }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% if user.status %}
+                            <span>Active</span>
+                        {% else %}
+                            <span>Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/user/{{ user.uid }}/edit" class="">Edit</a>
+                        <a href="/user/{{ user.uid }}/delete" class="">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            {% else %}
+                <tfoot>
+                <tr>
+                    <td colspan="6"><p>Sorry no users created yet.</p></td>
+                </tr>
+                </tfoot>
+            {% endif %}
+        </table>
+    </div>
+{% endblock %}

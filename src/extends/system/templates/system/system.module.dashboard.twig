@@ -1,0 +1,36 @@
+{% extends 'default.view.admin_base' %}
+
+
+{% block body %}
+<div class="system-links">
+    <h2>System Actions</h2>
+    <ul>
+        <li>
+            <a href="{{ url('system.module.rebuild') }}">
+                <i class="fa fa-gear"></i> Rebuild Core
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('system.module.system') }}">
+                <i class="fa fa-gear"></i> System
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('system.rebuild.cache') }}">
+                <i class="fa fa-gear"></i> Rebuild Cache
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('system.module.clear.cache') }}">
+                <i class="fa fa-gear"></i> Clear Cache
+            </a>
+        </li>
+        <li>
+            <a href="{{ url('system.module.rebuild.all') }}">
+                <i class="fa fa-gear"></i> Rebuild All
+            </a>
+        </li>
+    </ul>
+</div>
+
+{% endblock %}

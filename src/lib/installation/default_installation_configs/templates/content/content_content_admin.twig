@@ -1,0 +1,117 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <div class="login-header">{{ t("Content")  }}</div>
+    <a href="/node/add">+ {{ "Create Content"|t }}</a>
+    <a href="/file/add" style="margin-left: 10px;">+ {{ "Add File"|t }}</a>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('contents')">{{ "Contents"|t }}</div>
+        <div class="tab" onclick="showTab('files')">{{ "Files"|t }}</div>
+    </div>
+
+    <div id="contents" class="tab-content active">
+        {% include 'default.view.filter.form' with {filters: filters}  %}
+        <div class="table">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{{ "Title"|t }}</th>
+                    <th>{{ "Type"|t }}</th>
+                    <th>{{ "Author"|t }}</th>
+                    <th>{{ "Updated"|t }}</th>
+                    <th>{{ "Created"|t }}</th>
+                    <th>{{ "Status"|t }}</th>
+                    <th>{{ "Actions"|t }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if nodes is not empty %}
+                    {% for node in nodes %}
+                        <tr>
+                            <td>{{ node.nid }}</td>
+                            {% set alias = auto_path_key(node.nid) %}
+                            {% set uri_alias = url(alias) %}
+
+                            {% if uri_alias is not null %}
+                                <td><a href="{{ uri_alias }}">{{ node.title }}</a></td>
+                            {% else %}
+                                <td><a href="/node/{{ node.nid }}">{{ node.title }}</a></td>
+
+                            {% endif %}
+                            <td>{{ node.bundle }}</td>
+                            <td>{{ node.getOwner.name }}</td>
+                            <td>{{ node.updated }}</td>
+                            <td>{{ node.created }}</td>
+                            <td>
+                                {% if node.status %}
+                                    <span>{{ "Active"|t }}</span>
+                                {% else %}
+                                    <span>{{ "Inactive"|t }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/node/{{ node.nid }}/edit">{{ "Edit"|t }}</a>
+                                <a href="/node/{{ node.nid }}/delete">{{ "Delete"|t }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8">
+                            <p style="text-align: center; padding: 2rem;">{{ "No content created yet."|t }}</p>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div id="files" class="tab-content">
+        {% include 'default.view.filter.form' with {filters: files_filters} %}
+        <div class="table">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{{ "Name"|t }}</th>
+                    <th>{{ "Mime"|t }}</th>
+                    <th>{{ "Extension"|t }}</th>
+                    <th>{{ "Size"|t }}</th>
+                    <th>{{ "Author"|t }}</th>
+                    <th>{{ "Created"|t }}</th>
+                    <th>{{ "Actions"|t }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% if files is not empty %}
+                    {% for file in files %}
+                        <tr>
+                            <td>{{ file.fid }}</td>
+                            <td><a href="{{ file_uri(file.fid) }}">{{ file.name }}</a></td>
+                            <td>{{ file.getMimeType }}</td>
+                            <td>{{ file.getExtension }}</td>
+                            <td>{{ size_format(file.getSize) }}</td>
+                            <td>{{ file.getOwner.name }}</td>
+                            <td>{{ file.getCreated }}</td>
+                            <td>
+                                <a href="/file/{{ file.fid }}/edit">{{ "Edit"|t }}</a>
+                                <a href="/file/{{ file.fid }}/delete">{{ "Delete"|t }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8">
+                            <p style="text-align: center; padding: 2rem;">{{ "No content created yet."|t }}</p>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

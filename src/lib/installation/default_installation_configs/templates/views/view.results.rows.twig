@@ -1,0 +1,13 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    {% if display_settings.settings.display_style == 'table' %}
+
+        {{ include ('default.view.view.display.table.style', {}, with_context: true) }}
+
+    {% elseif display_settings.settings.display_style == 'grid_rows' %}
+
+        {{ include ('default.view.view.display.grid_rows.style', {}, with_context: true) }}
+
+    {% endif %}
+{% endblock %}

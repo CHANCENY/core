@@ -1,0 +1,12 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <h3>{{ "Confirm Deletion"|t }} ({{ node.title }})</h3>
+    <p>{{ "Are you sure you want to delete this node?"|t }}</p>
+    <p>{{ "Please pick a deletion option below"|t }}</p>
+    <a href="?action=1" class="mx-2" title="permanent deletion">{{ "Delete"|t }}</a>
+    <a href="?action=2" class="mx-2" title="mark deleted">{{ "Mark Delete"|t }}</a>
+    <a href="?action=3" class="mx-2" title="leave">{{ "Cancel"|t }}</a>
+
+{% endblock %}

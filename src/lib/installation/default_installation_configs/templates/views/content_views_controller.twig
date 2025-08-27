@@ -1,0 +1,36 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>Views</h3>
+    <a href="/admin/structure/views/add" class="create-btn">+ Add View</a>
+    <table class="table table-stripped">
+        <thead class="table-light">
+        <tr>
+            <th>View Name</th>
+            <th>View Machine Name</th>
+            <th>Description</th>
+            <th>Displays</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {%  for view in views %}
+            <tr>
+                <td><a href="/admin/structure/views/view/{{ view.machine_name }}/displays">{{ view.name }}</a></td>
+                <td>{{ view.machine_name }}</td>
+                <td>{{ view.description }}</td>
+                <td>
+                    {% for display in view.displays %}
+                        {{ display.name }}<br>
+                    {% endfor %}
+                </td>
+                <td class="actions">
+                    <a href="/admin/structure/views/view/{{ view.machine_name }}" class="btn edit-btn">Edit</a>
+                    <a href="/admin/structure/views/view/{{ view.machine_name }}/delete" class="btn delete-btn">Delete</a>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+{% endblock %}

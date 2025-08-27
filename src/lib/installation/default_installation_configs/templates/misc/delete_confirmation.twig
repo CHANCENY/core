@@ -1,0 +1,13 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <h4>{{ title }}</h4>
+    <p>{{ message }}</p>
+    <p class="text-danger">{{ "This action cannot be undone"|t }}!</p>
+    <div class="d-flex justify-content-start gap-3 mt-4">
+        <a href="?confirm=yes" class="btn btn-delete px-4">{{ "Delete"|t }}</a>
+        <a href="?confirm=no" class="btn btn-cancel px-4">{{ "Cancel"|t }}</a>
+    </div>
+
+{% endblock %}

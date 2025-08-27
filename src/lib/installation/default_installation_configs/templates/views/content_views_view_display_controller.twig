@@ -1,0 +1,256 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h2>View {{ view.name }} Display</h2>
+    <div class="db-views-container">
+        <a href="#" id="add-display">+ add display</a>
+    </div>
+
+    <div class="tabs">
+        {% for index, display in view.displays %}
+            {% if index == 0 %}
+                <div class="tab active" onclick="showTab('{{ display.display_name }}')">{{ display.name }}</div>
+            {% else %}
+                <div class="tab" onclick="showTab('{{ display.display_name }}')">{{ display.name }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% for index, display in view.displays %}
+        <div id="{{ display.display_name }}" class="tab-content {{ index == 0 ? 'active' : '' }}">
+            <div class="mb-lg-5">
+                <div class="display">
+                    <div class="title d-flex justify-content-between">
+                        <div>Display name: <strong>{{ display.name }}</strong></div>
+                        <div class="edit-display">
+                            <a href="/admin/structure/views/view/{{ display.view }}/display/{{ display.display_name }}/edit">Edit display</a>
+                        </div>
+                    </div>
+
+                    <!-- Milligram's grid system: container, and 2-column structure -->
+                    <div class="row">
+                        <div class="column" style="flex: 0 0 66.66667%;"> <!-- 8/12 equivalent -->
+                            <div class="section">
+                                <div class="section-title">TITLE</div>
+                                <div><em>Title: {{ display.name }}</em> ({{ route_by_name(display.display_name).getRoutePath|default('none') }})</div>
+                            </div>
+
+                            <div class="section">
+                                <div class="section-title">
+                                    <span>FIELDS</span>
+                                    <span><a href="#fields-{{ display.display_name }}" style="text-align: end; float: right;" id="add-field">+ Add Field</a></span>
+                                </div>
+                                <ul class="list" id="fields">
+                                    {% for field in display.fields %}
+                                        {% set field_data = get_content_type_field(field.content_type, field.field) %}
+                                        {% set type = get_content_type(field.content_type) %}
+                                        <li class="list-item"
+                                            data-field="fields|{{ type.machine_name|default(field.content_type) }}|{{ field_data.name|default(field.field) }}"
+                                            data-field_all="{{ field_data|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                            data-display="{{ field|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                            data-view="{{ view|json_encode(constant('JSON_PRETTY_PRINT')) }}">
+                                            <span>{{ type.name|default(field.content_type) }}: {{ field_data.label|default(field.field) }}</span>
+                                            <span>
+                                        <em>Exclude: {{ field.settings.exclude == '1' ? 'Yes' : 'No' }}</em>
+                                    </span>
+                                            <a href="#" class="configure"
+                                               data-field="fields|{{ type.machine_name|default(field.content_type) }}|{{ field_data.name|default(field.field) }}"
+                                               data-field_all="{{ field_data|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                               data-display="{{ field|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                               data-view="{{ view|json_encode(constant('JSON_PRETTY_PRINT')) }}">
+                                                configure
+                                            </a>
+                                            <span><a href="#" class="remove">remove</a></span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="section">
+                                <div class="section-title">
+                                    <span>FILTER CRITERIA</span>
+                                    <span><a href="#filter_criteria-{{ display.display_name }}" style="text-align: end; float: right;" id="add-field-filter">+ Add Field</a></span>
+                                </div>
+                                <ul class="list" id="filter_criteria">
+                                    {% for field in display.filter_criteria %}
+                                        {% set field_data = get_content_type_field(field.content_type, field.field) %}
+                                        {% set type = get_content_type(field.content_type) %}
+                                        <li class="list-item"
+                                            data-field="filter_criteria|{{ type.machine_name|default(field.content_type) }}|{{ field_data.name|default(field.field) }}"
+                                            data-field_all="{{ field_data|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                            data-display="{{ field|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                            data-view="{{ view|json_encode(constant('JSON_PRETTY_PRINT')) }}">
+                                            <span>{{ type.name|default(field.content_type) }}: {{ field_data.label|default(field.field) }}</span>
+
+                                            <a href="#" class="configure"
+                                               data-field="filter_criteria|{{ type.machine_name|default(field.content_type) }}|{{ field_data.name|default(field.field) }}"
+                                               data-field_all="{{ field_data|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                               data-display="{{ field|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                               data-view="{{ view|json_encode(constant('JSON_PRETTY_PRINT')) }}">configure</a>
+
+                                            <span><em> Conjunction operator: {{ field.settings.conjunction }} Parameter Name: {{ field.settings.param_name }}</em></span>
+                                            <span><a href="#" class="remove">remove</a></span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="section">
+                                <div class="section-title">
+                                    <span>SORT CRITERIA</span>
+                                    <span><a href="#sort_criteria-{{ display.display_name }}" style="text-align: end; float: right;" id="add-field-sort">+ Add Field</a></span>
+                                </div>
+                                <ul class="list" id="sort_criteria">
+                                    {% for field in display.sort_criteria %}
+                                        {% set field_data = get_content_type_field(field.content_type, field.field) %}
+                                        {% set type = get_content_type(field.content_type) %}
+                                        <li class="list-item"
+                                            data-field="sort_criteria|{{ type.machine_name|default(field.content_type) }}|{{ field_data.name|default(field.field) }}"
+                                            data-field_all="{{ field_data|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                            data-display="{{ field|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                            data-view="{{ view|json_encode(constant('JSON_PRETTY_PRINT')) }}">
+                                            <span>{{ type.name|default(field.content_type) }}: {{ field_data.label|default(field.field) }}</span>
+
+                                            <a href="#" class="configure"
+                                               data-field="sort_criteria|{{ type.machine_name|default(field.content_type) }}|{{ field_data.name|default(field.field) }}"
+                                               data-field_all="{{ field_data|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                               data-display="{{ field|json_encode(constant('JSON_PRETTY_PRINT')) }}"
+                                               data-view="{{ view|json_encode(constant('JSON_PRETTY_PRINT')) }}">configure</a>
+
+                                            <span><em>{{ field.settings.order_in }}</em></span>
+                                            <span><a href="#" class="remove">remove</a></span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="column" style="flex: 0 0 33.33333%;"> <!-- 4/12 equivalent -->
+                            <div class="section">
+                                <div class="form-group">
+                                    <label>Url Custom parameters</label>
+                                    <input value="{{ display.settings.custom_params|default('')|join(', ') }}" type="text" name="custom_params" id="custom_params" class="form-control">
+                                    <span class="field-description">Give name with comma separated</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Result limit</label>
+                                    <input value="{{ display.settings.limit }}" type="number" name="limit" id="limit" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Custom twig template ID</label>
+                                    <input value="{{ display.settings.template_id }}" type="text" name="template_id" id="template_id" class="form-control">
+                                    <span class="field-description">this is usually found with theme.view.name of twig file without .twig</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Pagination</label>
+                                    <input {{ display.settings.pagination == 'on' ? 'checked' : '' }} type="checkbox" name="pagination" id="pagination" class="form-check">
+                                </div>
+                                <div class="form-group">
+                                    <label>Display Styles</label>
+                                    <select name="display_styles" id="display_style" class="form-control">
+                                        <option value="table">Table</option>
+                                        <option value="grid_rows">Grid Rows</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Empty result response</label>
+                                    <textarea name="empty_default" id="empty_default" class="form-control">{{ display.settings.default_empty }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="buttons">
+                        <button id="save-change">Save</button>
+                        <button id="cancel" data-display="{{ display.display_name }}" class="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div id="view-modal" class="modal">
+        <div class="modal-content">
+            <span id="close" class="close float-end">&times;</span>
+            <div class="modal-header">Add New Display</div>
+            <div>
+                <form method="post" class="form">
+                    <div class="form-group">
+                        <label for="display_name">Display Name</label>
+                        <input type="text" class="form-control" id="display_name" required name="display_name" placeholder="Display Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="display_url">Display Url</label>
+                        <input type="text" class="form-control" id="display_url" required name="display_url" placeholder="Display URL">
+                        <span class="field-description">Given placeholder eg "/article/[id:int]" or "article/[title:string]/read" or "/articles"</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="response_type">Response Type</label>
+                        <select name="response_type" id="response_type" class="form-control">
+                            <option value="text/html">Document Html</option>
+                            <option value="application/json">Application Json</option>
+                            <option value="application/yml">Application Yaml</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-primary" name="submit-new-display" value="Save Display">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-field-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-field" class="close float-end">&times;</span>
+            <div class="modal-header">Fields</div>
+            <div>
+                <form method="post" class="form">
+                    <div class="form-group">
+                        <label for="response_type">Content Type Fields</label>
+                        <select name="view_field" id="view_field" class="form-control">
+                            <option value="">Select</option>
+                            <option value="node|nid">Node: ID</option>
+                            <option value="node|uid">Node: Author</option>
+                            <option value="node|title">Node: Title</option>
+                            <option value="node|created">Node: Created At</option>
+                            <option value="node|updated">Node: Updated At</option>
+                            <option value="node|status">Node: Status</option>
+                            {% for index, field in fields %}
+                                <option value="{{ index }}">{{ field }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="view" value="{{ view.machine_name }}">
+                    </div>
+                    <div class="form-group">
+                        <input id="add-field-btn" type="submit" class="btn btn-primary" name="add-field" value="Save Field">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="setting-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-field" class="close float-end">&times;</span>
+            <div class="modal-header">Field</div>
+            <div>
+                <form method="post" class="form">
+                    <div class="form-group">
+                        <input type="hidden" name="view" value="{{ view.machine_name }}">
+                    </div>
+                    <div class="wrapper">
+
+                    </div>
+                    <div class="form-group">
+                        <input id="settings-field-btn" type="submit" class="btn btn-primary" name="settings-field-btn" value="Save Settings">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        {{ assets.getAssetsFile('view.js')|raw }}
+    </script>
+
+{% endblock %}

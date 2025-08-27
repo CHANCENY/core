@@ -1,0 +1,67 @@
+{% set field_id = random() %}
+
+<div class="gallery-wrapper" id="{{ field_id }}">
+
+    <div class="container" style="border: 0.1rem solid #d1d1d1;" id="">
+        <h5>{{ field.label }}</h5>
+
+        <div class="demo-area">
+            <button type="button" id="open-gallery-modal" class="btn btn-primary">Open Gallery Picker</button>
+            <div id="selected-images-display">
+                <h6>Your selected images will appear here</h6>
+                <div id="result-container" class="result-images"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gallery Picker -->
+    <div id="gallery-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="gallery-container">
+                    <h3>Select from Gallery</h3>
+                    <div class="gallery" id="image-gallery">
+
+                        {% for image in images %}
+                            <!-- Gallery images will be loaded here -->
+                            <div class="gallery-item" data-id="{{ image.fid }}">
+                                <img src="{{ image.uri }}" alt="{{ image.name }}">
+                                <div class="overlay">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="pager" style="margin-top: 1rem;">
+                        {% if pager > 5 %}
+                            <button type="button" class="next"><i class="fa fa-chevron-right"></i></button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="upload-container">
+                    <h3>Upload New Images</h3>
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-instructions">
+                            <label for="file-input" class="upload-btn">Browse Files</label>
+                            <input type="file" id="file-input" multiple accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-container">
+                    <h3>Selected Images</h3>
+                    <div class="preview-area" id="preview-area">
+                        <p class="no-images">No images selected</p>
+                        <!-- Selected images will appear here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="clear-selection" class="btn btn-danger">Clear Selection</button>
+                <button id="submit-selection" class="btn btn-primary">Apply Selection</button>
+            </div>
+        </div>
+    </div>
+
+</div>

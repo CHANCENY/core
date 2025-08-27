@@ -1,0 +1,85 @@
+<style>
+
+    .log-error {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+
+        .header {
+            background: #ef4444;
+            color: white;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        .message {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #b91c1c;
+            word-break: break-word;
+        }
+        .details {
+            padding: 20px;
+            font-family: monospace;
+            font-size: 0.9em;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .trace {
+            padding: 20px;
+        }
+        .trace h2 {
+            margin-top: 0;
+        }
+        .trace ol {
+            padding-left: 20px;
+            margin: 0;
+            font-family: monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        .trace li {
+            margin-bottom: 5px;
+        }
+    }
+
+</style>
+
+<div class="log-error">
+    <div class="header">
+        <h1>{{ status_code|default(500) }} | {{ status_text|default('Server Error') }}</h1>
+    </div>
+    <div class="message">
+        {{ exception.message|default('An unexpected error occurred.') }}
+    </div>
+    <div class="details">
+        {% if exception.file is defined %}
+            <div>File: {{ exception.file }}:{{ exception.line }}</div>
+        {% endif %}
+        <div>Type: {{ exception.class|default('Unknown Exception') }}</div>
+    </div>
+    <div class="trace">
+        <h2>Stack Trace</h2>
+        <ol>
+            {% for trace in exception.trace|default([]) %}
+                <li>
+                    {% if trace.file is defined %}
+                        {{ trace.file }}:{{ trace.line }} -
+                    {% endif %}
+                    {% if trace.class is defined %}
+                        {{ trace.class }}{{ trace.type }}
+                    {% endif %}
+                    {{ trace.function }}()
+                </li>
+            {% else %}
+                <li>No trace available.</li>
+            {% endfor %}
+        </ol>
+    </div>
+</div>

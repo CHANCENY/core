@@ -32,7 +32,7 @@
         <div class="profile-item"><i class="fas fa-user"></i> Last Name: {{ profile.getLastName }}</div>
         <div class="profile-item"><i class="fas fa-user"></i> Auto Translation: {{ profile.isTranslationEnabled == 1 ? 'Yes' : 'no' }}</div>
         <div class="profile-item"><i class="fas fa-user"></i> Translation Language: {{ translation(profile.getTranslationCode).language }}</div>
-        <div class="profile-item"><i class="fas fa-info-circle"></i> {{ profile.getDescription|raw }} </div>
+        <div class="profile-item"><i class="fas fa-info-circle"></i> {{ profile.getDescription }} </div>
     </div>
 
     <!-- Action Buttons -->

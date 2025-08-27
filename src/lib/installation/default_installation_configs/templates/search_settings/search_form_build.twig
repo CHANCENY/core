@@ -1,0 +1,38 @@
+{% if exposed_fields is iterable %}
+
+    <form action="/search/{{ search_key }}">
+
+        {% for field in exposed_fields %}
+
+            {% if wrapper == true %}
+
+                <div class="form-group">
+                    <input type="text" name="{{ field.name }}" placeholder="Search {{ field.label }}">
+                </div>
+
+            {% else %}
+
+                {% if field.type == 'text' %}
+
+                    <input type="text" name="{{ field.name }}" placeholder="Search {{ field.label }}">
+
+                {% endif %}
+
+
+            {% endif %}
+
+        {% endfor %}
+
+        {% if wrapper == true %}
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+        {% else %}
+        <input type="submit" value="Search">
+        {% endif %}
+
+    </form>
+
+{% endif %}
+
+

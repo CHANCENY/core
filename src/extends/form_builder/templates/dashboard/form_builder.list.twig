@@ -1,0 +1,51 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <div>
+        <h3>Forms</h3>
+        <div>
+            <a href="{{ url('form_builder.dashboard') }}">+ Add Form</a>
+        </div>
+        <div>
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Machine Name</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% if forms %}
+
+                    {% for form in forms %}
+
+                        <tr>
+                            <td>{{ form.title }}</td>
+                            <td>{{ form.name }}</td>
+                            <td>{{ form.description }}</td>
+                            <td>
+                                <a href="{{ url('form_builder.edit', {'name': form.name}) }}">Edit</a>
+                                <a href="{{ url('form_builder.delete', {'name': form.name}) }}">Delete</a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+                        <td colspan="4">No Forms</td>
+                    </tr>
+
+                {% endif %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

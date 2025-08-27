@@ -205,11 +205,11 @@ class ReferenceField extends FieldBase
         $default_values = $this->getItems($default_values);
         $default_values = json_encode($default_values);
 
-         $id = $this->getId();
+        $id = $this->getId();
         $wrapper_id = "wrapper-".uniqid();
-         $callable = json_encode($this->field['reference'], JSON_PRETTY_PRINT);
+        $callable = json_encode($this->field['reference'], JSON_PRETTY_PRINT);
 
-         $script = <<<SCRIPT
+        $script = <<<SCRIPT
 <script>
  (function(){
   'use strict';
@@ -320,7 +320,7 @@ class ReferenceField extends FieldBase
 </script>
 SCRIPT;
 
-         return <<<HTML
+        return <<<HTML
 <div id="{$wrapper_id}" class="reference-field-wrapper">
 <label for="{$id}">{$this->getLabel()}</label>
   <div id="selectedItems" class="selected-items"></div>

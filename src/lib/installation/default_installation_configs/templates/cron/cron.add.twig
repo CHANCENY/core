@@ -1,0 +1,24 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Create Cron"|t }}</h3>
+    <h2>How to Set Up Cron</h2>
+
+  <p><strong>Every Option:</strong></p>
+  <p>If you pick the <code>every</code> option, the cron will run on a recurring basis depending on the selected interval:</p>
+  <ul>
+    <li><code>every|minute</code> — runs every minute</li>
+    <li><code>every|hour</code> — runs every hour</li>
+    <li><code>every|day</code> — runs every day</li>
+    <li><code>every|week</code> — runs every week</li>
+    <li><code>every|month</code> — runs every month</li>
+    <li><code>every|year</code> — runs every year</li>
+  </ul>
+
+  <p><strong>Once Option:</strong></p>
+  <p>If you pick the <code>once</code> option and provide a date (e.g. <code>once|2021-01-01</code>), the cron will run <strong>only once</strong> on the given date.</p>
+
+  <p><strong>Ontime Option:</strong></p>
+  <p>If you pick the <code>ontime</code> option and provide a time (e.g. <code>ontime|06:00:00</code>), the cron will run <strong>daily at that specific time</strong>, combined with the selected <code>every</code> interval.</p>
+    {{ _form|raw }}
+{% endblock %}

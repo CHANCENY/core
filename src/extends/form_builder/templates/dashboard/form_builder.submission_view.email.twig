@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Submission</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9fafb; margin: 0; padding: 20px;">
+
+<div>
+    <h3 style="color: #2563eb; font-size: 20px; margin-bottom: 20px;">Submission</h3>
+    <div>
+        <div class="submission-fields" style="margin: auto; display: grid; gap: 1rem;">
+            {% if submission %}
+                {% for key, field in fields %}
+                    <div class="field-card" style="background-color: #ffffff; border: 1px solid #e5e7eb; padding: 16px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 16px; margin-top: 16px;">
+                        <div class="field-name" style="font-size: 0.9rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                            {{ field.label }}
+                        </div>
+                        <div class="field-value" style="font-size: 1.05rem; font-weight: 500; word-break: break-word;">
+                            {% if field.type == 'file'%}
+
+                                {% for item in submission.get(key) %}
+
+                                    {% set file = file(item.value) %}
+
+                                    {% if file %}
+
+                                        {% if 'image' in file.getMimeType()  %}
+                                            <img src="{{ request.http.getSchemeAndHttpHost() }}{{ file_uri(file.getFid()) }}"
+                                                 alt="{{ file.getName }}"
+                                                 style="max-width: 300px; max-height: 300px; width: auto; height: auto; object-fit: cover; vertical-align: middle; border-radius: 4px;">
+                                        {% else %}
+                                            <a href="{{ request.http.getSchemeAndHttpHost() }}{{ file_uri(file.getFid()) }}"
+                                               target="_blank"
+                                               style="color: #2563eb; text-decoration: none;">{{ file.getName }}</a>
+                                        {%  endif %}
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                {% for item in submission.get(key) %}
+                                    <div style="font-size: large;">{{ item.value }}</div>
+                                {% endfor %}
+
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty" style="text-align: center; padding: 32px; background-color: #ffffff; border: 1px dashed #e5e7eb; border-radius: 12px; color: #6b7280;">
+                    No data submitted found.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,156 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+    <h3>{{ "Chat Support"|t }}</h3>
+    <div>
+        <div class="support-container">
+            <!-- Sidebar with user list -->
+            <div class="chat-sidebar">
+                <div class="sidebar-header">
+                    <h3>Active Conversations</h3>
+                    <div class="search-container">
+                        <input type="text" id="searchUsers" placeholder="Search users...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+
+                <div class="user-list" id="userList">
+                    <!-- User entries will be dynamically added here -->
+                    <div class="user-entry active" data-user-id="user1">
+                        <div class="user-avatar">
+                            <img src="https://via.placeholder.com/40" alt="User Avatar">
+                            <span class="user-status online"></span>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">John Doe</div>
+                            <div class="user-last-message">Thanks for your help!</div>
+                        </div>
+                        <div class="user-meta">
+                            <div class="message-time">10:30 AM</div>
+                            <div class="unread-count">0</div>
+                        </div>
+                    </div>
+
+                    <div class="user-entry" data-user-id="user2">
+                        <div class="user-avatar">
+                            <img src="https://via.placeholder.com/40" alt="User Avatar">
+                            <span class="user-status online"></span>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">Jane Smith</div>
+                            <div class="user-last-message">I'm having an issue with...</div>
+                        </div>
+                        <div class="user-meta">
+                            <div class="message-time">10:15 AM</div>
+                            <div class="unread-count">3</div>
+                        </div>
+                    </div>
+
+                    <div class="user-entry" data-user-id="user3">
+                        <div class="user-avatar">
+                            <img src="https://via.placeholder.com/40" alt="User Avatar">
+                            <span class="user-status offline"></span>
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">Robert Johnson</div>
+                            <div class="user-last-message">When will my order arrive?</div>
+                        </div>
+                        <div class="user-meta">
+                            <div class="message-time">Yesterday</div>
+                            <div class="unread-count">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main chat area -->
+            <div class="chat-main">
+                <!-- Chat header with user info -->
+                <div class="chat-header">
+                    <div class="current-user-info">
+                        <div class="user-avatar">
+                            <img src="https://via.placeholder.com/40" alt="User Avatar">
+                            <span class="user-status online"></span>
+                        </div>
+                        <div class="user-details">
+                            <div class="user-name">John Doe</div>
+                            <div class="user-email">john.doe@example.com</div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="action-button" title="View User Info">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="action-button" title="Close Chat">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat messages area -->
+                <div class="chat-messages" id="supportChatMessages">
+                    <!-- Messages will be dynamically added here -->
+                    <div class="message-timestamp">Today</div>
+
+                    <div class="message user-message">
+                        <div class="message-content">
+                            <p>Hello, I need help with my recent order #12345.</p>
+                        </div>
+                        <div class="message-time">10:05 AM</div>
+                    </div>
+
+                    <div class="message support-message">
+                        <div class="message-content">
+                            <p>Hi John, I'd be happy to help you with your order. Could you please provide more details about the issue you're experiencing?</p>
+                        </div>
+                        <div class="message-time">10:07 AM</div>
+                    </div>
+
+                    <div class="message user-message">
+                        <div class="message-content">
+                            <p>I ordered a laptop last week, but I haven't received any shipping confirmation yet.</p>
+                        </div>
+                        <div class="message-time">10:10 AM</div>
+                    </div>
+
+                    <div class="message support-message">
+                        <div class="message-content">
+                            <p>I understand your concern. Let me check the status of your order right away.</p>
+                        </div>
+                        <div class="message-time">10:12 AM</div>
+                    </div>
+
+                    <div class="message support-message">
+                        <div class="message-content">
+                            <p>I've checked our system, and it looks like your order is currently being processed. It should ship within the next 24 hours, and you'll receive an email confirmation once it's on its way.</p>
+                        </div>
+                        <div class="message-time">10:15 AM</div>
+                    </div>
+
+                    <div class="message user-message">
+                        <div class="message-content">
+                            <p>Thanks for your help!</p>
+                        </div>
+                        <div class="message-time">10:30 AM</div>
+                    </div>
+                </div>
+
+                <!-- Chat input area -->
+                <div class="chat-input">
+                    <textarea id="supportMessageInput" placeholder="Type your message here..."></textarea>
+                    <div class="input-actions">
+                        <button class="action-button" title="Attach File">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button class="action-button" title="Insert Emoji">
+                            <i class="fas fa-smile"></i>
+                        </button>
+                        <button id="supportSendButton" class="send-button">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends 'default.view.admin_base' %}
+
+
+{% block body %}
+
+    <style>
+    .form-settings-container {
+    max-width: 1050px;
+    margin: 22px auto;
+    padding: 0 16px;
+    }
+
+    .card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(16,24,40,0.03);
+    }
+
+    h1{ margin: 0 0 12px 0; font-size: 18px; }
+    .muted{ color:var(--muted); font-size: 13px; }
+
+    form .row{
+    display:flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    align-items: center;
+    }
+    form .row.col-2{ gap: 12px; }
+    label{ display:block; font-size: 13px; margin-bottom:6px; color:#374151; }
+    input[type="text"], input[type="email"], input[type="number"], select, textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #e5e7eb;
+    border-radius:6px;
+    font-size:14px;
+    background:white;
+    box-sizing: border-box;
+    }
+    textarea{ min-height:100px; resize:vertical; }
+
+    .field-list{
+    margin-top:10px;
+    border:1px dashed #e8eef0;
+    padding:10px;
+    border-radius:6px;
+    background: linear-gradient(180deg, rgba(240,249,247,0.6), transparent);
+    }
+    .field-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:8px 6px;
+    border-bottom:1px solid #f1f5f9;
+    }
+    .field-row:last-child{ border-bottom: none; }
+    .field-row .meta{ font-size:13px; color:var(--muted); }
+    .actions{ margin-top:16px; display:flex; gap:8px; justify-content: flex-end; }
+
+    .btn.ghost{
+    background:transparent;
+    border:1px solid #e5e7eb;
+    color:#374151;
+    }
+
+    /* responsive */
+    @media (max-width:720px){
+    .row{ flex-direction: column; align-items: stretch; }
+    .page-title{ margin-left: 0; }
+    }
+    </style>
+
+    <div>
+        <h3>Form Settings - {{ title }}</h3>
+        <div class="form-settings-container">
+            <div class="card">
+                <h1>Form Settings</h1>
+                <p class="muted">Change form-level options. These settings apply to the selected form.</p>
+
+                <form method="post" id="form-settings">
+                    <!-- basic -->
+                    <div class="row">
+                        <div style="flex:1">
+                            <label for="title">Form title</label>
+                            <input value="{{ settings.title }}" id="title" name="title" type="text" placeholder="e.g. Contact Us" required />
+                        </div>
+
+                        <div style="width:220px">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" aria-label="Form status">
+                                <option  {{ settings.status == 'published' ? 'selected' : ''}} value="published">Published</option>
+                                <option  {{ settings.require_login == 'draft' ? 'selected' : ''}} value="draft">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div style="flex:1">
+                            <label for="slug">Form slug / path</label>
+                            <input value="{{ settings.slug }}" id="slug" name="slug" type="text" placeholder="contact-us" />
+                            <div class="muted" style="margin-top:6px">The URL path segment for this form.</div>
+                        </div>
+
+                        <div style="width:220px">
+                            <label for="require_login">Require login</label>
+                            <select id="require_login" name="require_login">
+                                <option {{ settings.require_login == 'on' ? 'selected' : ''}} value="no">No (public)</option>
+                                <option  {{ settings.require_login == 'yes' ? 'selected' : ''}} value="yes">Yes (only logged-in users)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- notifications & limits -->
+                    <div class="row">
+                        <div style="flex:1">
+                            <label for="notify">Notification email</label>
+                            <input value="{{ settings.notify }}" id="notify" name="notify" type="email" placeholder="admin@example.com" />
+                            <div class="muted" style="margin-top:6px">Email to receive form submissions (comma-separated allowed).</div>
+                        </div>
+
+                        <div style="width:220px">
+                            <label for="limit">Submission limit</label>
+                            <input value="{{ settings.limit }}" id="limit" name="limit" type="number" min="0" placeholder="0 = unlimited" />
+                        </div>
+                    </div>
+
+                    <!-- confirmation message -->
+                    <div class="row">
+                        <div style="flex:1">
+                            <label for="confirm">Confirmation message</label>
+                            <textarea id="confirm" name="confirmation" placeholder="Thank you for your submission.">{{ settings.confirmation }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- confirmation message -->
+                    <div class="row">
+                        <div style="flex:1">
+                            <label for="confirm">Embedded Page Content</label>
+                            <textarea id="confirm" name="embedded" class="editor" placeholder="page html">{{ settings.embedded }}</textarea>
+                            <span>write content of page here. This content will be on the page where the form can be accessed. <strong>Note: add [__form__] somewhere in this html</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- actions -->
+                    <div class="actions">
+                        <button type="submit" class="btn primary">Save settings</button>
+                    </div>
+                </form>
+            </div>
+            <script>
+                // basic client-side UX examples: debounce slug from title and basic submit prevention
+                (function(){
+                    const title = document.getElementById('title');
+                    const slug = document.getElementById('slug');
+
+                    title.addEventListener('input', () => {
+                        // auto-fill slug if empty or matches previous auto
+                        if(!slug.dataset.touched){
+                            slug.value = title.value.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'');
+                        }
+                    });
+                    slug.addEventListener('input', () => { slug.dataset.touched = '1'; });
+
+                    document.getElementById('form-settings').addEventListener('submit', function(e){
+                        // simple client validation example
+                        const titleVal = title.value.trim();
+                        if(!titleVal){
+                            e.preventDefault();
+                            alert('Please enter a form title.');
+                            title.focus();
+                        }
+                    });
+                })();
+            </script>
+
+
+        </div>
+    </div>
+
+{% endblock %}

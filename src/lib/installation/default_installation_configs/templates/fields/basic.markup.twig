@@ -1,0 +1,25 @@
+<form method="post" class="form">
+    <input type="hidden" name="type" value="{{ field.type }}">
+    <div class="field-wrapper">
+        <!-- Field Label and Name -->
+        <div class="form-group">
+            <label for="field-name">Label</label>
+            <input value="{{ definition.label }}" type="text" name="title" id="field-name" class="form-control" placeholder="Enter field label">
+        </div>
+
+        <!-- Field Settings -->
+        <fieldset class="form-control">
+            <legend>Markup Text</legend>
+            <div class="form">
+                <label for="content">Text</label>
+                <textarea name="content" class="editor" id="content" cols="30" rows="30"></textarea>
+            </div>
+        </fieldset>
+        {% if definition.index is empty %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary w-25">Save</button>
+            </div>
+        {% endif %}
+    </div>
+
+</form>

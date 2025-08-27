@@ -1,0 +1,89 @@
+<div class="table-responsive">
+    <div class="{{ display_settings.settings.display_style }}-wrapper">
+        <div class="view-content d-block m-4 p-4 {{ display_settings.settings.display_style }}-container">
+        {% for row in content %}
+            <div class="row">
+                {% for field in fields %}
+                    {% set results = row.get(field.name) %}
+                    {% set field = get_content_type_field(field.content_type, field.name) %}
+                    {% if results is iterable %}
+                        <div class="row-data-view col-md-12 p-1">
+                            <ul>
+                                {% for result in results %}
+                                    {% if field %}
+                                        {% if field.type == 'file' %}
+                                            {% set file = file_uri(result) %}
+                                            <li>
+                                                <a href="{{ file }}">{{ file(result).getName }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li>{{  result }}</li>
+                                        {% endif %}
+                                    {% else %}
+                                        {{  result|raw }}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="row-data-view col-md-12 p-1">
+                            {% if field.is_label %}
+                               <div class="label-wrapper">
+                                   <strong>{{ field.label }}</strong>
+                               </div>
+                            {% endif %}
+                            <div class="field-field-row">
+                                {% if field %}
+                                    {% if field.type == 'file' %}
+                                        {% set file = file_uri(results) %}
+                                        <a href="{{ file }}">{{ file(results).getName }}</a>
+                                    {% else %}
+                                        {{  results|raw }}
+                                    {% endif %}
+                                {% else %}
+                                    {{  results|raw }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                {% endfor %}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+
+    {% if display.isPaginated() %}
+        <div class="pagination-wrapper">
+
+            {% set pagination_data = display.pagination(request.http) %}
+            {% include 'default.view.pagination' with pagination_data %}
+
+        </div>
+    {% endif %}
+</div>
+
+{% if is_admin %}
+    <div class="row">
+        <div class="mysql-query">
+            <h5>View query</h5>
+            <pre>{{ query|raw }}</pre>
+        </div>
+        <div class="view-templates">
+            <h5>View templates</h5>
+            <div>
+                <div class="active-template">
+                    <strong>Active template:</strong>
+                    <p>{{ template }}</p>
+                </div>
+                <div class="possible-templates">
+                    <strong>Possible Overrides</strong>
+                    {% for template in possible_templates %}
+                        <p>{{ template }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+

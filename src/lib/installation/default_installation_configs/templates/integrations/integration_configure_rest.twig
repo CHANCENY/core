@@ -1,0 +1,79 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <div class="db-form-container">
+        <h2>{{ "REST Integration"|t }}</h2>
+
+        <div class="action-buttons">
+            <a href="#" id="version-create" class="">+ {{ "create version"|t }}</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-stripped">
+                <thead>
+                  <tr>
+                      <th>{{ "Title"|t }}</th>
+                      <th>{{ "Version"|t }}</th>
+                      <th>{{ "Status"|t }}</th>
+                      <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for version in versions %}
+
+                        <tr>
+                            <td>
+                                <a href="/admin/integration/rest/version/{{ version.version_key }}">{{ version.title }}</a>
+                            </td>
+                            <td>{{ version.version_key }}</td>
+                            <td>{{ version.status == 1 ? 'online' : 'offline' }}</td>
+                            <td>
+                                <a href="/admin/integration/rest/version/{{ version.version_key }}/delete">{{ "Delete"|t }}</a>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div id="version-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-field" class="close float-end">&times;</span>
+            <div class="modal-header">{{ "Create Version"|t }}</div>
+            <div>
+                <form method="post" class="form">
+                    <div class="form-group">
+                        <label for="version">{{ "Version Name"|t }}</label>
+                        <input type="text" name="version" placeholder="Version" class="form-control">
+                        <span class="field-description">{{ "this is name will be used as key and prefix of routes"|t }}</span>
+                    </div>
+                    <div class="form-group">
+                        <input id="settings-field-btn" type="submit" class="btn btn-primary" name="settings-field-btn" value="Create Version">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+
+            const versionCreate = document.querySelector('#version-create');
+            if (versionCreate) {
+                versionCreate.addEventListener('click',(e)=>{
+                    e.preventDefault();
+                    window.modal(document.querySelector('#version-modal'),
+                        versionCreate,
+                        document.querySelector('#version-modal').querySelector('#close-field')
+                    );
+                });
+            }
+
+        })();
+    </script>
+
+{% endblock %}

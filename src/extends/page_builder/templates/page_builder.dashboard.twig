@@ -1,0 +1,51 @@
+{% extends 'default.view.admin_base' %}
+
+
+{% block body %}
+
+    <div>
+        <h3>Dashboard</h3>
+        <div>
+            <a href="{{ url('page_builder.create') }}">Create page</a>
+        </div>
+        <div>
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Version</th>
+                    <th>Created Date</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                  {% if pages %}
+
+                      {% for page in pages %}
+
+                          <tr>
+                              <td>{{ page.title }}</td>
+                              <td>{{ page.name }}</td>
+                              <td>{{ page.status == 1 ? 'Yes' : 'No' }}</td>
+                              <td>{{ page.version }}</td>
+                              <td>{{ page.created_at|date('d F, Y h:s A') }}</td>
+                              <td><a href="{{ url('page_builder.create', {}, {t: page.name}) }}">Edit</a></td>
+                          </tr>
+
+                      {% endfor %}
+
+                  {% else %}
+
+                      <tr>
+                          <td colspan="6">No pages found</td>
+                      </tr>
+
+                 {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,78 @@
+{% set content = node.get(definition.name) %}
+
+{% set display = display[definition.name] %}
+
+{% if content %}
+
+    {% if display %}
+
+    <div class="field">
+        {% if content is iterable %}
+
+            {% if content.0 %}
+                {% if display.display_label == '1' %}
+                    {% if definition.label %}
+                        <strong class="field-label">{{ definition.label }}</strong>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+
+            {%  for item in content %}
+
+                {% if item %}
+                    {% set settings = display %}
+                    {% set page = load_page(item) %}
+
+                    {% if settings.display_enabled %}
+                        <div class="field--{{ definition.name|replace({'_':'-'}) }} field-text-{{ definition.name|replace({'_':'-'}) }} margin-top-field">
+
+                            {% if definition.settings.show_as == 'Iframe' %}
+
+                                <div class="iframe-wrapper">
+                                    <iframe src="{{ url('page_builder.action.embeddable',{pid: page.id()}) }}" frameborder="0"></iframe>
+                                </div>
+
+                            {% elseif definition.settings.show_as == 'Embedded' %}
+
+                                <div class="iframe-wrapper">
+                                    <embed src="{{ url('page_builder.action.embeddable',{pid: page.id()}) }}" frameborder="0" type="text/html">
+                                </div>
+
+                            {% elseif definition.settings.show_as == "Page-link" %}
+
+                                {% set name = r_strip(page.getTitle()) %}
+
+                                <div class="page-link">
+                                    <a href="{{ url('page_builder.action.link',{name: name, pid: page.id()}) }}">{{ page.title }}</a>
+                                </div>
+
+                            {% elseif definition.settings.show_as == 'Pdf-link' %}
+
+                                <div class="pdf-link">
+                                    <a href="{{ pdf_link(page) }}">{{ pdf_file(page).getName }}</a>
+                                </div>
+
+                            {% else %}
+
+                                {{ page.getContent|raw }}
+
+                                <style>
+                                    .field--{{ definition.name|replace({'_':'-'}) }} {
+                                    {{ page.getCss|raw }}
+                                    }
+                                </style>
+
+                            {% endif %}
+
+                        </div>
+                    {% endif %}
+
+                {% endif %}
+
+            {% endfor %}
+
+        {% endif %}
+    </div>
+    {% endif %}
+
+{% endif %}

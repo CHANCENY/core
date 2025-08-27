@@ -1,0 +1,22 @@
+{% extends 'default.view.admin_base' %}
+
+{% block head %}
+
+    <style>
+
+        .container-{{ css_wrapper }} {
+        {{ css|raw }}
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block body %}
+
+
+<section class="container-{{ css_wrapper }}" data-pid="{{ pid }}" data-name="{{ name }}" data-version="{{ version }}">
+    {{ content|raw }}
+</section>
+
+{% endblock %}

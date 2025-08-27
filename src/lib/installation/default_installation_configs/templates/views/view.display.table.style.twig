@@ -1,0 +1,90 @@
+<!-- Responsive Table Wrapper -->
+<div style="overflow-x: auto; margin-bottom: 2rem;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            {% for field in fields %}
+                <th style="text-align: left; padding: 0.75rem; border-bottom: 1px solid #e1e1e1;">
+                    {{ field.label }}
+                </th>
+            {% endfor %}
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for row in content %}
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+                {% for field in fields %}
+                    {% set results = row.get(field.name) %}
+                    {% set field = get_content_type_field(field.content_type, field.name) %}
+                    <td style="padding: 0.75rem; vertical-align: top;">
+                        {% if results is iterable %}
+                            <ul style="margin: 0; padding-left: 1rem;">
+                                {% for result in results %}
+                                    {% if field %}
+                                        {% if field.type == 'file' %}
+                                            {% set file = file_uri(result) %}
+                                            <li><a href="{{ file }}">{{ file(result).getName }}</a></li>
+                                        {% else %}
+                                            <li>{{ result }}</li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li>{{ result|raw }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            {% if field %}
+                                {% if field.type == 'file' %}
+                                    {% set file = file_uri(results) %}
+                                    <a href="{{ file }}">{{ file(results).getName }}</a>
+                                {% else %}
+                                    {{ results|raw }}
+                                {% endif %}
+                            {% else %}
+                                {{ results|raw }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if display.isPaginated() %}
+    <div style="margin-top: 2rem;">
+        {% set pagination_data = display.pagination(request.http) %}
+        {% include 'default.view.pagination' with pagination_data %}
+    </div>
+{% endif %}
+
+<!-- Admin Debug Info -->
+{% if is_admin %}
+    <div style="display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 3rem;">
+        <!-- MySQL Query -->
+        <div style="flex: 1;">
+            <h5>View query</h5>
+            <pre style="background: #f4f4f4; padding: 1rem; border-radius: 4px;">{{ br(query,110)|raw }}</pre>
+        </div>
+
+        <!-- Templates Info -->
+        <div style="flex: 1;">
+            <h5>View templates</h5>
+            <div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Active template:</strong>
+                    <p>{{ template }}</p>
+                </div>
+                <div>
+                    <strong>Possible Overrides</strong>
+                    {% for template in possible_templates %}
+                        <p>{{ template }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

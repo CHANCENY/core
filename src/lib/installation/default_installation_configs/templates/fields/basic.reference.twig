@@ -1,0 +1,121 @@
+{% set random_number = random() %}
+<form method="post" class="form">
+    <input type="hidden" name="type" value="{{ field.type }}">
+    <div class="field-wrapper">
+        <!-- Field Label and Name -->
+        <div class="form-group">
+            <label for="field-name">Label</label>
+            <input type="text" name="title" id="field-name" class="form-control" placeholder="Enter field label" value="{{ definition.label }}">
+        </div>
+
+        <!-- Allowed Number of Values -->
+        <div class="form-group">
+            <label for="storage-limit">Allowed number of values</label>
+            <input type="number" name="limit" min="1" id="storage-limit" class="form-control" placeholder="e.g., 1 or unlimited" value="{{ defintion.limit }}">
+        </div>
+
+        <!-- Field Settings -->
+        <fieldset class="form-control">
+            <legend>Field Settings</legend>
+
+            <!-- Required Checkbox -->
+            <div class="form-group">
+                <label for="field-required">
+                    <input type="checkbox" name="required" id="field-required" {{ definition.required ? 'checked' : '' }}>
+                    Required
+                </label>
+            </div>
+
+            <!-- Need Field (Custom Setting) -->
+            <div class="form-group">
+                <label for="default-value">Default value</label>
+                <input type="text" name="default_value" id="default-value" class="form-control" value="{{ definition.default_value }}">
+            </div>
+
+            <div class="form-group">
+                <label for="class">Css Classes (optional)</label>
+                <input type="text" name="class" id="class" class="form-control" value="{{ definition.class|join(' ')}}">
+                <small>Separate classes with a space</small>
+            </div>
+            <div class="form-group">
+                <label for="default-value">Html ID (optional)</label>
+                <input type="text" name="id" id="default-value" class="form-control" value="{{ definition.id }}">
+            </div>
+        </fieldset>
+
+        <fieldset class="form-control" id="{{ random_number }}">
+            <legend>Field Reference Settings</legend>
+
+            <!-- Need Field (Custom Setting) -->
+            <div class="form-group">
+                <label for="reference-type">Reference Type value</label>
+                <select name="reference_type" id="reference-type">
+                    <option value="">Select</option>
+                    <option value="node">Node</option>
+                    <option value="user">User</option>
+                    <option value="file">File</option>
+                    <option value="term">Term</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="reference-type-node" style="display: none;">
+                <label for="reference-type-content">Content types</label>
+                <select name="reference_content_type" id="reference-type-content">
+                    {% for key, content_type in content_types %}
+                        <option value="{{ key }}">{{ content_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" id="reference-type-user" style="display: none;">
+                <label for="reference-type-user">User</label>
+                <select name="reference_type_user" id="reference-type-user">
+                    <option value="users">User</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="reference-type-file" style="display: none;">
+                <label for="reference-type-file">User</label>
+                <select name="reference_type_file" id="reference-type-file">
+                    <option value="file_managed">File</option>
+                </select>
+            </div>
+            <div class="form-group" id="reference-type-term" style="display: none;">
+                <label for="reference-type-file">Taxonomy</label>
+                <select name="reference_type_term" id="reference-type-file">
+                    <option value="term_data">Select...</option>
+                    {% for vocabulary in vocabularies %}
+
+                        <option value="{{ vocabulary.name }}">{{ vocabulary.label }}</option>
+
+                    {% endfor %}
+                </select>
+            </div>
+        </fieldset>
+
+        {% if definition.index is empty %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary w-25">Save</button>
+            </div>
+        {% endif %}
+    </div>
+
+</form>
+
+<script>
+    (function() {
+        $(document).ready(function() {
+            const reference_setting = $('#{{ random_number }}');
+
+            if (reference_setting.length > 0) {
+                reference_setting.find('#reference-type').on('change', function() {
+                    const value = $(this).val();
+                    $('#reference-type-node').hide();
+                    $('#reference-type-user').hide();
+                    $('#reference-type-' + value).show();
+                });
+            }
+
+        });
+    })();
+</script>
