@@ -137,7 +137,7 @@ class ReferenceField extends FieldBase
         return $this->getValue();
     }
 
-    private function getItems(array $data): array
+    private function getItems(array|string $data): array
     {
         $items = [];
         if (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'node') {
@@ -165,6 +165,7 @@ class ReferenceField extends FieldBase
                 }
             }
         }
+
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'term') {
             foreach ($data as $item) {
                 $term = Term::load($item);
@@ -176,6 +177,7 @@ class ReferenceField extends FieldBase
                 }
             }
         }
+
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'file') {
             foreach ($data as $item) {
                 $file = File::load($item);
@@ -189,6 +191,8 @@ class ReferenceField extends FieldBase
         }
         return $items;
     }
+
+
     public function getBuildField(bool $wrapper = true): string
     {
         $class = implode(' ', $this->getClassList());

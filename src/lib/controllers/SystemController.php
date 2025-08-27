@@ -856,6 +856,7 @@ class SystemController
 
                 $content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
 
+                $content_type['permission'] = array_merge($content_type['permission'], ['administrator']);
                 $permission = $content_type['permission'] ?? [
                     'administrator'
                 ];
@@ -872,7 +873,7 @@ class SystemController
 
 
             $entity = $node->getEntityArray();
-            $options['route']->route_title = $node->getTitle();
+            $route->route_title = $node->getTitle();
             $definitions = [];
             foreach ($entity['storage'] as $field) {
                 $name = substr($field,6,strlen($field));
