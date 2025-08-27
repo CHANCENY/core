@@ -124,7 +124,7 @@ class NodeStorageEntity implements IteratorAggregate
      *
      * @return self
      */
-    public function execute(): self
+    public function execute(string $connector = 'AND'): self
     {
         $sql = [];
         $sql[] = $this->nodeStorageQuery['start'];
@@ -133,7 +133,7 @@ class NodeStorageEntity implements IteratorAggregate
             $sql[] = implode(' ', $this->nodeStorageQuery['joins']);
         }
         if (!empty($this->nodeStorageQuery['where'])) {
-            $sql[] = 'WHERE ' . implode(' AND ', $this->nodeStorageQuery['where']);
+            $sql[] = 'WHERE ' . implode(" $connector ", $this->nodeStorageQuery['where']);
         }
         if (!empty($this->nodeStorageQuery['group'] ?? '')) {
             $sql[] = $this->nodeStorageQuery['group'];
@@ -542,6 +542,19 @@ class NodeStorageEntity implements IteratorAggregate
             'total_pages' => $totalPages,
             'total_items' => $total,
         ];
+    }
+
+    /**
+     * Randomizes the order of nodes in the query.
+     *
+     * @return self
+     */
+    public function pickRandom()
+    {
+        $this->nodeStorageQuery['order'] = !empty($this->nodeStorageQuery['order']) ?
+            $this->nodeStorageQuery['order'] . ', RAND()' :
+            'ORDER BY RAND()';
+        return $this;
     }
 
 }
