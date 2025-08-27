@@ -520,7 +520,7 @@ class NodeStorageEntity implements IteratorAggregate
     public function paginate(int $page): array
     {
         // Step 1: Get total rows
-        $this->nodeStorageQuery['start'] = "SELECT COUNT(nid) AS total FROM node_data";
+        $this->nodeStorageQuery['start'] = "SELECT COUNT(*) AS total FROM node_data";
         $limit = !empty($this->nodeStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->nodeStorageQuery['limit']) : 20;
         $this->nodeStorageQuery['limit'] = "";
         $this->execute();

@@ -18,6 +18,22 @@ fields:
     label: Site Name
     class:
       - form-control
+  site_phone:
+    name: site_phone
+    type: tel
+    required: true
+    id: sitePhone
+    label: Site Phone
+    class:
+      - form-control
+  site_address:
+    name: site_address
+    type: text
+    required: true
+    id: site_address
+    label: Site Adress
+    class:
+      - form-control
   # --- Admin Tab ---
   admin_username:
     name: admin_username
