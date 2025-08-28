@@ -5,6 +5,7 @@ namespace Simp\Core\lib\themes;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\components\request\Request;
 use Simp\Core\components\site\SiteManager;
+use Simp\Core\modules\config\ConfigManager;
 use Simp\Core\modules\menu\Menus;
 use Twig\Loader\ArrayLoader;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
@@ -112,10 +113,10 @@ class Theme extends SystemDirectory
         }
 
         $loader = new ArrayLoader($twig_views);
-        //$twig_options = Yaml::parseFile($this->schema_dir.DIRECTORY_SEPARATOR.'manifest.yml')['twig_setting'] ?? [];
+        $twig_configs = ConfigManager::config()->getConfigFile('development.setting');
         $twig_options = [
-            'debug' => true,
-            'cache' => false,
+            'debug' => $twig_configs->get('logger') !== 'yes',
+            'cache' => $twig_configs->get('caching')['twig_caching'] === 'yes' ? $this->var_dir . DIRECTORY_SEPARATOR . 'twig' : FALSE,
             'strict_variables' => FALSE,
             'charset' => 'UTF-8',
         ];
