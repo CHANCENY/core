@@ -9,6 +9,7 @@ use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\components\request\Request;
+use Simp\Core\extends\variables\src\Plugin\Variables;
 use Simp\Core\lib\app\App;
 use Simp\Core\lib\file\file_system\stream_wrapper\GlobalStreamWrapper;
 use Simp\Core\lib\file\file_system\stream_wrapper\ModuleStreamWrapper;
@@ -151,6 +152,7 @@ class InstallerValidator extends SystemDirectory
         }
         else {
             $_SESSION['install'] = false;
+            $this->bootVariables();
             App::runApp();
         }
 
@@ -169,6 +171,7 @@ class InstallerValidator extends SystemDirectory
         // Copy install.php to core directory
         $this->copyInstaller();
         $this->bootStorage();
+        $this->bootVariables();
 
         return 0;
     }
@@ -399,6 +402,27 @@ class InstallerValidator extends SystemDirectory
             }
             else {
                 @copy($file_full,$new_file);
+            }
+        }
+    }
+
+    protected function bootVariables(): void
+    {
+        // ModuleHandler getModules installed
+        $module_handler = ModuleHandler::factory();
+        $modules = $module_handler->getModules();
+
+        // Get module variables
+        if (Database::database()->isTableExist('environment_variables')) {
+            $query = Database::database()->con()->prepare("SELECT name FROM environment_variables");
+            $query->execute();
+            $variables = $query->fetchAll();
+            $variables = array_column($variables, 'name');
+
+            foreach ($variables as $variable) {
+                if (!defined($variable)) {
+                    define($variable, Variables::load($variable));
+                }
             }
         }
     }

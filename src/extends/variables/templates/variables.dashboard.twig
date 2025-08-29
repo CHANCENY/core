@@ -1,0 +1,71 @@
+{% extends 'default.view.admin_base' %}
+
+{% block body %}
+
+    <div>
+        <h2>System Variables</h2>
+    </div>
+    <div>
+        <button id="new-variable">Add Variable</button>
+    </div>
+
+    <div>
+        <table id="variables-table">
+            <thead>
+            <tr>
+                <th>Variable Name</th>
+                <th>Value</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if variables %}
+                {% for variable in variables %}
+                    <tr data-id="{{ variable.id }}">
+                        <td class="var-name">{{ variable.name }}</td>
+                        <td class="var-value">{{ variable.value }}</td>
+                        <td>
+                            <button class="edit-btn">Edit</button>
+                            <button class="delete-btn">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">No Variables</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal -->
+    <div id="variable-modal" class="modal" style="display:none;">
+        <div class="modal-content" style="background:#fff;padding:20px;border-radius:8px;max-width:500px;width:100%;margin:auto;">
+            <h3 id="modal-title">Add Variable</h3>
+            <input type="hidden" id="var-id">
+
+            <label>Variable Name:</label>
+            <input type="text" id="var-input" placeholder="Enter variable name" style="width:100%;margin:10px 0;padding:6px;">
+
+            <label>Variable Value:</label>
+            <textarea id="var-value-input" placeholder="Enter variable value" rows="4" style="width:100%;margin:10px 0;padding:6px;"></textarea>
+
+            <div style="margin-top:10px;text-align:right;">
+                <button id="save-variable">Save</button>
+                <button id="cancel-variable">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Simple modal overlay */
+        .modal {
+            position: fixed;
+            left:0; top:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5);
+            display:flex; align-items:center; justify-content:center;
+            z-index:9999;
+        }
+    </style>
+{% endblock %}
