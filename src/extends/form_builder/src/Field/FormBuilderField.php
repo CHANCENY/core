@@ -72,6 +72,15 @@ class FormBuilderField extends FieldBase
 
         $form_builder_handler = FormConfigManager::factory()->getForm($this->field['settings']['show_as']);
 
+        $request = Service::serviceManager()->request->server->get('ROUTE_ATTRIBUTES')['route'] ?? null;
+        if ($request) {
+            $node = $request->getOptions();
+            $nid = !empty($node['node']) ? $node['node'] : null;
+            if ($nid) {
+                $this->node = Node::load($nid);
+            }
+        }
+
         $this->internal_form = null;
         if (!empty($form_builder_handler)) {
             foreach ($form_builder_handler['fields'] as $field_name => $field) {
@@ -106,6 +115,8 @@ class FormBuilderField extends FieldBase
             }
             $this->internal_form = new FormBuilder(new SubmissionFormHandler($form_builder_handler));
         }
+
+
 
 
         if ($request_method === 'POST') {
