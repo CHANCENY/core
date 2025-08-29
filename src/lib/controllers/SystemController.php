@@ -870,9 +870,8 @@ class SystemController
                 }
             }
 
-
             $entity = $node->getEntityArray();
-            $options['route']->route_title = $node->getTitle();
+            $route->route_title = $node->getTitle();
             $definitions = [];
             foreach ($entity['storage'] as $field) {
                 $name = substr($field,6,strlen($field));
