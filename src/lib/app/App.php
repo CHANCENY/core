@@ -55,6 +55,9 @@ class App
             $this->optionRequestHandler();
         }
 
+        // Set cors headers
+        $this->setHeadersForCors();
+
         $development = ConfigManager::config()->getConfigFile('development.setting');
         if ($development instanceof ConfigReadOnly) {
 
@@ -291,7 +294,7 @@ class App
         // Optional: Cache preflight for 1 day
        // header("Access-Control-Max-Age: 86400");
 
-        http_response_code(201);
+        http_response_code(200);
         exit();
     }
 
@@ -304,6 +307,22 @@ class App
            MailQueueActivity::factory()->listeners($request,$route, $this->response);
            DatabaseActivity::factory()->listeners($request,$route, $this->response);
        }catch (Throwable $exception){}
+    }
+
+    private function setHeadersForCors(): void
+    {
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+        if ($origin) {
+            header("Access-Control-Allow-Origin: $origin");
+            header("Vary: Origin");
+            header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+
+            // Dynamically reflect back requested headers
+            $requestedHeaders = $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'] ?? '';
+            if ($requestedHeaders) {
+                header("Access-Control-Allow-Headers: $requestedHeaders");
+            }
+        }
     }
 
 }
