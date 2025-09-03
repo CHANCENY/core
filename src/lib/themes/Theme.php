@@ -115,8 +115,8 @@ class Theme extends SystemDirectory
         $loader = new ArrayLoader($twig_views);
         $twig_configs = ConfigManager::config()->getConfigFile('development.setting');
         $twig_options = [
-            'debug' => $twig_configs->get('logger') !== 'yes',
-            'cache' => $twig_configs->get('caching')['twig_caching'] === 'yes' ? $this->var_dir . DIRECTORY_SEPARATOR . 'twig' : FALSE,
+            'debug' => $twig_configs?->get('logger') !== 'yes',
+            'cache' => $twig_configs?->get('caching')['twig_caching'] === 'yes' ? $this->var_dir . DIRECTORY_SEPARATOR . 'twig' : FALSE,
             'strict_variables' => FALSE,
             'charset' => 'UTF-8',
         ];
