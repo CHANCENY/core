@@ -281,24 +281,6 @@ class InstallerValidator extends SystemDirectory
      */
     public function cacheDefaults(): void
     {
-        // Cache services
-        $service_file = $this->webroot_dir . DIRECTORY_SEPARATOR . 'core'. DIRECTORY_SEPARATOR .'defaults' . DIRECTORY_SEPARATOR . 'services'
-            . DIRECTORY_SEPARATOR . 'default.services.yml';
-        $services_custom = $this->webroot_dir . DIRECTORY_SEPARATOR . 'services' . DIRECTORY_SEPARATOR . 'custom.services.yml';
-        $services = [];
-        if (file_exists($service_file)) {
-            $services = Yaml::parseFile($service_file) ?? [];
-        }
-        if (file_exists($services_custom)) {
-            $services = array_merge($services, Yaml::parseFile($services_custom) ?? []);
-        }
-
-        foreach ($services as $key=>$service) {
-            $services[$key] = base64_encode($service);
-        }
-
-        Caching::init()->set('system_services', $services);
-
         $setting_root = $this->webroot_dir . DIRECTORY_SEPARATOR . 'core'.DIRECTORY_SEPARATOR .'defaults';
         $files = array_diff(scandir($setting_root) ?? [], ['..', '.']);
         $default_keys = [];
@@ -427,6 +409,21 @@ class InstallerValidator extends SystemDirectory
                 }
             }
         }
+
+        $custom_services = $module_handler->getServicesProvider();
+        $defaults_services = [
+            'request' => Request::createFromGlobals(),
+            'theme.manager' => new ThemeManager(),
+            'module.handler' => $module_handler,
+            'system.directory' => new SystemDirectory(),
+            'database' => Database::database(),
+            'connection' => Database::database()->con(),
+        ];
+
+        $merged_services = array_merge($defaults_services, $custom_services);
+
+        $container = new \DI\Container($merged_services);
+        define('DI_CONTAINER_SERVICES_TAGS',$container);
     }
 
 }

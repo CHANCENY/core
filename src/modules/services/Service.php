@@ -2,95 +2,73 @@
 
 namespace Simp\Core\modules\services;
 
-use ReflectionClass;
-use Phpfastcache\Exceptions\PhpfastcacheCoreException;
-use Phpfastcache\Exceptions\PhpfastcacheDriverException;
-use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
-use Phpfastcache\Exceptions\PhpfastcacheLogicException;
-use ReflectionException;
-use Simp\Core\components\request\Request;
-use Simp\Core\lib\memory\cache\Caching;
+use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 
 /**
  * This class supports arbitrary dynamic properties via __get() and __set().
  */
 
-/**
- * @property mixed $anyProperty
- * @property Request|null $request
- */
 class Service
 {
-    protected array $services = [];
-
-    /**
-     * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheLogicException
-     * @throws PhpfastcacheDriverException
-     * @throws PhpfastcacheInvalidArgumentException
-     */
+    protected Container $container;
+    protected array $arguments = [];
     public function __construct()
     {
-        $services = Caching::init()->get('system_services') ?? [];
-        if (!empty($services)) {
-            $this->services = $services;
-        }
+        $this->container = DI_CONTAINER_SERVICES_TAGS;
     }
 
     /**
-     * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheLogicException
-     * @throws PhpfastcacheDriverException
-     * @throws PhpfastcacheInvalidArgumentException
-     * @throws ReflectionException
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function __get($name)
     {
-        $service = $this->services[$name] ?? null;
-        if ($service) {
-            $service = base64_decode($service);
-            $reflection = new ReflectionClass($service);
-            if (!$reflection->getConstructor()) {
-                return $reflection->newInstance();
-            }
-
-            $create_function = $service.'::create';
-            if (function_exists($create_function)) {
-                $parameters = $create_function();
-                return $reflection->newInstanceArgs($parameters);
-            }
-            return $reflection->newInstance();
+        if ($this->container->has($name)) {
+            return $this->container->get($name);
         }
-        return null;
 
+        // try doing DI autowiring
+        return $this->container->make($name,$this->arguments);
     }
 
+
     /**
-     * @throws PhpfastcacheCoreException
-     * @throws ReflectionException
-     * @throws PhpfastcacheLogicException
-     * @throws PhpfastcacheDriverException
-     * @throws PhpfastcacheInvalidArgumentException
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function __call(string $name, array $arguments)
     {
+        $this->arguments = $arguments;
         return $this->__get($name);
     }
 
     /**
-     * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheLogicException
-     * @throws ReflectionException
-     * @throws PhpfastcacheDriverException
-     * @throws PhpfastcacheInvalidArgumentException
+     * @param string $service_name
+     * @param array $arguments
+     * @return mixed
+     * @throws DependencyException
+     * @throws NotFoundException
      */
-    public function service(string $service_name)
+    public function service(string $service_name, array $arguments = []): mixed
     {
+        $this->arguments = $arguments;
         return $this->__get($service_name);
     }
 
     public static function serviceManager(): Service
     {
         return new self();
+    }
+
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public static function get(string $service_name, array $arguments = [])
+    {
+        $object = new static();
+        return $object->service($service_name, $arguments);
     }
 }

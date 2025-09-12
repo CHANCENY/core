@@ -304,4 +304,20 @@ class ModuleHandler extends SystemDirectory
         return $commands;
     }
 
+    public function getServicesProvider(): array
+    {
+        $services = array();
+        foreach($this->modules as $name=>$module) {
+            $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
+            if (file_exists($module_installer) && $module['enabled'] === true) {
+                 require_once $module_installer;
+                  $service_install = $name . '_service_install';
+                  if (\function_exists($service_install)) {
+                    $services = \array_merge($services, $service_install());
+                  }
+            }
+        }
+        return $services;
+    }
+
 }
