@@ -223,3 +223,13 @@ function system_twig_extension_install(): array
 {
     return [];
 }
+
+function system_command_install(): array
+{
+    return [
+        new \Simp\Core\extends\system\src\Plugin\SystemCommand(),
+        new \Simp\Core\extends\system\src\Plugin\SystemCoreRebuildCommand(),
+        new \Simp\Core\extends\system\src\Plugin\SystemRebuildTypeCommand(),
+        new \Simp\Core\extends\system\src\Plugin\SystemRebuildAllCommand(),
+    ];
+}

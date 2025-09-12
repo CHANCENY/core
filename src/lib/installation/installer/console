@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . "/../../vendor/autoload.php";
+
+use Simp\Core\lib\app\App;
+use Simp\Core\modules\console\Console;
+
+// before everything else check if a script is running on cli
+$isCli = PHP_SAPI === 'cli' || defined('STDIN');
+
+if (!$isCli) {
+    echo "This script can only be run from the command line.";
+    exit;
+}
+
+
+try{
+    // Initialize the overall application
+    App::consoleApp();
+
+    // Run the console application
+    $application = Console::application();
+    $application->run();
+
+}catch (Throwable $e){
+    echo PHP_EOL;
+
+    echo "Error: ";
+    echo $e->getMessage();
+
+    echo PHP_EOL;
+}
+
+
+

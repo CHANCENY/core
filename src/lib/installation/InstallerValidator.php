@@ -172,7 +172,6 @@ class InstallerValidator extends SystemDirectory
         $this->copyInstaller();
         $this->bootStorage();
         $this->bootVariables();
-
         return 0;
     }
 
@@ -209,6 +208,7 @@ class InstallerValidator extends SystemDirectory
             'cron.php',
             'simp.php',
             'cron_executor.php',
+            'console'
         ];
 
         $destinationDir = $this->webroot_dir . DIRECTORY_SEPARATOR . 'core';
@@ -222,6 +222,7 @@ class InstallerValidator extends SystemDirectory
                 $flag[] = false;
             }
         }
+
         if (in_array(true, $flag) && !in_array(false, $flag)) {
             return;
         }
@@ -240,6 +241,7 @@ class InstallerValidator extends SystemDirectory
 
             copy($source, $destination);
         }
+
     }
 
     protected function developerCustomRoutes(): array

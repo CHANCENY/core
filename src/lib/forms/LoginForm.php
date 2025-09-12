@@ -7,6 +7,7 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Simp\Core\lib\routes\Route;
 use Simp\Core\modules\auth\AuthenticationSystem;
 use Simp\Core\modules\auth\normal_auth\AuthUser;
 use Simp\Core\modules\messager\Messager;
@@ -69,7 +70,7 @@ class LoginForm extends FormBase
                $auth->finalizeAuthenticate();
                $user = $auth->getUser();
                Messager::toast()->addMessage("Welcome back {$user->getName()}!");
-               $redirect = new RedirectResponse('/');
+               $redirect = new RedirectResponse(Route::url('system.account.view',['uid'=>$user->getUid()]));
                $redirect->send();
            }
            else {

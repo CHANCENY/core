@@ -288,4 +288,20 @@ class ModuleHandler extends SystemDirectory
 
     }
 
+    public function getConsoleCommands(): array
+    {
+        $commands = array();
+        foreach($this->modules as $name=>$module) {
+            $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
+            if (file_exists($module_installer) && $module['enabled'] === true) {
+                 require_once $module_installer;
+                  $command_install = $name . '_command_install';
+                  if (\function_exists($command_install)) {
+                    $commands = \array_merge($commands, $command_install());
+                  }
+            }
+        }
+        return $commands;
+    }
+
 }
