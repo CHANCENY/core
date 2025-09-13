@@ -224,4 +224,9 @@ class File
     {
         return json_encode($this->toArray(),JSON_PRETTY_PRINT);
     }
+
+    public static function fileStorage(): FileStorageEntity
+    {
+        return new FileStorageEntity();
+    }
 }

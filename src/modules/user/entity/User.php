@@ -396,4 +396,9 @@ class User
     {
         return new RoleManager($this->uid);
     }
+
+    public static function userStorage(): UserStorageEntity
+    {
+        return new UserStorageEntity();
+    }
 }
