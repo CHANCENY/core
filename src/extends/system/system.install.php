@@ -151,10 +151,10 @@ function system_menu_install(array &$menus): void
 
         foreach ($content_types_list as $type=>$content_type) {
 
-            $type_route = Route::fromRouteName('system.structure.content.form')->toArray();
-            $type_route['path'] = Route::url('system.structure.content.form',['content_name'=>$type]);
+            $type_route = Route::fromRouteName('system.structure.content-type.manage')->toArray();
+            $type_route['path'] = Route::url('system.structure.content-type.manage',['machine_name'=>$type]);
             $type_route['title'] = $content_type['name'] ?? $type;
-            $content_types->addChild(new Menu(['route_id' => 'system.structure.content.form', 'route_data' => $type_route]));
+            $content_types->addChild(new Menu(['route_id' => 'system.structure.content-type.manage', 'route_data' => $type_route]));
 
         }
 

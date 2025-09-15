@@ -168,9 +168,8 @@ function page_builder_template_install(): array {
 function page_builder_menu_install(array &$menus): void
 {
     $page_builder_menu = new \Simp\Core\modules\menu\Menu('page_builder.list');
-    $menus['page_builder.dashboard'] = $page_builder_menu;
-
     $page_builder_menu->addChild(new \Simp\Core\modules\menu\Menu('page_builder.create'));
+    $menus['system.config']->addChild($page_builder_menu);
 }
 
 function page_builder_field_install(): array

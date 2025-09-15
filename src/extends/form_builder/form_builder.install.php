@@ -203,8 +203,6 @@ function form_builder_menu_install(array &$menus): void
 
     if ($current_user->isIsAdmin()){
         $menu_form_builder = new Menu('form_builder.dashboard');
-        $menus['system.form_builder.dashboard'] = &$menu_form_builder;
-
         $list_menu = new Menu('form_builder.list');
 
         $forms = FormConfigManager::factory()->getForms();
@@ -232,6 +230,8 @@ function form_builder_menu_install(array &$menus): void
             $list_menu->addChild($ch_menu);
         }
         $menu_form_builder->addChild($list_menu);
+
+        $menus['system.config']->addChild($menu_form_builder);
     }
    // dd($menus);
 
