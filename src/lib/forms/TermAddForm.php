@@ -23,7 +23,7 @@ class TermAddForm extends FormBase
 
     public function buildForm(array $form): array
     {
-        $term = Term::factory()->getTerm(Service::serviceManager()->request->get('tid',0));
+        $term = Term::factory()->getTerm(Service::get('request')->get('tid',0));
         $form['title'] = [
             'type' => 'text',
             'label' => 'Title',
@@ -62,8 +62,8 @@ class TermAddForm extends FormBase
      */
     public function submitForm(array $form): void
     {
-        $vid = Service::serviceManager()->request->get('name');
-        $tid = Service::serviceManager()->request->get('tid');
+        $vid = Service::get('request')->get('name');
+        $tid = Service::get('request')->get('tid');
 
         if (!empty($vid) && empty($tid)) {
             if (Term::factory()->create($vid, $form['title']->getValue())) {

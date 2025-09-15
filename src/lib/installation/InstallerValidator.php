@@ -412,7 +412,6 @@ class InstallerValidator extends SystemDirectory
 
         $custom_services = $module_handler->getServicesProvider();
         $defaults_services = [
-            'request' => Request::createFromGlobals(),
             'theme.manager' => new ThemeManager(),
             'module.handler' => $module_handler,
             'system.directory' => new SystemDirectory(),

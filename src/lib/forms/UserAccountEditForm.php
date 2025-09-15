@@ -28,7 +28,7 @@ class UserAccountEditForm extends UserAccountForm
     public function __construct()
     {
         parent::__construct();
-        $this->user = User::load(Service::serviceManager()->request->get('uid'));
+        $this->user = User::load(Service::get('request')->get('uid'));
 
     }
 

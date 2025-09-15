@@ -71,7 +71,7 @@ class Theme extends SystemDirectory
         }
 
         /**@var Request $request**/
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $menus = Menus::menus();
 
         $assets_manager = new AssetsManager();

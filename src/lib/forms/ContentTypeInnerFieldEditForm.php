@@ -32,7 +32,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
 
     public function buildForm(array $form): array
     {
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $name = $request->get('machine_name');
         $field_name = $request->get('parent_name');
 
@@ -209,7 +209,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
      */
     public function submitForm(array $form): void
     {
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         if ($this->validated) {
             $data = array_map(function ($item) {
                 return $item->getValue();

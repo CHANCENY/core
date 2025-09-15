@@ -355,7 +355,7 @@ function get_field_type_info(string $type = '', $index = 0, array $field = []): 
 
     $handler = FieldManager::fieldManager()->getFieldBuilderHandler($type);
     if ($handler instanceof FieldBuilderInterface) {
-        return $handler->build(Service::serviceManager()->request,$type, $options);
+        return $handler->build(Service::get('request'),$type, $options);
     }
     return '';
 }

@@ -128,7 +128,7 @@ class Route
         $controller = $controller->newInstance();
         $method = $route->getControllerMethod();
         $options = [
-            'request'=>Service::serviceManager()->request,
+            'request'=> $controller_method_arguments['request'] ?? Service::get('request'),
             'route_name' => $route->route_id,
             'options' => $controller_method_arguments
 
@@ -180,7 +180,7 @@ class Route
 
                 $alias = AutoPathAlias::createRouteId($options['nid']);
                 $options['is_alias'] = true;
-                $found = url($alias, $options, $params);
+                $found = self::url($alias, $options, $params);
                 if (!empty($found)) {
                     return $found;
                 }
@@ -227,6 +227,20 @@ class Route
             }
         }
         return implode('/', $segments);
+    }
+
+    /**
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
+    public static function getRoutes(): array
+    {
+        $routes = Caching::init()->get('system.routes.keys');
+         return array_map(function ($item) {
+            return Caching::init()?->get($item);
+        },$routes);
     }
 
 }

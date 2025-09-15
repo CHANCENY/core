@@ -18,7 +18,7 @@ class DefaultTokenResolver implements ResolverInterface
     protected Request $request;
     public function __construct()
     {
-        $this->request = Service::serviceManager()->request;
+        $this->request = Service::get('request');
     }
 
     /**

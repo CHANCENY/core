@@ -72,7 +72,7 @@ class FormBuilderField extends FieldBase
 
         $form_builder_handler = FormConfigManager::factory()->getForm($this->field['settings']['show_as']);
 
-        $request = Service::serviceManager()->request->server->get('ROUTE_ATTRIBUTES')['route'] ?? null;
+        $request = Service::get('request')->server->get('ROUTE_ATTRIBUTES')['route'] ?? null;
         if ($request) {
             $node = $request->getOptions();
             $nid = !empty($node['node']) ? $node['node'] : null;
@@ -88,11 +88,11 @@ class FormBuilderField extends FieldBase
                     unset($form_builder_handler[$field_name]);
                 }
             }
-            if (Service::serviceManager()->request->get('nid')) {
+            if (Service::get('request')->get('nid')) {
                 $form_builder_handler['fields']['nid'] = [
                     'type' => 'hidden',
                     'name' => 'nid',
-                    'default_value' => Service::serviceManager()->request->get('nid'),
+                    'default_value' => Service::get('request')->get('nid'),
                     'label' => '',
                     'class' => [],
                     'id' => '',
@@ -111,7 +111,7 @@ class FormBuilderField extends FieldBase
                     'options' => [],
                     'handler' => \Simp\Core\components\basic_fields\BasicField::class
                 ];
-                $this->node = Node::load(Service::serviceManager()->request->get('nid'));
+                $this->node = Node::load(Service::get('request')->get('nid'));
             }
             $this->internal_form = new FormBuilder(new SubmissionFormHandler($form_builder_handler));
         }

@@ -147,7 +147,7 @@ class GalleryField extends FieldBase
 
         $id = $this->getId();
         $gallery = Gallery::factory();
-        $images = $gallery->getImagesByPage(Service::serviceManager()->request->get('page', 1), 5);
+        $images = $gallery->getImagesByPage(Service::get('request')->get('page', 1), 5);
 
         $module_handler = ModuleHandler::factory();
         $module_handler->attachLibrary('image', 'image.gallery.library');

@@ -1,6 +1,6 @@
 <?php
 
-namespace Simp\Core\modules\structures\content_types\entity;
+namespace Simp\Core\modules\structures\taxonomy;
 
 use Simp\Core\modules\database\Database;
 use IteratorAggregate;
@@ -8,16 +8,16 @@ use ArrayIterator;
 use Traversable;
 
 /**
- * Class NodeStorageEntity
+ * Class TermStorageEntity
  *
- * Provides functionality to build SQL queries for handling node storage.
+ * Provides functionality to build SQL queries for handling Term storage.
  * This class allows dynamic query construction by adding joins, where clauses,
  * order by conditions, limits, and offsets.
  */
-class NodeStorageEntity implements IteratorAggregate
+class TermStorage implements IteratorAggregate
 {
     /**
-     * @var Node[] Entities resulting from query execution.
+     * @var Term[] Entities resulting from query execution.
      */
     protected array $entities = [];
 
@@ -31,7 +31,7 @@ class NodeStorageEntity implements IteratorAggregate
     /**
      * @var array Query parts.
      */
-    protected array $nodeStorageQuery = [
+    protected array $termStorageQuery = [
         'start' => '',
         'joins' => [],
         'where' => [],
@@ -48,15 +48,10 @@ class NodeStorageEntity implements IteratorAggregate
     /**
      * Constructor method to initialize the object with the given bundle.
      *
-     * @param string $bundle The bundle name used in the query initialization.
      */
-    public function __construct(string $bundle)
+    public function __construct()
     {
-        $this->nodeStorageQuery['start'] = "SELECT node_data.* FROM node_data";
-        if (!empty($bundle)) {
-            $this->nodeStorageQuery['where'][] = "bundle = :bundle";
-            $this->parameters['bundle'] = $bundle;
-        }
+        $this->termStorageQuery['start'] = "SELECT term_data.* FROM term_data";
 
     }
 
@@ -69,7 +64,7 @@ class NodeStorageEntity implements IteratorAggregate
      */
     public function addJoin(string $table, string $alias, string $condition): self
     {
-        $this->nodeStorageQuery['joins'][] = "JOIN {$table} {$alias} ON {$condition}";
+        $this->termStorageQuery['joins'][] = "JOIN {$table} {$alias} ON {$condition}";
         return $this;
     }
 
@@ -81,7 +76,7 @@ class NodeStorageEntity implements IteratorAggregate
      */
     public function addWhere(string $condition, array $params = []): self
     {
-        $this->nodeStorageQuery['where'][] = $condition;
+        $this->termStorageQuery['where'][] = $condition;
         foreach ($params as $key => $value) {
             $this->parameters[$key] = $value;
         }
@@ -96,7 +91,7 @@ class NodeStorageEntity implements IteratorAggregate
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
-        $this->nodeStorageQuery['order'] = "ORDER BY {$column} {$direction}";
+        $this->termStorageQuery['order'] = "ORDER BY {$column} {$direction}";
         return $this;
     }
 
@@ -107,7 +102,7 @@ class NodeStorageEntity implements IteratorAggregate
      */
     public function limit(int $limit): self
     {
-        $this->nodeStorageQuery['limit'] = "LIMIT {$limit}";
+        $this->termStorageQuery['limit'] = "LIMIT {$limit}";
         return $this;
     }
 
@@ -118,38 +113,39 @@ class NodeStorageEntity implements IteratorAggregate
      */
     public function offset(int $offset): self
     {
-        $this->nodeStorageQuery['offset'] = "OFFSET {$offset}";
+        $this->termStorageQuery['offset'] = "OFFSET {$offset}";
         return $this;
     }
 
     /**
-     * Executes the built query and hydrates Node entities.
+     * Executes the built query and hydrates Term entities.
      *
+     * @param string $connector
      * @return self
      */
     public function execute(string $connector = 'AND'): self
     {
         $sql = [];
-        $sql[] = $this->nodeStorageQuery['start'];
+        $sql[] = $this->termStorageQuery['start'];
 
-        if (!empty($this->nodeStorageQuery['joins'])) {
-            $sql[] = implode(' ', $this->nodeStorageQuery['joins']);
+        if (!empty($this->termStorageQuery['joins'])) {
+            $sql[] = implode(' ', $this->termStorageQuery['joins']);
         }
-        if (!empty($this->nodeStorageQuery['where'])) {
-            $sql[] = 'WHERE ' . implode(" $connector ", $this->nodeStorageQuery['where']);
+        if (!empty($this->termStorageQuery['where'])) {
+            $sql[] = 'WHERE ' . implode(" $connector ", $this->termStorageQuery['where']);
         }
-        if (!empty($this->nodeStorageQuery['group'] ?? '')) {
-            $sql[] = $this->nodeStorageQuery['group'];
+        if (!empty($this->termStorageQuery['group'] ?? '')) {
+            $sql[] = $this->termStorageQuery['group'];
         }
-        if (!empty($this->nodeStorageQuery['order'])) {
-            $sql[] = $this->nodeStorageQuery['order'];
+        if (!empty($this->termStorageQuery['order'])) {
+            $sql[] = $this->termStorageQuery['order'];
         }
-        if (!empty($this->nodeStorageQuery['limit'])) {
+        if (!empty($this->termStorageQuery['limit'])) {
             // ensure this is like "LIMIT 3", not a placeholder
-            $sql[] = $this->nodeStorageQuery['limit'];
+            $sql[] = $this->termStorageQuery['limit'];
         }
-        if (!empty($this->nodeStorageQuery['offset'])) {
-            $sql[] = $this->nodeStorageQuery['offset'];
+        if (!empty($this->termStorageQuery['offset'])) {
+            $sql[] = $this->termStorageQuery['offset'];
         }
 
         $this->sql = implode(' ', $sql);
@@ -181,18 +177,7 @@ class NodeStorageEntity implements IteratorAggregate
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         $this->results = $rows;
-
-        $expected_columns = ['title','bundle','uid', 'nid', 'created', 'updated','lang', 'status'];
-        $this->entities = array_filter(array_map(function ($row) use ($expected_columns) {
-            $keys = array_keys($row);
-            $diff = array_diff($keys, $expected_columns);
-            if (!empty($diff)) {
-                return null;
-            }
-            return new Node(...$row);
-        },$rows));
-
-
+        $this->entities = $rows;
         return $this;
     }
 
@@ -200,7 +185,7 @@ class NodeStorageEntity implements IteratorAggregate
     /**
      * Returns all entities.
      *
-     * @return Node[]
+     * @return Term[]
      */
     public function all(): array
     {
@@ -210,9 +195,9 @@ class NodeStorageEntity implements IteratorAggregate
     /**
      * Returns the first entity or null.
      *
-     * @return Node|null
+     * @return Term|null
      */
-    public function first(): ?Node
+    public function first(): ?Term
     {
         return $this->entities[0] ?? null;
     }
@@ -220,9 +205,9 @@ class NodeStorageEntity implements IteratorAggregate
     /**
      * Returns the last entity or null.
      *
-     * @return Node|null
+     * @return Term|null
      */
-    public function last(): ?Node
+    public function last(): ?Term
     {
         return !empty($this->entities) ? end($this->entities) : null;
     }
@@ -266,14 +251,14 @@ class NodeStorageEntity implements IteratorAggregate
     {
         if ($fromDatabase) {
             $sql = [];
-            $sql[] = "SELECT COUNT(*) as cnt FROM node_data";
+            $sql[] = "SELECT COUNT(*) as cnt FROM term_data";
 
-            if (!empty($this->nodeStorageQuery['joins'])) {
-                $sql[] = implode(' ', $this->nodeStorageQuery['joins']);
+            if (!empty($this->termStorageQuery['joins'])) {
+                $sql[] = implode(' ', $this->termStorageQuery['joins']);
             }
 
-            if (!empty($this->nodeStorageQuery['where'])) {
-                $sql[] = "WHERE " . implode(" AND ", $this->nodeStorageQuery['where']);
+            if (!empty($this->termStorageQuery['where'])) {
+                $sql[] = "WHERE " . implode(" AND ", $this->termStorageQuery['where']);
             }
 
             $query = implode(' ', $sql);
@@ -299,11 +284,11 @@ class NodeStorageEntity implements IteratorAggregate
         $values = [];
 
         foreach ($this->entities as $entity) {
-            // If Node is an object with properties
+            // If Term is an object with properties
             if (is_object($entity) && isset($entity->$column)) {
                 $values[] = $entity->$column;
             }
-            // If Node is an array (fallback)
+            // If Term is an array (fallback)
             elseif (is_array($entity) && array_key_exists($column, $entity)) {
                 $values[] = $entity[$column];
             }
@@ -316,18 +301,18 @@ class NodeStorageEntity implements IteratorAggregate
      * Re-index the loaded entities by a given column/property.
      *
      * @param string $column The column/property to use as the array key.
-     * @return array An associative array with the column value as key and Node as value.
+     * @return array An associative array with the column value as key and Term as value.
      */
     public function keyBy(string $column): array
     {
         $result = [];
 
         foreach ($this->entities as $entity) {
-            // If Node is an object with properties
+            // If Term is an object with properties
             if (is_object($entity) && isset($entity->$column)) {
                 $result[$entity->$column] = $entity;
             }
-            // If Node is an array (fallback)
+            // If Term is an array (fallback)
             elseif (is_array($entity) && array_key_exists($column, $entity)) {
                 $result[$entity[$column]] = $entity;
             }
@@ -339,7 +324,7 @@ class NodeStorageEntity implements IteratorAggregate
     /**
      * Applies a callback to each loaded entity and returns the results.
      *
-     * @param callable $callback A function that receives a Node and returns a transformed value.
+     * @param callable $callback A function that receives a Term and returns a transformed value.
      * @return array An array of transformed results.
      */
     public function map(callable $callback): array
@@ -354,7 +339,7 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes that are published.
+     * Filter Terms that are published.
      *
      * @return self
      */
@@ -364,7 +349,7 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes by author ID.
+     * Filter Terms by author ID.
      *
      * @param int $uid The user ID of the author.
      * @return self
@@ -375,7 +360,7 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes by a specific content type (bundle).
+     * Filter Terms by a specific content type (bundle).
      *
      * @param string $bundle
      * @return self
@@ -386,7 +371,7 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes created after a certain timestamp.
+     * Filter Terms created after a certain timestamp.
      *
      * @param int $timestamp
      * @return self
@@ -397,7 +382,7 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes created before a certain timestamp.
+     * Filter Terms created before a certain timestamp.
      *
      * @param int $timestamp
      * @return self
@@ -408,7 +393,7 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes created within the last given number of days.
+     * Filter Terms created within the last given number of days.
      *
      * @param int $days Number of days to look back. Default is 7.
      * @return self
@@ -420,9 +405,9 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes updated after a certain timestamp.
+     * Filter Terms updated after a certain timestamp.
      *
-     * @param int $timestamp UNIX timestamp to filter nodes updated after.
+     * @param int $timestamp UNIX timestamp to filter Terms updated after.
      * @return self
      */
     public function updatedAfter(int $timestamp): self
@@ -431,9 +416,9 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes updated before a certain timestamp.
+     * Filter Terms updated before a certain timestamp.
      *
-     * @param int $timestamp UNIX timestamp to filter nodes updated before.
+     * @param int $timestamp UNIX timestamp to filter Terms updated before.
      * @return self
      */
     public function updatedBefore(int $timestamp): self
@@ -442,10 +427,10 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Filter nodes by a taxonomy term (category, tag, etc.).
+     * Filter Terms by a taxonomy term (category, tag, etc.).
      *
-     * @param int $termId The taxonomy term ID to filter nodes by.
-     * @param string $field The field in node table that stores term reference. Defaults to 'tid'.
+     * @param int $termId The taxonomy term ID to filter Terms by.
+     * @param string $field The field in Term table that stores term reference. Defaults to 'tid'.
      * @return self
      */
     public function byTerm(int $termId, string $field = 'tid'): self
@@ -465,8 +450,8 @@ class NodeStorageEntity implements IteratorAggregate
     {
         usort($this->entities, function ($a, $b) use ($field, $direction) {
 
-            /**@var Node $a **/
-            /**@var Node $b **/
+            /**@var Term $a **/
+            /**@var Term $b **/
 
             $a_data = [];
             $b_data = [];
@@ -500,17 +485,17 @@ class NodeStorageEntity implements IteratorAggregate
         // Alias for the subquery
         $alias = $table . '_cnt';
 
-        // Build subquery to count the field per node, with proper alias
+        // Build subquery to count the field per Term, with proper alias
         $subquery = "(SELECT nid, COUNT($field) AS field_count FROM $table GROUP BY nid) AS $alias";
 
         // Add LEFT JOIN with the subquery
-        $this->nodeStorageQuery['joins'][] = "LEFT JOIN $subquery ON $alias.nid = node_data.nid";
+        $this->termStorageQuery['joins'][] = "LEFT JOIN $subquery ON $alias.nid = term_data.nid";
 
-        // Update SELECT to include all node_data fields plus the count from subquery
-        $this->nodeStorageQuery['start'] = "SELECT node_data.*, $alias.field_count FROM node_data";
+        // Update SELECT to include all term_data fields plus the count from subquery
+        $this->termStorageQuery['start'] = "SELECT term_data.*, $alias.field_count FROM term_data";
 
         // Order by the counted field
-        $this->nodeStorageQuery['order'] = "ORDER BY $alias.field_count $direction";
+        $this->termStorageQuery['order'] = "ORDER BY $alias.field_count $direction";
 
         return $this;
     }
@@ -523,9 +508,9 @@ class NodeStorageEntity implements IteratorAggregate
     public function paginate(int $page): array
     {
         // Step 1: Get total rows
-        $this->nodeStorageQuery['start'] = "SELECT COUNT(*) AS total FROM node_data";
-        $limit = !empty($this->nodeStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->nodeStorageQuery['limit']) : 20;
-        $this->nodeStorageQuery['limit'] = "";
+        $this->termStorageQuery['start'] = "SELECT COUNT(*) AS total FROM term_data";
+        $limit = !empty($this->termStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->termStorageQuery['limit']) : 20;
+        $this->termStorageQuery['limit'] = "";
         $this->execute();
 
         $total = $this->results[0]['total'] ?? 0;
@@ -548,14 +533,14 @@ class NodeStorageEntity implements IteratorAggregate
     }
 
     /**
-     * Randomizes the order of nodes in the query.
+     * Randomizes the order of Terms in the query.
      *
      * @return self
      */
     public function pickRandom()
     {
-        $this->nodeStorageQuery['order'] = !empty($this->nodeStorageQuery['order']) ?
-            $this->nodeStorageQuery['order'] . ', RAND()' :
+        $this->termStorageQuery['order'] = !empty($this->termStorageQuery['order']) ?
+            $this->termStorageQuery['order'] . ', RAND()' :
             'ORDER BY RAND()';
         return $this;
     }

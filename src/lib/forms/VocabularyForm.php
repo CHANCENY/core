@@ -26,9 +26,9 @@ class VocabularyForm extends FormBase
     public function buildForm(array $form): array
     {
         $taxonomy = [];
-        $name = Service::serviceManager()->request->get('name');
+        $name = Service::get('request')->get('name');
         if($name) {
-            $taxonomy = VocabularyManager::factory()->getVocabulary($name)['label'] ?? Service::serviceManager()->request->get('name');
+            $taxonomy = VocabularyManager::factory()->getVocabulary($name)['label'] ?? Service::get('request')->get('name');
         }
         $form['title'] = [
             'type' => 'text',
@@ -37,7 +37,7 @@ class VocabularyForm extends FormBase
             'id' => 'title',
             'class' =>[],
             'required' => true,
-            'default_value' => Service::serviceManager()->request->get('name', null)
+            'default_value' => Service::get('request')->get('name', null)
         ];
         $form['submit'] = [
             'type' => 'submit',
@@ -68,7 +68,7 @@ class VocabularyForm extends FormBase
     {
         if ($this->validated) {
 
-            $name = Service::serviceManager()->request->get('name');
+            $name = Service::get('request')->get('name');
 
             if (empty($name)) {
 

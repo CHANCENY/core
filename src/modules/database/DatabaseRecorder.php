@@ -44,7 +44,7 @@ class DatabaseRecorder
         try {
             // Dependency on Service Manager is kept for now.
             // Ideally, the Request object should be passed or available via a request context service.
-            $request = Service::serviceManager()->request;
+            $request = Service::get('request');
             if ($request instanceof Request) {
                 $uri = $request->getRequestUri();
             }

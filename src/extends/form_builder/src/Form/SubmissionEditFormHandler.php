@@ -146,7 +146,7 @@ class SubmissionEditFormHandler extends FormBase
                 }
             }
 
-            $redirect = new RedirectResponse(Service::serviceManager()->request->getRequestUri());
+            $redirect = new RedirectResponse(Service::get('request')->getRequestUri());
             $redirect->send();
         }
 

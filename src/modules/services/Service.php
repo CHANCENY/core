@@ -5,6 +5,7 @@ namespace Simp\Core\modules\services;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
+use Simp\Core\components\request\Request;
 
 /**
  * This class supports arbitrary dynamic properties via __get() and __set().
@@ -27,6 +28,12 @@ class Service
     {
         if ($this->container->has($name)) {
             return $this->container->get($name);
+        }
+
+        if ($name === 'request') {
+            $request = Request::createFromGlobals();
+            $this->container->set('request', $request);
+            return $request;
         }
 
         // try doing DI autowiring

@@ -2,6 +2,8 @@
 
 namespace Simp\Core\modules\structures\content_types\form;
 
+use DI\DependencyException;
+use DI\NotFoundException;
 use Exception;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -35,16 +37,19 @@ class ContentTypeDefinitionForm extends FormBase
     protected Request $request;
 
     /**
-     * @throws PhpfastcacheIOException
      * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheLogicException
      * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheIOException
      * @throws PhpfastcacheInvalidArgumentException
+     * @throws PhpfastcacheLogicException
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function __construct()
     {
-        $this->request = Service::serviceManager()->request;
+        $this->request = Service::get('request');
         $content_name = $this->request->get("content_name");
+
         if (empty($content_name)) {
             $redirect = new RedirectResponse('/');
             Messager::toast()->addWarning("No content type name provided");
@@ -265,7 +270,7 @@ class ContentTypeDefinitionForm extends FormBase
                 ];
                 $node_data = array_merge($data_all, $node_data);
 
-                $request = Service::serviceManager()->request;
+                $request = Service::get('request');
 
                 $temp = [];
                 foreach ($node_data as $key => $value) {

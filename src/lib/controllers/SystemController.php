@@ -670,6 +670,16 @@ class SystemController
         return new RedirectResponse('/admin/structure/content-type/'.$name.'/manage');
     }
 
+    /**
+     * @throws RuntimeError
+     * @throws LoaderError
+     * @throws SyntaxError
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheIOException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
     public function content_node_add_controller(...$args): RedirectResponse|Response
     {
         extract($args);
@@ -677,6 +687,7 @@ class SystemController
         $form_base->getFormBase()->setFormMethod('POST');
         $form_base->getFormBase()->setFormEnctype('multipart/form-data');
         $content = $request->get('content_name');
+
         if (empty($content)) {
             Messager::toast()->addWarning("Content type not found.");
             return new RedirectResponse('/');
@@ -816,18 +827,37 @@ class SystemController
     {
         extract($args);
 
+        $route_finder = function ($object) use (&$route_finder){
+
+            foreach ($object as $key => $value) {
+                if ($key === 'route') {
+                    return $value;
+                }
+
+                elseif (is_array($value)) {
+                    $v = $route_finder($value);
+                    if ($v instanceof Route) {
+                        return $v;
+                    }
+                }
+            }
+
+        };
+
         $nid = $request->get('nid');
 
-        /**@var Route|null $route**/
-        $route = $options['route'] ?? null;
+        $is_alias = !empty($options['key']) && str_contains($options['key'], 'auto.path.route');
 
-        $options = $route->getOptions();
+        $route = $route_finder($args);
 
-        if (!empty($options['default']) && !empty($options['node'])) {
+        $options = $route?->getOptions();
+
+        if ($is_alias) {
 
             if (str_starts_with($route->route_id,'auto.path.route')) {
                 $actual_route = Route::fromRouteName($options['default']);
                 if (!empty($actual_route)) {
+                    $args['request']->query->set('nid', $options['node']);
                     return Route::getControllerResponse($actual_route, $args);
                 }
             }
@@ -856,7 +886,7 @@ class SystemController
 
                 $content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
 
-                $permission = $content_type['permission'] ?? [
+                $permission = !empty($content_type['permission']) ? $content_type['permission'] : [
                     'administrator'
                 ];
 
@@ -864,7 +894,7 @@ class SystemController
                     return $role->getName();
                 },CurrentUser::currentUser()->getUser()->roleManager()->getRoles());
 
-                // Check if current user has permissions which are in the permission list
+                // Check if the current user has permissions which are in the permission list
                 if (empty(array_intersect($roles, $permission))) {
                     return new RedirectResponse(Route::url('system.error.page.denied'));
                 }
@@ -873,7 +903,8 @@ class SystemController
             $entity = $node->getEntityArray();
             $route->route_title = $node->getTitle();
             $definitions = [];
-            foreach ($entity['storage'] as $field) {
+
+            foreach ($entity['storage'] ?? [] as $field) {
                 $name = substr($field,6,strlen($field));
                 $field = Node::findField($entity['fields'], $name);
                 if (!empty($field['handler'])) {
@@ -884,19 +915,19 @@ class SystemController
                     /**@var FieldBase $handler_instance**/
                     $definitions[$name] = $handler_class->newInstance(
                         $field,
-                        Service::serviceManager()->request->getMethod(),
-                        Service::serviceManager()->request->request->all(),
+                        Service::get('request')->getMethod(),
+                        Service::get('request')->request->all(),
                         $_GET,
-                        Service::serviceManager()->request->files->all()
+                        Service::get('request')->files->all()
                     );
                 }
                 else {
                     $definitions[$name] = new BasicField(
                         $field,
-                        Service::serviceManager()->request->getMethod(),
-                        Service::serviceManager()->request->request->all(),
+                        Service::get('request')->getMethod(),
+                        Service::get('request')->request->all(),
                         $_GET,
-                        Service::serviceManager()->request->files->all()
+                        Service::get('request')->files->all()
                     );
                 }
             }

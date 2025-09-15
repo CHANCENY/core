@@ -118,4 +118,9 @@ class Term
     {
         return Term::factory()->getTerm($tid);
     }
+
+    public static function termStorage(): TermStorage
+    {
+        return new TermStorage();
+    }
 }

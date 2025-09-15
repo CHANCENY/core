@@ -31,7 +31,7 @@ class GoogleAuth
         $this->client->setClientId($this->client_id);
         $this->client->setClientSecret($this->client_secret);
 
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $schema = trim($request->getSchemeAndHttpHost(), '/');
         $this->client->setRedirectUri($schema.'/'. trim($this->redirect_uri, '/'));
         $this->client->setScopes($this->scope);

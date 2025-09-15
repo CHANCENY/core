@@ -79,7 +79,7 @@ class PasswordManager
      */
     public function sendForgotPasswordLink(): bool|array|null
     {
-        $host = Service::serviceManager()->request->getSchemeAndHttpHost() . $this->forgotPasswordLink();
+        $host = Service::get('request')->getSchemeAndHttpHost() . $this->forgotPasswordLink();
         $mail = MailManager::mailManager();
 
         $mail->addEnvelope(Envelope::create(

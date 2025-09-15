@@ -45,7 +45,7 @@ class ViewAddForm extends FormBase
         $content_list = array_keys($content_list);
         $content_list = array_combine($content_list, $content_list);
 
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $view = ViewsManager::viewsManager()->getView($request->get('view_name', ''));
 
         $form['wrapper'] = [
@@ -185,7 +185,7 @@ class ViewAddForm extends FormBase
             $redirect->setStatusCode(302);
             unset($data['submit']);
 
-            $request = Service::serviceManager()->request;
+            $request = Service::get('request');
             $view = ViewsManager::viewsManager()->getView($request->get('view_name', ''));
             $message = "Views successfully created!";
             $name = null;

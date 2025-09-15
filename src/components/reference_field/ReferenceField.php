@@ -141,7 +141,7 @@ class ReferenceField extends FieldBase
     {
         $items = [];
         if (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'node') {
-
+            $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
                 $node = Node::load($item ?? 0);
                 if ($node) {
@@ -155,8 +155,9 @@ class ReferenceField extends FieldBase
         }
 
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'user') {
+           $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
-                $user = User::load($item ?? 0);
+                $user = is_numeric($item) ? User::load($item) : User::loadByName($item);
                 if ($user) {
                     $items[] = [
                         'id' => $user->getUid(),
@@ -167,6 +168,7 @@ class ReferenceField extends FieldBase
         }
 
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'term') {
+            $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
                 $term = Term::load($item ?? 0);
                 if ($term) {
@@ -179,6 +181,7 @@ class ReferenceField extends FieldBase
         }
 
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'file') {
+            $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
                 $file = File::load($item ?? 0);
                 if ($file) {

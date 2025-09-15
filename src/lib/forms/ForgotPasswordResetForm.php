@@ -58,7 +58,7 @@ class ForgotPasswordResetForm extends FormBase
     public function submitForm(array $form): void
     {
         if ($this->validated) {
-            $hash = Service::serviceManager()->request->get('hash');
+            $hash = Service::get('request')->get('hash');
             if (Caching::init()->has($hash)) {
                 $user = Caching::init()->get($hash);
                 $password = new PasswordManager($user->getUid());

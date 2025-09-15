@@ -27,7 +27,7 @@ class DisplayEditForm extends FormBase
 
     public function buildForm(array $form): array
     {
-        $display = ViewsManager::viewsManager()->getDisplay(Service::serviceManager()->request->get('display'));
+        $display = ViewsManager::viewsManager()->getDisplay(Service::get('request')->get('display'));
 
         $form['display_wrapper'] = [
             'type'=> 'fieldset',
@@ -125,7 +125,7 @@ class DisplayEditForm extends FormBase
     public function submitForm(array $form): void
     {
         $data = array_map(fn($item) => $item->getValue(), $form);
-        $display = ViewsManager::viewsManager()->getDisplay(Service::serviceManager()->request->get('display'));
+        $display = ViewsManager::viewsManager()->getDisplay(Service::get('request')->get('display'));
 
         $display['name'] = !empty($data['display_wrapper']['name']) ? $data['display_wrapper']['name'] : $display['name'];
         $display['response_type'] = !empty($data['display_wrapper']['response_type']) ? $data['display_wrapper']['response_type'] : $display['response_type'];
@@ -140,7 +140,7 @@ class DisplayEditForm extends FormBase
         else {
             Messager::toast()->addMessage("Display settings not updated");
         }
-        $redirect = new RedirectResponse('/admin/structure/views/view/'.Service::serviceManager()->request->get('view_name').'/displays');
+        $redirect = new RedirectResponse('/admin/structure/views/view/'.Service::get('request')->get('view_name').'/displays');
         $redirect->setStatusCode(302);
         $redirect->send();
     }

@@ -28,7 +28,7 @@ class SearchFormConfiguration extends FormBase
 
     public function buildForm(array $form): array
     {
-        $key = Service::serviceManager()->request->get('key','');
+        $key = Service::get('request')->get('key','');
         $search = SearchManager::searchManager()->getSetting($key);
         $form['search_wrapper'] = array(
             'type' => 'fieldset',
@@ -116,7 +116,7 @@ class SearchFormConfiguration extends FormBase
     public function submitForm(array $form): void
     {
         if ($this->validated) {
-            $search_key = Service::serviceManager()->request->get('key');
+            $search_key = Service::get('request')->get('key');
 
             $data = array_map(fn($field)=> $field->getValue(), $form);
             $data = $data['search_wrapper'];

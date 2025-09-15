@@ -279,16 +279,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.411.1",
+            "version": "v0.412.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "04c4a6caf7e443afc76f70827814656c7b03cbd1"
+                "reference": "212b51a11caa98e71c97f08041cc58e3425b2e15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/04c4a6caf7e443afc76f70827814656c7b03cbd1",
-                "reference": "04c4a6caf7e443afc76f70827814656c7b03cbd1",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/212b51a11caa98e71c97f08041cc58e3425b2e15",
+                "reference": "212b51a11caa98e71c97f08041cc58e3425b2e15",
                 "shasum": ""
             },
             "require": {
@@ -317,9 +317,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.411.1"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.412.0"
             },
-            "time": "2025-09-12T01:08:23+00:00"
+            "time": "2025-09-15T00:56:22+00:00"
         },
         {
             "name": "google/auth",
@@ -2402,16 +2402,16 @@
         },
         {
             "name": "simp/forms",
-            "version": "v1.1.5",
+            "version": "v1.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CHANCENY/forms.git",
-                "reference": "15cb92863a2e6bc0ec74be798d8ee5de604fac65"
+                "reference": "2bfa9978540ee4f3274b0ef45b2e6c3dc00d48c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CHANCENY/forms/zipball/15cb92863a2e6bc0ec74be798d8ee5de604fac65",
-                "reference": "15cb92863a2e6bc0ec74be798d8ee5de604fac65",
+                "url": "https://api.github.com/repos/CHANCENY/forms/zipball/2bfa9978540ee4f3274b0ef45b2e6c3dc00d48c0",
+                "reference": "2bfa9978540ee4f3274b0ef45b2e6c3dc00d48c0",
                 "shasum": ""
             },
             "require": {
@@ -2436,9 +2436,9 @@
             "description": "This is form builder library",
             "support": {
                 "issues": "https://github.com/CHANCENY/forms/issues",
-                "source": "https://github.com/CHANCENY/forms/tree/v1.1.5"
+                "source": "https://github.com/CHANCENY/forms/tree/v1.1.6"
             },
-            "time": "2025-08-22T09:39:16+00:00"
+            "time": "2025-09-15T08:38:52+00:00"
         },
         {
             "name": "simp/mail",

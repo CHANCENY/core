@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sitemap</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 220px;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            margin: 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .sidebar h2:hover,
+        .sidebar h2.active {
+            background: #34495e;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #0073e6;
+            color: #fff;
+            text-align: left;
+        }
+        tr:hover {
+            background: #f1f9ff;
+        }
+        a {
+            color: #0073e6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    {% for key, section in sitemap %}
+        <h2 data-target="{{ key }}" class="{{ loop.first ? 'active' : '' }}">
+            {{ section.title }}
+        </h2>
+    {% endfor %}
+</div>
+
+<div class="content">
+    {% for key, section in sitemap %}
+        <div id="{{ key }}" class="section {{ loop.first ? 'active' : '' }}">
+            {% if section.paths is not empty %}
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>URL</th>
+                        <th>Modified</th>
+                        {% if section.paths[0].priority is defined %}
+                            <th>Priority</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for path in section.paths %}
+                        <tr>
+                            <td>{{ path.title }}</td>
+                            <td><a href="{{ path.url }}" target="_blank">{{ path.url }}</a></td>
+                            <td>{{ path.modified }}</td>
+                            {% if path.priority is defined %}
+                                <td>{{ path.priority }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No paths found.</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.querySelectorAll('.sidebar h2').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.sidebar h2').forEach(h => h.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            item.classList.add('active');
+            document.getElementById(item.dataset.target).classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>

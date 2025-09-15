@@ -68,7 +68,7 @@ class ContentTypeForm extends FormBase
     public function submitForm(array $form): void
     {
         $system = new SystemDirectory();
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $data = $request->request->all();
         $line = str_replace(' ', '_', $data['name']);
         $line = 'content_'.strtolower($line);

@@ -39,7 +39,7 @@ class ContentTypeDefinitionEditForm extends FormBase
      */
     public function __construct()
     {
-        $this->request = Service::serviceManager()->request;
+        $this->request = Service::get('request');
         $nid = $this->request->get('nid');
         $node = Node::load($nid);
         if (empty($node)) {
@@ -307,7 +307,7 @@ class ContentTypeDefinitionEditForm extends FormBase
             $user = User::loadByName($data_all['owner'] ?? '');
             if ($user instanceof User) {
 
-                $request = Service::serviceManager()->request;
+                $request = Service::get('request');
                 $this->node->setTitle($data_all['title'] ?? $this->node->getTitle());
                 $this->node->setStatus(($data_all['status'] == 1 ? 1 : 2));
                 $this->node->setUid($user->getUid());

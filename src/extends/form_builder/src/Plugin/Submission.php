@@ -96,7 +96,7 @@ class Submission
 
     public function create(array $submission_data): Submission
     {
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $this->raw_data = $submission_data;
         $this->ip = $request->getClientIp();
         $this->user_agent = $request->headers->get('User-Agent');

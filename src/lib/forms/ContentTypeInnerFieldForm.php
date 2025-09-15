@@ -256,7 +256,7 @@ class ContentTypeInnerFieldForm extends FormBase
      */
     public function submitForm(array $form): void
     {
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
        if ($this->validated) {
            $data = array_map(function($item) {
                return $item->getValue();

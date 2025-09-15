@@ -28,7 +28,7 @@ class ProfileEditForm extends FormBase
     public function buildForm(array $form): array
     {
         $form = parent::buildForm($form);
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $user = User::load($request->get('uid'));
         if ($profile = $user->getProfile()) {
 
@@ -70,7 +70,7 @@ class ProfileEditForm extends FormBase
      */
     public function submitForm(array $form): void
     {
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $user = User::load($request->get('uid'));
         $profile = $user->getProfile();
         //TODO: upload image here if exist.

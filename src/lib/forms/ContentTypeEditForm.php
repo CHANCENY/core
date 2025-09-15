@@ -12,7 +12,7 @@ class ContentTypeEditForm extends ContentTypeForm
 {
     public function submitForm(array $form): void
     {
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $new_data = $request->request->all();
         $name = $request->get('machine_name');
         $content = ContentDefinitionManager::contentDefinitionManager()->getContentType($name);

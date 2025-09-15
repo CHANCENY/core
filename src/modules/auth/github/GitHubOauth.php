@@ -27,7 +27,7 @@ class GitHubOauth
         $this->client_secret = $credential->client_secret;
         $this->redirect_uri = $credential->redirect;
 
-        $request = Service::serviceManager()->request;
+        $request = Service::get('request');
         $schema = trim($request->getSchemeAndHttpHost(), '/');
 
         $this->github = new Github([
