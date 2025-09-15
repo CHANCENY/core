@@ -7,6 +7,7 @@ use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\extends\sitemap\src\Controller\SiteMapController;
 use Simp\Core\lib\routes\Route;
+use Simp\Core\modules\menu\Menu;
 use Simp\Core\modules\structures\content_types\entity\Node;
 use Simp\Core\modules\structures\taxonomy\Term;
 
@@ -32,7 +33,7 @@ function sitemap_route_install(): array
             'path' => '/sitemap.xml',
         ),
         'sitemap.xml.dashboard' => array(
-            'title' => 'Dashboard',
+            'title' => 'Sitemap Settings',
             'description' => 'Sitemap',
             'method' => array('GET', 'POST'),
             'controller' => array(
@@ -42,7 +43,9 @@ function sitemap_route_install(): array
             'access' => array(
                 'administrator',
             ),
-            'options' => array(),
+            'options' => array(
+                'classes' => ['fa-solid', 'fa-sitemap']
+            ),
             'path' => '/sitemap/dashboard',
         )
     );
@@ -81,6 +84,11 @@ function sitemap_sitemap_generator_install(): array
           );
       }
     );
+}
+
+function sitemap_menu_install(array &$menus): void
+{
+    $menus['system.config']->addChild(new Menu('sitemap.xml.dashboard'));
 }
 
 function getContentURLs(int $page): array
