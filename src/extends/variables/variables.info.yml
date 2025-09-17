@@ -2,4 +2,3 @@ name: Environment Variable
 description: 'This module is built-in for environment variable, these variables can be used in the system globally'
 type: module
 core_version_requirement: ^1
-enabled: true

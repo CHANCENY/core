@@ -1,0 +1,4 @@
+name: Multi Site Support
+description: 'This is extension allow the multi site support'
+type: module
+core_version_requirement: ^1

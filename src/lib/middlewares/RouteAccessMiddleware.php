@@ -13,6 +13,10 @@ class RouteAccessMiddleware implements Middleware
 {
     public function __invoke(Request $request, Access $access_interface, $next)
     {
+        if (!$access_interface->access_granted) {
+            return $next($request, $access_interface);
+        }
+
         $current_user = CurrentUser::currentUser();
         $access_roles = $access_interface->options['options']['access'] ?? [];
         $redirect = new RedirectResponse('/error/page/access-denied');

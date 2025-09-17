@@ -156,7 +156,7 @@ class ModuleHandler extends SystemDirectory
         $routes = array();
         foreach($this->modules as $name=>$module) {
              $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
-            if (file_exists($module_installer) && $module['enabled'] === true) {
+            if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
                  require_once $module_installer;
                   $route_install = $name . '_route_install';
                   if (\function_exists($route_install)) {
@@ -172,7 +172,7 @@ class ModuleHandler extends SystemDirectory
         $templates = array();
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
-            if (file_exists($module_installer) && $module['enabled'] === true) {
+            if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
                  require_once $module_installer;
                   $templates_install = $name . '_template_install';
                   if (\function_exists($templates_install)) {
@@ -191,17 +191,15 @@ class ModuleHandler extends SystemDirectory
      * @throws PhpfastcacheInvalidArgumentException
      */
     public function moduleEnable(string $name): bool {
-        $module = $this->modules[$name] ?? [];
-        if (!empty($module)) {
-            $module['enabled'] = true;
-            $path = $module['path']. \DIRECTORY_SEPARATOR . $name . '.info.yml';
-            unset($module['path']);
-            if (\file_exists($path)) {
-                $this->installModule($name);
-                return !empty(\file_put_contents($path, Yaml::dump($module, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
-            }
+        $extension = $this->setting_dir. DIRECTORY_SEPARATOR . 'extension.yml';
+        if (!file_exists($extension)) {
+            touch($extension);
         }
-        return false;
+        $extend = Yaml::parseFile($extension) ?? [];
+
+        $extend[$name] = true;
+        $this->installModule($name);
+        return !empty(\file_put_contents($extension, Yaml::dump($extend, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
     }
 
     public static function factory(): ModuleHandler
@@ -210,25 +208,24 @@ class ModuleHandler extends SystemDirectory
     }
 
     public function isModuleEnabled(string $name): bool {
-        $module = $this->modules[$name] ?? [];
-        if (!empty($module)) {
-            return $module['enabled'] ?? false;
+        $extension = $this->setting_dir. DIRECTORY_SEPARATOR . 'extension.yml';
+        if (!file_exists($extension)) {
+            touch($extension);
         }
-        return false;
+        $extend = Yaml::parseFile($extension) ?? [];
+        return !empty($extend[$name]);
     }
 
     public function moduleDisable(mixed $name): bool
     {
-        $module = $this->modules[$name] ?? [];
-        if (!empty($module)) {
-            unset($module['enabled']);
-            $path = $module['path']. \DIRECTORY_SEPARATOR . $name . '.info.yml';
-            unset($module['path']);
-            if (\file_exists($path)) {
-                return !empty(\file_put_contents($path, Yaml::dump($module, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
-            }
+        $extension = $this->setting_dir. DIRECTORY_SEPARATOR . 'extension.yml';
+        if (!file_exists($extension)) {
+            touch($extension);
         }
-        return false;
+        $extend = Yaml::parseFile($extension) ?? [];
+
+        $extend[$name] = false;
+        return !empty(\file_put_contents($extension, Yaml::dump($extend, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
     }
 
     public function getFieldExtension(): array
@@ -236,7 +233,7 @@ class ModuleHandler extends SystemDirectory
         $fields = array();
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
-            if (file_exists($module_installer) && $module['enabled'] === true) {
+            if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
                 require_once $module_installer;
                 $field_install = $name . '_field_install';
                 if (\function_exists($field_install)) {
@@ -256,26 +253,27 @@ class ModuleHandler extends SystemDirectory
             $library_install = $module . '_library_install';
             if (\function_exists($library_install)) {
                 $assets =$library_install($library_name);
+
                 foreach ($assets as $key=>$asset) {
 
                    foreach ($asset as $file) {
                        $extension = pathinfo($file, PATHINFO_EXTENSION);
                        if ($key === 'head') {
                            if ($extension === 'css') {
-                               $GLOBALS['theme']['head'][] = "<link rel='stylesheet' href='{$file}'>\n";
+                               $GLOBALS['theme']['head'][] = "<link rel='stylesheet' href='{$file}'>";
                            }
                            elseif ($extension === 'js') {
-                               $GLOBALS['theme']['head'][] = "<script src='{$file}'></script>\n";
+                               $GLOBALS['theme']['head'][] = "<script src='{$file}'></script>";
                            }
                        }
 
                        elseif ($key === 'footer') {
 
                            if ( $extension === 'css') {
-                               $GLOBALS['theme']['footer'][] = "<link rel='stylesheet' href='{$file}'>\n";
+                               $GLOBALS['theme']['footer'][] = "<link rel='stylesheet' href='{$file}'>";
                            }
                            elseif ( $extension === 'js') {
-                               $GLOBALS['theme']['footer'][] = "<script src='{$file}'></script>\n";
+                               $GLOBALS['theme']['footer'][] = "<script src='{$file}'></script>";
                            }
 
                        }
@@ -286,6 +284,8 @@ class ModuleHandler extends SystemDirectory
             }
         }
 
+        $GLOBALS['theme']['head'] = array_unique($GLOBALS['theme']['head'] ?? []);
+        $GLOBALS['theme']['footer'] = array_unique($GLOBALS['theme']['footer'] ?? []);
     }
 
     public function getConsoleCommands(): array
@@ -293,7 +293,7 @@ class ModuleHandler extends SystemDirectory
         $commands = array();
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
-            if (file_exists($module_installer) && $module['enabled'] === true) {
+            if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
                  require_once $module_installer;
                   $command_install = $name . '_command_install';
                   if (\function_exists($command_install)) {
@@ -309,7 +309,7 @@ class ModuleHandler extends SystemDirectory
         $services = array();
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
-            if (file_exists($module_installer) && $module['enabled'] === true) {
+            if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
                  require_once $module_installer;
                   $service_install = $name . '_service_install';
                   if (\function_exists($service_install)) {
@@ -318,6 +318,22 @@ class ModuleHandler extends SystemDirectory
             }
         }
         return $services;
+    }
+
+    public function getMiddlewares(): array
+    {
+        $middlewares = array();
+        foreach($this->modules as $name=>$module) {
+            $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
+            if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
+                 require_once $module_installer;
+                  $middleware_install = $name . '_middleware_install';
+                  if (\function_exists($middleware_install)) {
+                    $middlewares = \array_merge($middlewares, $middleware_install());
+                  }
+            }
+        }
+        return $middlewares;
     }
 
 }

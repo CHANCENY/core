@@ -9,6 +9,7 @@ use Phpfastcache\Exceptions\PhpfastcacheIOException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\lib\forms\ExtendAddFrom;
+use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\messager\Messager;
 use Simp\FormBuilder\FormBuilder;
@@ -56,19 +57,14 @@ class ExtendController
         }
 
         $modules = ModuleHandler::factory()->getModules();
+        $moduler = ModuleHandler::factory();
         $enabled_modules = [];
         $un_enabled_modules = [];
-        foreach ($modules as $key=>$module) {
-            if (!empty($module['enabled'])) {
-                $enabled_modules[$key] = $module;
-            }
-            else {
-                $un_enabled_modules[$key] = $module;
-            }
+        foreach ($modules as $key=>&$module) {
+            $module['enabled'] = $moduler->isModuleEnabled($key);
         }
         return new Response(View::view('default.view.extend_manage',[
-            'lists' => $un_enabled_modules,
-            'enabled_modules' => $enabled_modules,
+            'lists' => $modules,
         ]), Response::HTTP_OK);
     }
 
@@ -83,5 +79,37 @@ class ExtendController
         $form_base->getFormBase()->setFormMethod('POST');
         $form_base->getFormBase()->setFormEnctype('multipart/form-data');
         return new Response(View::view('default.view.extend_manage_add',['_form'=>$form_base]), Response::HTTP_OK);
+    }
+
+    /**
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheIOException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
+    public function extend_manage_enable(...$args): RedirectResponse
+    {
+        extract($args);
+        $module = $request->get('name');
+        ModuleHandler::factory()->moduleEnable($module);
+        Messager::toast()->addMessage("Updates save successfully.");
+        return new RedirectResponse(Route::url('system.extends.manage'));
+    }
+
+    /**
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheIOException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
+    public function extend_manage_disabled(...$args): RedirectResponse
+    {
+        extract($args);
+        $module = $request->get('name');
+        ModuleHandler::factory()->moduleDisable($module);
+        Messager::toast()->addMessage("Updates save successfully.");
+        return new RedirectResponse(Route::url('system.extends.manage'));
     }
 }

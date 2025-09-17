@@ -26,6 +26,10 @@ class NodeAccessMiddleware implements Middleware
      */
     public function __invoke(Request $request, Access $access_interface, $next)
     {
+        if (!$access_interface->access_granted) {
+            return $next($request, $access_interface);
+        }
+
         $user = CurrentUser::currentUser()?->getUser() ?? null;
         $nid = $request->get('nid', $request->request->get('nid'));
         $redirect = new RedirectResponse('/error/page/access-denied');

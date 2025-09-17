@@ -143,7 +143,8 @@ class ReferenceField extends FieldBase
         if (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'node') {
             $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
-                $node = Node::load($item ?? 0);
+                $item = intval($item);
+                $node = Node::load($item);
                 if ($node) {
                     $items[] = [
                         'id' => $node->getNid(),
@@ -170,7 +171,8 @@ class ReferenceField extends FieldBase
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'term') {
             $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
-                $term = Term::load($item ?? 0);
+                $item = intval($item);
+                $term = Term::load($item);
                 if ($term) {
                     $items[] = [
                         'id' => $term['id'],
@@ -183,7 +185,8 @@ class ReferenceField extends FieldBase
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'file') {
             $data = !is_array($data) ? [$data] : $data;
             foreach ($data as $item) {
-                $file = File::load($item ?? 0);
+                $item = intval($item);
+                $file = File::load($item);
                 if ($file) {
                     $items[] = [
                         'id' => $file->getFid(),

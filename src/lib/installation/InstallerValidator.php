@@ -23,6 +23,7 @@ use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\TwigResolver;
 use Simp\Core\modules\database\Database;
 use Simp\Core\modules\theme\ThemeManager;
+use Simp\Core\modules\user\roles\RolesRepository;
 use Simp\StreamWrapper\WrapperRegister\WrapperRegister;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Yaml\Yaml;
@@ -297,9 +298,9 @@ class InstallerValidator extends SystemDirectory
             $this->recursive_caching_defaults($template, $default_keys);
         }
 
-        Caching::init()->set('system.theme.keys', $default_keys);
+        $default_keys = [...$default_keys, ...$this->cacheCustomThemes()];
 
-        new ThemeManager();
+        Caching::init()->set('system.theme.keys', $default_keys);
 
         $default_route = Caching::init()->get('default.admin.routes');
         $routes = [];
@@ -347,24 +348,33 @@ class InstallerValidator extends SystemDirectory
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    protected function recursive_theme_caching(string $directory, string $theme , &$keys): void
+    protected function recursive_theme_caching(string $directory, string $theme, array &$keys): void
     {
-        $list = array_diff(scandir($directory) ?? [], ['..', '.']);
+        $list = array_diff(scandir($directory) ?: [], ['..', '.']);
+
         foreach ($list as $file) {
             $file_path = $directory . DIRECTORY_SEPARATOR . $file;
-            $list_name = explode('.', $file);
-            $type = end($list_name) === 'twig' ? 'view' : 'file';
-            $list_n = array_slice($list_name, 0, -1);
-            $key_name = "$theme.".$type.".". implode('.', $list_n);
+
             if (is_file($file_path)) {
+                $list_name = explode('.', $file);
+                $type = end($list_name) === 'twig' ? 'view' : 'file';
+                $list_n = array_slice($list_name, 0, -1);
+                $key_name = "$theme.$type." . implode('.', $list_n);
+
                 if ($type === 'view') {
                     $keys[] = $key_name;
                     $file_path = new TwigResolver($file_path);
                 }
+
                 Caching::init()->set($key_name, $file_path);
+            }
+            elseif (is_dir($file_path)) {
+                // recurse deeper into theme directories
+                $this->recursive_theme_caching($file_path, $theme, $keys);
             }
         }
     }
+
 
     protected function recursive_mover(string $directory, string $directory_name): void
     {
@@ -417,12 +427,32 @@ class InstallerValidator extends SystemDirectory
             'system.directory' => new SystemDirectory(),
             'database' => Database::database(),
             'connection' => Database::database()->con(),
+            'system.roles' => new RolesRepository($this)
         ];
 
         $merged_services = array_merge($defaults_services, $custom_services);
 
         $container = new \DI\Container($merged_services);
         define('DI_CONTAINER_SERVICES_TAGS',$container);
+    }
+
+    /**
+     * @throws PhpfastcacheCoreException
+     * @throws PhpfastcacheLogicException
+     * @throws PhpfastcacheDriverException
+     * @throws PhpfastcacheInvalidArgumentException
+     */
+    private function cacheCustomThemes(): array
+    {
+        $keys = [];
+        $files = array_diff(scandir($this->theme_dir ) ?? [], ['..', '.']);
+        foreach ($files as $file) {
+            $file_path = $this->theme_dir . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($file_path)) {
+                $this->recursive_theme_caching($file_path, $file, $keys);
+            }
+        }
+        return $keys;
     }
 
 }

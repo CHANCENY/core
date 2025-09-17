@@ -30,6 +30,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Simp\Router\Route as Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Yaml\Yaml;
 use Throwable;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -169,18 +170,24 @@ class App
         $cache = Caching::init()->driver();
         $route_keys = $cache->getItem('system.routes.keys');
 
+        $module_handler = ModuleHandler::factory();
         $system = new SystemDirectory;
       
         $middleware_file = $system->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'defaults' . DIRECTORY_SEPARATOR .
             'middleware' . DIRECTORY_SEPARATOR . 'middleware.yml';
 
+        $middlewares = file_exists($middleware_file) ? Yaml::parseFile($middleware_file)['access'] : [];
+        $custom_middleware = $module_handler->getMiddlewares();
+        $middlewares = array_merge($middlewares, $custom_middleware);
+
+
         // auto path
         $auto_path_alias = array();
-        if(ModuleHandler::factory()->isModuleEnabled('auto_path')) {
+        if($module_handler->isModuleEnabled('auto_path')) {
             $auto_path_alias = AutoPathAlias::injectAliases();
         }
 
-        $router = new Router($middleware_file);
+        $router = new Router($middlewares);
 
         if ($route_keys->isHit()) {
             $route_keys = $route_keys->get();

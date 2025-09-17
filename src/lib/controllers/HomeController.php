@@ -28,7 +28,6 @@ class HomeController
         $home_controller = $site->get('front_page_url',null);
         $theme = ThemeManager::manager();
         $home_template = 'default.view.home';
-
         if (!empty($home_controller)) {
             $route = Route::fromRouteUrl($home_controller);
             if ($route !== null) {

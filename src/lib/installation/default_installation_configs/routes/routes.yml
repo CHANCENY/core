@@ -11,7 +11,7 @@ database.form.route:
     method: database_form
 home.page.route:
   title: Home
-  path: ''
+  path: '/'
   method:
     - GET
   access:
@@ -1072,6 +1072,36 @@ system.extends.manage:
   controller:
     class: Simp\Core\lib\controllers\ExtendController
     method: extend_manage
+  options:
+    classes:
+      - fa
+      - fa-wrench
+system.extends.manage.enabled:
+  title: Extend Enable
+  path: /admin/extends/[name:string]/enable
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\ExtendController
+    method: extend_manage_enable
+  options:
+    classes:
+      - fa
+      - fa-wrench
+system.extends.manage.disabled:
+  title: Extend Disabled
+  path: /admin/extends/[name:string]/disabled
+  method:
+    - GET
+    - POST
+  access:
+    - administrator
+  controller:
+    class: Simp\Core\lib\controllers\ExtendController
+    method: extend_manage_disabled
   options:
     classes:
       - fa

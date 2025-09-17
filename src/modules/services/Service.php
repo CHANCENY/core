@@ -17,7 +17,9 @@ class Service
     protected array $arguments = [];
     public function __construct()
     {
-        $this->container = DI_CONTAINER_SERVICES_TAGS;
+        $this->container = defined("DI_CONTAINER_SERVICES_TAGS") ?
+            DI_CONTAINER_SERVICES_TAGS
+            : new Container();
     }
 
     /**

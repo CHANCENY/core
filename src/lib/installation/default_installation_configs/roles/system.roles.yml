@@ -1,0 +1,18 @@
+roles:
+  primary:
+    - administrator
+    - Content Creator
+    - Manager
+    - Authenticated
+    - Anonymous
+  secondary:
+    - Editor
+    - Author
+    - Subscriber
+    - Contributor
+    - Moderator
+    - Reviewer
+    - Publisher
+    - Analyst
+    - Support
+    - Guest

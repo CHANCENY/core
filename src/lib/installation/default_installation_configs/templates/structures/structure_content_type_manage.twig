@@ -106,7 +106,7 @@
         <form method="post">
             <label for="permissions">Select Roles</label>
             <select name="permission[]" id="permissions" multiple>
-                {% for role in ['administrator', 'authenticated', 'manager', 'content_creator', 'anonymous'] %}
+                {% for role in roles %}
                     <option value="{{ role }}"
                             {% if role in content.permission %}selected{% endif %}>
                         {{ role|capitalize|replace({'_': ' '}) }}

@@ -11,6 +11,7 @@ use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\modules\messager\Messager;
 use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
 use Simp\Core\modules\structures\views\ViewsManager;
+use Simp\Core\modules\user\roles\RolesRepository;
 use Simp\Default\FieldSetField;
 use Simp\Default\SelectField;
 use Simp\Fields\FieldBase;
@@ -106,13 +107,7 @@ class ViewAddForm extends FormBase
                     'id' => 'permission',
                     'class' => ['form-control'],
                     'name' => 'permission[]',
-                    'option_values' => [
-                        'administrator' => 'Administrator',
-                        'content_creator' => 'Content Creator',
-                        'manager' => 'Manager',
-                        'authenticated' => 'Authenticated',
-                        'anonymous' => 'Anonymous',
-                    ],
+                    'option_values' => RolesRepository::getSelectRoleOptions(),
                     'handler' => SelectField::class,
                     'default_value' => $view['permission'] ?? 'all',
                     'options' => [

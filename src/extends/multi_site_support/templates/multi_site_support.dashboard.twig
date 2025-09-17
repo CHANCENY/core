@@ -1,0 +1,34 @@
+{% extends "default.view.admin_base" %}
+
+{% block body %}
+
+    <noscript>{{ sites|json_encode|raw }}</noscript>
+    <noscript id="themes">{{ themes|json_encode|raw }}</noscript>
+    <noscript id="primary">{{ primary_roles|json_encode|raw }}</noscript>
+    <noscript id="secondary">{{ secondary_roles|json_encode|raw }}</noscript>
+    <div>
+        <h1>Multi Site Support</h1>
+        <p>
+            Use this form to configure and manage multiple sites within your application.
+            You can define site domains, assign user roles, and select themes for each site.
+            Click <strong>Add Site</strong> to include additional sites, and review your
+            settings in the configuration preview before saving.
+        </p>
+    </div>
+    <div>
+        <form class="config-form" id="multisiteForm">
+            <div id="sitesContainer">
+                <!-- Site blocks will be added here -->
+            </div>
+
+            <button type="button" id="addSiteBtn">Add Site</button>
+            <button type="submit">Save Configuration</button>
+
+            <div class="preview" id="previewBox">
+                <h3>Configuration Preview:</h3>
+                <div id="previewContent"></div>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

@@ -41,7 +41,10 @@ body {
     margin-top: 12rem;
 }
 .container {
-    max-width: unset;
+    clear: both;
+    margin-top: 100px;
+    padding: 2rem;
+    max-width: 158rem;
 }
 .field-message {
     font-size: large;
@@ -824,5 +827,95 @@ fieldset input[type="radio"] {
         margin-left: 5px;
         cursor: pointer;
         font-weight: bold;
+    }
+}
+
+/* Container for all rows */
+.container-field {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* spacing between columns and rows */
+    justify-content: flex-start;
+}
+
+/* Each column holding a table */
+.column {
+    flex: 1 1 calc(50% - 20px); /* two columns per row with gap accounted */
+    box-sizing: border-box;
+    min-width: 250px; /* ensures columns don't get too small */
+}
+
+/* Table styling */
+.field-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* Table row with icon and text */
+.field-table tr:first-child {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px;
+}
+
+/* Icon cell */
+.field-table td:first-child {
+    width: 80px;
+    padding-right: 15px;
+    text-align: center;
+}
+
+/* Text cell */
+.field-table td:nth-child(2) {
+    flex: 1;
+}
+
+/* Bottom row for "Create" button */
+.field-table tr:last-child td {
+    text-align: center;
+    padding: 10px;
+}
+
+/* Create link styling */
+.create-link {
+    color: #8a2be2; /* purple */
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.create-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive: for smaller screens, switch to single column */
+@media (max-width: 768px) {
+    .column {
+        flex: 1 1 100%;
+    }
+}
+
+
+@media (max-width: 992px) {
+    .main-content {
+        margin-top: 80px;
+        padding: 1.5rem;
+    }
+    .container {
+        max-width: 95%;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        margin-top: 70px;
+        padding: 1rem;
+    }
+    .container {
+        max-width: 100%;
     }
 }

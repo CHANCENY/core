@@ -1,5 +1,9 @@
 <?php
 
+use Phpfastcache\Exceptions\PhpfastcacheCoreException;
+use Phpfastcache\Exceptions\PhpfastcacheDriverException;
+use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
+use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\extends\system\src\Controller\System;
 use Simp\Core\lib\routes\Route;
@@ -123,10 +127,10 @@ function system_cron_subscribers_install(): array
 }
 
 /**
- * @throws \Phpfastcache\Exceptions\PhpfastcacheCoreException
- * @throws \Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException
- * @throws \Phpfastcache\Exceptions\PhpfastcacheLogicException
- * @throws \Phpfastcache\Exceptions\PhpfastcacheDriverException
+ * @throws PhpfastcacheCoreException
+ * @throws PhpfastcacheInvalidArgumentException
+ * @throws PhpfastcacheLogicException
+ * @throws PhpfastcacheDriverException
  */
 function system_menu_install(array &$menus): void
 {

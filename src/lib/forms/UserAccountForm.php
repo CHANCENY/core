@@ -14,6 +14,7 @@ use Simp\Core\modules\messager\Messager;
 use Simp\Core\modules\timezone\TimeZone;
 use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\entity\User;
+use Simp\Core\modules\user\roles\RolesRepository;
 use Simp\Fields\FieldBase;
 use Simp\FormBuilder\FormBase;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -42,6 +43,8 @@ class UserAccountForm extends FormBase
     public function buildForm(array $form): array
     {
         $this->entity_form = parent::buildForm($form);
+        $this->entity_form['roles']['option_values'] = RolesRepository::getSelectRoleOptions();
+        
 
         $config = ConfigManager::config()->getConfigFile('account.setting');
         if ($config?->get('allow_account_creation') !== 'administrator') {

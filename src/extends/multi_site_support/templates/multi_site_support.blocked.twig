@@ -1,0 +1,28 @@
+{% extends "default.view.admin_base" %}
+
+{% block body %}
+    <div class="blocked-site">
+        <h1>Site Access Blocked</h1>
+        <p>
+            This site is currently unavailable because access has been restricted
+            by the administrator. If you believe this is an error or need further
+            assistance, please contact the system administrator.
+        </p>
+
+        <div class="blocked-info">
+            <h3>Possible Reasons</h3>
+            <ul>
+                <li>The site is under maintenance.</li>
+                <li>The site has been temporarily disabled.</li>
+                <li>Your access has been restricted due to policy enforcement.</li>
+            </ul>
+        </div>
+
+        <div class="support-contact">
+            <p>
+                For more information or support, please reach out to
+                <a href="mailto:{{ site.get('site_email','') }}">{{ site.get('site_email','') }}</a>.
+            </p>
+        </div>
+    </div>
+{% endblock %}

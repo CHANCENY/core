@@ -20,6 +20,8 @@ use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Simp\Core\components\request\Request;
+use Simp\Core\extends\multi_site_support\src\Plugin\MultiSiteSupport;
 use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\lib\themes\TwigResolver;
@@ -48,48 +50,28 @@ class ThemeManager
         
         $files = array_diff(scandir($themes_base) ?? [], ['.', '..']);
 
-        if (!empty($files)) {
-            foreach ($files as $file) {
+        // handle multi-site themes
+        $request = Request::createFromGlobals();
+        $domain = $request->getHttpHost();
 
-                $full_path = $themes_base . DIRECTORY_SEPARATOR . $file . DIRECTORY_SEPARATOR .
-                    $file.'.info.yml';
+        $multi_site_support = new MultiSiteSupport();
 
-                if (file_exists($full_path)) {
-                    $content = Yaml::parseFile($full_path);
-                    if (!empty($content['name']) && !empty($content['version'])) {
-                        $this->themes[$file] = $content;
+        $this->themes = $multi_site_support->getThemes();
+        $this->currentTheme = $multi_site_support->getCurrentTheme();
+        $this->currentThemeHomeTemplate = $multi_site_support->getCurrentThemeHomeTemplate();
+        $this->current_theme_files = $multi_site_support->getCurrentThemeFiles();
 
-                        if (!empty($content['default'])) {
-                            $this->currentTheme = $file;
-                            $this->currentThemeHomeTemplate = $content['home_template'] ?? null;
-                            $all_twig_files = array_diff(scandir($themes_base . DIRECTORY_SEPARATOR . $file) ?? [], ['.', '..']);
-                            foreach ($all_twig_files as $twig_file) {
-                                $full_twig_path = $themes_base . DIRECTORY_SEPARATOR . $file . DIRECTORY_SEPARATOR . $twig_file;
-                                if (is_dir($full_twig_path)) {
-                                    $this->recursive_dir_iterator($full_twig_path);
-                                }
-                                elseif (file_exists($full_twig_path) && pathinfo($full_twig_path, PATHINFO_EXTENSION) === 'twig') {
-                                    $key = $file. '.view.'. pathinfo($twig_file, PATHINFO_FILENAME);
-                                    $this->current_theme_files[$key] = new TwigResolver($full_twig_path);
-                                }
-                            }
-                        }
+        if (MultiSiteSupport::isMultiSiteSupportEnabled()) {
+            $theme_used = $multi_site_support->getThemeByDomain($domain);
 
-                    }
-                }
-            }
+            if ($theme_used) {
 
-            if (!empty($this->currentTheme) && !empty($this->current_theme_files)) {
-
-                $theme_keys = Caching::init()->get('system.theme.keys');
-                foreach ($this->current_theme_files as $key => $value) {
-                    $theme_keys[] = $key;
-                    Caching::init()->set($key, $value);
-                }
-                $theme_keys = array_unique($theme_keys);
-                Caching::init()->set('system.theme.keys', $theme_keys);
+                $this->currentTheme = $multi_site_support->getThemeIdByDomain($domain);
+                $this->current_theme_files = $multi_site_support->getCurrentThemeFiles();
+                $this->currentThemeHomeTemplate = $theme_used['home_template'] ?? 'default.view.home';
             }
         }
+
         $GLOBALS['theme_manager'] = $this;
         
     }
@@ -158,13 +140,16 @@ class ThemeManager
         return $this->currentThemeHomeTemplate;
     }
 
-
-    
     public static function manager(): ThemeManager
     {
         if (isset($GLOBALS['theme_manager'])) {
             return $GLOBALS['theme_manager'];
         }
         return new ThemeManager();
+    }
+
+    public function getTheme(mixed $theme)
+    {
+        return $this->themes[$theme] ?? [];
     }
 }

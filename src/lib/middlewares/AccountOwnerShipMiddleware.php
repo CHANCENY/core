@@ -24,6 +24,10 @@ class AccountOwnerShipMiddleware implements Middleware
      */
     public function __invoke(Request $request, Access $access_interface, $next)
     {
+        if (!$access_interface->access_granted) {
+            return $next($request, $access_interface);
+        }
+
         $user = CurrentUser::currentUser()?->getUser() ?? null;
         $uid = $request->get('uid', $request->request->get('uid'));
         $redirect = new RedirectResponse('/error/page/access-denied');

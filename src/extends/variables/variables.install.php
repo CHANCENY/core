@@ -39,7 +39,11 @@ function variables_route_install()
 
 // register a menu item
 function variables_menu_install(array &$menus) {
-    $menus['system.config']->addChild(new \Simp\Core\modules\menu\Menu('variables.dashboard.route'));
+
+    if (!empty($menus['system.config'])) {
+        $menus['system.config']?->addChild(new \Simp\Core\modules\menu\Menu('variables.dashboard.route'));
+    }
+
 }
 
 // install library

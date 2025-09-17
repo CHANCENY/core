@@ -23,6 +23,7 @@ use Simp\Core\modules\structures\content_types\field\FieldManager;
 use Simp\Core\modules\structures\content_types\form\ContentTypeDefinitionEditForm;
 use Simp\Core\modules\structures\taxonomy\Term;
 use Simp\Core\modules\structures\views\ViewsManager;
+use Simp\Core\modules\user\roles\RolesRepository;
 use Simp\Default\BasicField;
 use Simp\Fields\FieldBase;
 use Simp\Fields\FieldInterface;
@@ -541,7 +542,8 @@ class SystemController
         }
         $content['permission'] = $content['permission'] ?? [];
         $content['display_setting'] = $content['display_setting'] ?? [];
-        return new Response(View::view('default.view.structure_content_type_manage',['content'=>$content]), 200);
+        return new Response(View::view('default.view.structure_content_type_manage',['content'=>$content,
+            'roles'=> RolesRepository::getSelectRoleOptions()]), 200);
     }
 
     /**

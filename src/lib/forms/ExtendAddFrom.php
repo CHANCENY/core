@@ -2,6 +2,9 @@
 
 namespace Simp\Core\lib\forms;
 
+use Simp\Core\lib\installation\SystemDirectory;
+use Simp\Core\modules\files\entity\File;
+use Simp\Core\modules\files\helpers\FileFunction;
 use ZipArchive;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -72,14 +75,18 @@ class ExtendAddFrom extends FormBase
     {
         if ($this->validated) {
             $file = $form['file_extension']->getValue();
-            $file_name = $file['name'] ?? null;
-            if (empty($file_name)) {
+            $r = json_decode($file,true);
+            $file = reset($r);
+
+            if (empty($file)) {
                 Messager::toast()->addError('Please select a file');
                 $redirect = new RedirectResponse('/admin/extend/add');
                 $redirect->send();
                 return;
             }
-            $name = pathinfo($file_name, PATHINFO_FILENAME);
+            $file = File::load($file);
+
+            $name = pathinfo($file->getUri(), PATHINFO_FILENAME);
             if (!empty(ModuleHandler::factory()->getModule($name))) {
                 Messager::toast()->addError('Module already exists');
                 $redirect = new RedirectResponse('/admin/extend/add');
@@ -87,11 +94,15 @@ class ExtendAddFrom extends FormBase
                 return;
             }
 
+            $system = new SystemDirectory();
+
+            $file_name = $system->webroot_dir . DIRECTORY_SEPARATOR . FileFunction::resolve_fid($file->getFid());
             $module_handler = ModuleHandler::factory();
             // unzip the file into modules directory
             $location = $module_handler->module_dir;
             $zip = new ZipArchive();
-            $res = $zip->open($file['tmp_name']);
+            $res = $zip->open($file_name);
+
             if ($res === true) {
                 $zip->extractTo($location );
                 $zip->close();

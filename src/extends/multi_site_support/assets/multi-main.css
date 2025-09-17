@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.config-form {
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.site-block {
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fafafa;
+}
+
+.site-block h3 {
+    margin-top: 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #444;
+}
+
+button.remove-site,
+button#addSiteBtn,
+button[type="submit"]{
+    padding: 0 30px;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.roles label {
+    font-weight: normal;
+}
+
+button {
+    background: #0066cc;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #004999;
+}
+
+.preview {
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f0f8ff;
+    border: 1px solid #cce0ff;
+    display: none;
+}
+
+.remove-site {
+    background: #cc0000;
+    margin-top: 10px;
+}
