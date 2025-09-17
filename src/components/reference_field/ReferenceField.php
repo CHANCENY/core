@@ -16,8 +16,10 @@ use Simp\Fields\FieldTypeSupportException;
 class ReferenceField extends FieldBase
 {
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
 
     /**
      * @throws Exception
@@ -38,8 +40,6 @@ class ReferenceField extends FieldBase
             'reference',
             'name',
         ];
-
-        $this->validation_message = '';
 
         foreach ($required as $field_key) {
             if (!array_key_exists($field_key, $field)) {
@@ -63,6 +63,7 @@ class ReferenceField extends FieldBase
             if (!empty($field['required']) && empty($value) && empty($field['default_value'])) {
                 $this->validation_message = "This input field is mandatory.";
             }
+
             if ($value !== null) {
                 $this->submission['value'] = $value;
             }
@@ -73,7 +74,7 @@ class ReferenceField extends FieldBase
 
         }
 
-        if ($request_method === 'GET' && !empty($params)) {
+        if ($request_method === 'GET' && $params !== []) {
 
             $value = $params[$field['name']] ?? null;
             if ($value !== null) {
@@ -100,7 +101,7 @@ class ReferenceField extends FieldBase
 
     public function getId(): string
     {
-        return !empty($this->field['id']) ? $this->field['id'] : FieldManager::createFieldName($this->getLabel());
+        return empty($this->field['id']) ? FieldManager::createFieldName($this->getLabel()) : $this->field['id'];
     }
 
     public function getClassList(): array
@@ -110,7 +111,7 @@ class ReferenceField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -125,10 +126,11 @@ class ReferenceField extends FieldBase
 
     public function getValue(): string|int|float|null|array|bool
     {
-        $data = !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? [];
+        $data = empty($this->submission['value']) ? $this->field['default_value'] ?? [] : $this->submission['value'];
         if (!empty($this->field['limit']) && $this->field['limit'] == 1) {
             return $data[0];
         }
+
         return $data;
     }
 
@@ -141,11 +143,11 @@ class ReferenceField extends FieldBase
     {
         $items = [];
         if (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'node') {
-            $data = !is_array($data) ? [$data] : $data;
+            $data = is_array($data) ? $data : [$data];
             foreach ($data as $item) {
                 $item = intval($item);
                 $node = Node::load($item);
-                if ($node) {
+                if ($node instanceof \Simp\Core\modules\structures\content_types\entity\Node) {
                     $items[] = [
                         'id' => $node->getNid(),
                         'title' => $node->getTitle()
@@ -156,10 +158,10 @@ class ReferenceField extends FieldBase
         }
 
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'user') {
-           $data = !is_array($data) ? [$data] : $data;
+           $data = is_array($data) ? $data : [$data];
             foreach ($data as $item) {
                 $user = is_numeric($item) ? User::load($item) : User::loadByName($item);
-                if ($user) {
+                if ($user instanceof \Simp\Core\modules\user\entity\User) {
                     $items[] = [
                         'id' => $user->getUid(),
                         'title' => $user->getName()
@@ -169,11 +171,11 @@ class ReferenceField extends FieldBase
         }
 
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'term') {
-            $data = !is_array($data) ? [$data] : $data;
+            $data = is_array($data) ? $data : [$data];
             foreach ($data as $item) {
                 $item = intval($item);
                 $term = Term::load($item);
-                if ($term) {
+                if ($term !== null && $term !== []) {
                     $items[] = [
                         'id' => $term['id'],
                         'title' => $term['label']
@@ -183,11 +185,11 @@ class ReferenceField extends FieldBase
         }
 
         elseif (!empty($this->field['reference']['type']) && $this->field['reference']['type'] == 'file') {
-            $data = !is_array($data) ? [$data] : $data;
+            $data = is_array($data) ? $data : [$data];
             foreach ($data as $item) {
                 $item = intval($item);
                 $file = File::load($item);
-                if ($file) {
+                if ($file instanceof \Simp\Core\modules\files\entity\File) {
                     $items[] = [
                         'id' => $file->getFid(),
                         'title' => $file->getName()
@@ -195,6 +197,7 @@ class ReferenceField extends FieldBase
                 }
             }
         }
+
         return $items;
     }
 
@@ -223,9 +226,9 @@ class ReferenceField extends FieldBase
   var wrapper = $(`#{$wrapper_id}`);
 
   if (wrapper.length > 0) {
-    const settings = JSON.parse(JSON.stringify($callable)); 
-    const default_values = JSON.parse(JSON.stringify($default_values)); // [{id, title}, ...]
-    
+    const settings = JSON.parse(JSON.stringify({$callable})); 
+    const default_values = JSON.parse(JSON.stringify({$default_values})); // [{id, title}, ...]
+
     var input = wrapper.find(`#{$id}`);
     var suggestionsBox = wrapper.find(".suggestions");
     var selectedItemsDiv = wrapper.find("#selectedItems");
@@ -337,12 +340,12 @@ SCRIPT;
     name="{$this->getName()}"  
     placeholder="Type to search..."
   >
-  
+
   <span class="field-description">{$this->getDescription()}</span>
   <span class="field-message message-{$this->getName()}">{$this->validation_message}</span>
-  
+
   <div class="suggestions"></div>
-  
+
   <input type="hidden" name="{$this->getName()}_hidden" value="[]">
 </div>
 {$script}

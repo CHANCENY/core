@@ -37,14 +37,12 @@ class CronCommand extends Command
             }
         }
 
-        if (count($queued) > 0) {
-            foreach ($queued as $k=>$cron) {
-                $serialized = base64_encode(serialize($cron));
-                $command = 'php '.$executor.' "' . $serialized . '" > /dev/null 2>&1 &';
-                $output->writeln("$k has started execution");
+        foreach ($queued as $k=>$cron) {
+            $serialized = base64_encode(serialize($cron));
+            $command = 'php '.$executor.' "' . $serialized . '" > /dev/null 2>&1 &';
+            $output->writeln($k . ' has started execution');
 
-                exec($command);
-            }
+            exec($command);
         }
 
         return Command::SUCCESS;

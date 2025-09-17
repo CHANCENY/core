@@ -21,8 +21,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class SubmissionFormHandler extends FormBase
 {
     protected bool $validated = true;
+
     protected mixed $options;
+
     protected array $fields;
+
     protected string $form_id;
 
     public function __construct(mixed $options = [])
@@ -50,6 +53,7 @@ class SubmissionFormHandler extends FormBase
         foreach ($form as $e=>$field) {
             $form[$e]['handler'] = str_replace('\\\\', '\\', $field['handler']);
         }
+
         return $form;
     }
 
@@ -71,18 +75,13 @@ class SubmissionFormHandler extends FormBase
             $submission = new Submission(form_name: $this->form_id);
             $fields = $submission->getFields();
 
-            $values = array();
+            $values = [];
 
-            foreach ($fields as $key=>$field) {
+            foreach (array_keys($fields) as $key) {
 
                 $value = $form[$key]->getValue();
 
-                if (!is_array($value)) {
-                    $values[$key] = [$value];
-                }
-                else {
-                    $values[$key] = $value;
-                }
+                $values[$key] = is_array($value) ? $value : [$value];
 
             }
 
@@ -96,6 +95,7 @@ class SubmissionFormHandler extends FormBase
                          foreach ($fields[$key]['settings']['allowed_file_types'] as $extension) {
                              $upload->addAllowedExtension($extension);
                          }
+
                          $upload->addAllowedMaxSize($fields[$key]['settings']['allowed_file_size']);
                          $upload->addFileObject($value);
                          $upload->validate();
@@ -119,7 +119,7 @@ class SubmissionFormHandler extends FormBase
                          $files['uri'] = $files['file_path'];
 
                          $file = File::create($files);
-                         if ($file) {
+                         if ($file instanceof \Simp\Core\modules\files\entity\File) {
                              $values[$key] = [$file->getFid()];
                          }
 
@@ -141,14 +141,12 @@ class SubmissionFormHandler extends FormBase
             $setting = FormSettings::factory($this->form_id);
             $this->options['submission'] = $submission;
 
-            if (!empty($submission->getCreatedAt())) {
+            if (!in_array($submission->getCreatedAt(), ['', '0'], true) && !in_array($setting->getConfirmation(), ['', '0'], true)) {
 
-                if (!empty($setting->getConfirmation())) {
-                    Messager::toast()->addMessage($setting->getConfirmation());
-                }
+                Messager::toast()->addMessage($setting->getConfirmation());
             }
 
-            if (!empty($setting->getNotify())) {
+            if (!in_array($setting->getNotify(), ['', '0'], true)) {
                 $submission = Submission::load($submission->getSid());
                 $fields = $submission->getFields();
                 $message = View::view('default.view.form_builder.submission_view.email',['submission'=>$submission, 'fields'=>$fields, 'form_name'=>$this->form_id]);

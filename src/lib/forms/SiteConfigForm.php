@@ -46,6 +46,7 @@ class SiteConfigForm extends FormBase
                 unset($form[$key]);
             }
         }
+
         return $form;
     }
 
@@ -54,14 +55,14 @@ class SiteConfigForm extends FormBase
         if ($this->validated) {
 
             // Save site info
-            $site_info = array(
+            $site_info = [
                 'site_name' => $form['site_name']->getValue(),
                 'site_mail' => $form['site_mail']->getValue(),
                 'site_slogan' => $form['site_slogan']->getValue(),
                 'front_page_url' => $form['front_page_url']->getValue(),
                 'not_found_page' => $form['not_found_page']->getValue(),
                 'access_denied_page' => $form['access_denied_page']->getValue(),
-            );
+            ];
 
             $site = SiteManager::factory()->set($site_info);
 
@@ -71,16 +72,16 @@ class SiteConfigForm extends FormBase
                 // create user
                 $user = User::create(
                     [
-                        'name' => htmlspecialchars(strip_tags($form['admin_username']->getValue())),
-                        'mail' => htmlspecialchars(strip_tags($form['admin_email']->getValue())),
-                        'password' => htmlspecialchars(strip_tags($form['admin_password']->getValue())),
+                        'name' => htmlspecialchars(strip_tags((string) $form['admin_username']->getValue())),
+                        'mail' => htmlspecialchars(strip_tags((string) $form['admin_email']->getValue())),
+                        'password' => htmlspecialchars(strip_tags((string) $form['admin_password']->getValue())),
                         'roles' => ['administrator'],
-                        'time_zone' => htmlspecialchars(strip_tags($form['timezone']->getValue()))
+                        'time_zone' => htmlspecialchars(strip_tags((string) $form['timezone']->getValue()))
 
                     ]
                 );
 
-                if ($user) {
+                if ($user !== null) {
 
                     $redirect = new RedirectResponse('/');
                     $redirect->send();

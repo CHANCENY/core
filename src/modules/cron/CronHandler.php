@@ -91,7 +91,7 @@ class CronHandler
             $next_run = $now + 31536000;
         }
 
-        if (empty($recorded_cron)) {
+        if ($recorded_cron === false || $recorded_cron === []) {
             $query = "INSERT INTO cron_jobs (name, last_run, next_run) VALUES (:name, :last_run, :next_run)";
             $query = Database::database()->con()->prepare($query);
             $query->bindParam(':name', $this->name);
@@ -105,6 +105,7 @@ class CronHandler
         if ($recorded_cron['next_run'] > $now) {
             return false;
         }
+
         $query = "UPDATE cron_jobs SET last_run = :last_run, next_run = :next_run WHERE name = :name";
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':name', $this->name);
@@ -114,10 +115,6 @@ class CronHandler
         return true;
     }
 
-    /**
-     *
-     * @return bool
-     */
     private function validateOnceCron(): bool
     {
         $recorded_cron = $this->getRecordedCrons();
@@ -125,7 +122,7 @@ class CronHandler
         $date = $timing[1];
         $next_run = strtotime($date);
         $now = time();
-        if (empty($recorded_cron)) {
+        if ($recorded_cron === false || $recorded_cron === []) {
             $query = "INSERT INTO cron_jobs (name, last_run, next_run) VALUES (:name, :last_run, :next_run)";
             $query = Database::database()->con()->prepare($query);
             $query->bindParam(':name', $this->name);
@@ -162,7 +159,7 @@ class CronHandler
         $next_run = $date;
         $now = time();
 
-        if (empty($recorded_cron)) {
+        if ($recorded_cron === false || $recorded_cron === []) {
             $query = "INSERT INTO cron_jobs (name, last_run, next_run) VALUES (:name, :last_run, :next_run)";
             $query = Database::database()->con()->prepare($query);
             $query->bindParam(':name', $this->name);
@@ -174,10 +171,12 @@ class CronHandler
 
         $datetime = new DateTime();
         $datetime->modify("+". $frequency);
+
         $next_run = $datetime->getTimestamp();
         if ($recorded_cron['next_run'] > $now) {
             return false;
         }
+
         $query = "UPDATE cron_jobs SET last_run = :last_run, next_run = :next_run WHERE name = :name";
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':name', $this->name);

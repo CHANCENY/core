@@ -144,7 +144,7 @@ class AccountSettingForm extends FormBase
                     'class' => ['form-check-input'],
                     'name' => 'account_creation',
                      'option' => [
-                         'checked' => !empty($config?->get('account_creation_message', null)) ? 'checked' : '',
+                         'checked' => empty($config?->get('account_creation_message', null)) ? '' : 'checked',
                      ]
                 ],
                 'account_creation_message' => [
@@ -167,7 +167,7 @@ class AccountSettingForm extends FormBase
                     'class' => ['form-check-input'],
                     'name' => 'account_activation',
                     'option' => [
-                        'checked' => !empty($config?->get('account_activation_message', null)) ? 'checked' : '',
+                        'checked' => empty($config?->get('account_activation_message', null)) ? '' : 'checked',
                     ]
                 ],
                 'account_activation_message' => [
@@ -190,7 +190,7 @@ class AccountSettingForm extends FormBase
                     'class' => ['form-check-input'],
                     'name' => 'password_recovery',
                     'option' => [
-                        'checked' => !empty($config?->get('password_recovery_message', null)) ? 'checked' : '',
+                        'checked' => empty($config?->get('password_recovery_message', null)) ? '' : 'checked',
                     ]
                 ],
                 'password_recovery_message' => [
@@ -240,9 +240,7 @@ class AccountSettingForm extends FormBase
 
     public function submitForm(array $form): void
     {
-        $account_settings = array_map(function ($account_setting) {
-            return $account_setting->getValue();
-        }, $form);
+        $account_settings = array_map(fn($account_setting) => $account_setting->getValue(), $form);
 
         ConfigManager::config()->addConfigFile('account.setting', $account_settings);
         $redirect = new RedirectResponse('/admin/config/people/accounts');

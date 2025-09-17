@@ -30,10 +30,15 @@ use Twig\Error\SyntaxError;
 class FormBuilderField extends FieldBase
 {
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
+
     private $internal_form;
+
     protected bool $submission_created = false;
+
     protected Node $node;
 
     /**
@@ -56,8 +61,6 @@ class FormBuilderField extends FieldBase
             'name',
         ];
 
-        $this->validation_message = '';
-
         foreach ($required as $field_key) {
             if (!array_key_exists($field_key, $field)) {
                 throw new FieldRequiredException('Field "' . $field_key . '" is required.');
@@ -75,19 +78,20 @@ class FormBuilderField extends FieldBase
         $request = Service::get('request')->server->get('ROUTE_ATTRIBUTES')['route'] ?? null;
         if ($request) {
             $node = $request->getOptions();
-            $nid = !empty($node['node']) ? $node['node'] : null;
+            $nid = empty($node['node']) ? null : $node['node'];
             if ($nid) {
                 $this->node = Node::load($nid);
             }
         }
 
         $this->internal_form = null;
-        if (!empty($form_builder_handler)) {
+        if ($form_builder_handler !== []) {
             foreach ($form_builder_handler['fields'] as $field_name => $field) {
                 if ($field['type'] === 'submit' || $field['type'] === 'reset' || $field['type'] === 'button') {
                     unset($form_builder_handler[$field_name]);
                 }
             }
+
             if (Service::get('request')->get('nid')) {
                 $form_builder_handler['fields']['nid'] = [
                     'type' => 'hidden',
@@ -113,6 +117,7 @@ class FormBuilderField extends FieldBase
                 ];
                 $this->node = Node::load(Service::get('request')->get('nid'));
             }
+
             $this->internal_form = new FormBuilder(new SubmissionFormHandler($form_builder_handler));
         }
 
@@ -158,7 +163,7 @@ class FormBuilderField extends FieldBase
 
     public function getId(): string
     {
-        return !empty($this->field['id']) ? $this->field['id'] : FieldManager::createFieldName($this->getLabel());
+        return empty($this->field['id']) ? FieldManager::createFieldName($this->getLabel()) : $this->field['id'];
     }
 
     public function getClassList(): array
@@ -168,7 +173,7 @@ class FormBuilderField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -183,7 +188,7 @@ class FormBuilderField extends FieldBase
 
     public function getValue(): string|int|float|null|array|bool
     {
-        return !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
+        return empty($this->submission['value']) ? $this->field['default_value'] ?? '' : $this->submission['value'];
     }
 
     public function get(string $field_name): float|int|bool|array|string|null
@@ -192,8 +197,6 @@ class FormBuilderField extends FieldBase
     }
 
     /**
-     * @param bool $wrapper
-     * @return string
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
@@ -213,7 +216,8 @@ class FormBuilderField extends FieldBase
 
         $page = Page::load(is_numeric($pid) ? $pid : 0);
 
-        $status = $page->getStatus() == 1 ? 'Yes' : 'No';
+        if ($page->getStatus() == 1) {
+        }
 
         $wrapper_id = $this->getName() . "-wrapper-" . uniqid();
 

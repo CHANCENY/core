@@ -61,11 +61,10 @@ class VocabularyController
     public function delete(...$args): Response {
         extract($args);
         $name = $request->get("name");
-        if (!empty($name)) {
-            if (VocabularyManager::factory()->removeVocabulary($name)) {
-                return new RedirectResponse("/admin/structure/taxonomy");
-            }
+        if (!empty($name) && VocabularyManager::factory()->removeVocabulary($name)) {
+            return new RedirectResponse("/admin/structure/taxonomy");
         }
+
         return new RedirectResponse("/admin/structure/taxonomy");
     }
 
@@ -93,7 +92,7 @@ class VocabularyController
         $form = new FormBuilder(new TermAddForm());
         $form->getFormBase()->setFormEnctype('multipart/form-data');
         $form->getFormBase()->setFormMethod('POST');
-        return new Response(View::view('default.view.term_add',['_form'=>$form, '_title'=> (!empty($_title)) ? $_title : 'New Term']), Response::HTTP_OK);
+        return new Response(View::view('default.view.term_add',['_form'=>$form, '_title'=> (empty($_title)) ? 'New Term' : $_title]), Response::HTTP_OK);
     }
 
     /**
@@ -118,13 +117,12 @@ class VocabularyController
         extract($args);
         $name = $request->get("name");
         $tid = $request->get("tid");
-        if (!empty($name) && !empty($tid)) {
-            if (Term::factory()->delete($tid)) {
-                Messager::toast()->addMessage('Term '.$name.' has been deleted');
-                return new RedirectResponse("/admin/structure/taxonomy/$name/terms");
-            }
+        if (!empty($name) && !empty($tid) && Term::factory()->delete($tid)) {
+            Messager::toast()->addMessage('Term '.$name.' has been deleted');
+            return new RedirectResponse(sprintf('/admin/structure/taxonomy/%s/terms', $name));
         }
-        return new RedirectResponse("/admin/structure/taxonomy/$name/terms");
+
+        return new RedirectResponse(sprintf('/admin/structure/taxonomy/%s/terms', $name));
     }
 
     /**
@@ -141,11 +139,12 @@ class VocabularyController
             $terms = Term::factory()->get($name);
             $terms = array_column($terms,'id');
 
-            if (!empty($terms)) {
+            if ($terms !== []) {
                 $nodes = Node::referenceEntities($terms);
             }
 
         }
+
         return new Response(View::view('default.view.term_view',['nodes'=>$nodes]), Response::HTTP_OK);
     }
 }

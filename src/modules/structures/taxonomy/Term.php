@@ -9,16 +9,14 @@ use Simp\Environment\Definition\Helper;
 
 class Term
 {
-    protected PDO $PDO;
-
-    public function __construct(PDO $PDO) {
-        $this->PDO = $PDO;
+    public function __construct(protected PDO $PDO)
+    {
     }
 
     public static function search($value): array
     {
         $query = Database::database()->con()->prepare("SELECT * FROM term_data WHERE label LIKE :label");
-        $query->bindValue(':label', "%$value%");
+        $query->bindValue(':label', sprintf('%%%s%%', $value));
         $query->execute();
         return $query->fetchAll();
     }
@@ -34,8 +32,9 @@ class Term
     {
         $query = $this->PDO->prepare("SELECT * FROM `term_data` WHERE `id` = :term_id");
         $query->execute(['term_id' => $term_id]);
+
         $term = $query->fetch();
-        return !empty($term) ? $term : null;
+        return empty($term) ? null : $term;
     }
 
     public function getTermByVid(string $vid): array
@@ -55,14 +54,14 @@ class Term
     protected function createName(string $name): string
     {
         $name = preg_replace('/[^a-zA-Z0-9_]/', '_', $name);
-        $name = preg_replace('/\s+/', '_', $name);
-        return preg_replace('/_+/', '_', $name);
+        $name = preg_replace('/\s+/', '_', (string) $name);
+        return preg_replace('/_+/', '_', (string) $name);
     }
 
-    public function getReferenceEntities(string $name)
+    public function getReferenceEntities(string $name): void
     {
         $list = $this->get($name);
-        $tid_s = array_map(function ($item) { return $item['id']; },$list);
+        array_map(fn(array $item) => $item['id'],$list);
 
     }
 
@@ -90,13 +89,13 @@ class Term
         return $this->PDO->prepare("DELETE FROM `term_data` WHERE `id` = :tid")->execute(['tid' => $tid]);
     }
 
-    public function getTermsByTid(array $tids)
+    public function getTermsByTid(array $tids): array
     {
         // Create placeholders like :id0, :id1, ...
         $placeholders = [];
         $params = [];
         foreach ($tids as $i => $tid) {
-            $placeholder = ":id{$i}";
+            $placeholder = ':id' . $i;
             $placeholders[] = $placeholder;
             $params[$placeholder] = $tid;
         }

@@ -46,7 +46,7 @@ class ComplexQueryTranslator
 
         foreach (explode(',', $columnsDef) as $def) {
             preg_match('/`(\w+)`\s+(\w+)(\(\d+\))?.*/', trim($def), $col);
-            if (!empty($col)) {
+            if ($col !== []) {
                 $columns[] = [
                     'name' => $col[1],
                     'type' => strtoupper($col[2])
@@ -102,7 +102,7 @@ class ComplexQueryTranslator
         $collection = $matches[2] ?? null;
         $filter = [];
 
-        if (!empty($matches[3])) {
+        if (isset($matches[3]) && ($matches[3] !== '' && $matches[3] !== '0')) {
             $filter = self::parseWhereClause($matches[3]);
         }
 
@@ -164,7 +164,7 @@ class ComplexQueryTranslator
     {
         preg_match('/DELETE FROM `(\w+)`(?: WHERE (.+))?/i', $query, $matches);
         $collection = $matches[1] ?? null;
-        $filter = !empty($matches[2]) ? self::parseWhereClause($matches[2]) : [];
+        $filter = empty($matches[2]) ? [] : self::parseWhereClause($matches[2]);
 
         return [
             'operation' => 'deleteMany',
@@ -218,6 +218,7 @@ class ComplexQueryTranslator
                     if (!isset($filters['$or'])) {
                         $filters['$or'] = [];
                     }
+
                     $filters['$or'][] = $condition;
                 } elseif ($currentLogic === 'AND') {
                     $filters = array_merge($filters, $condition);
@@ -238,8 +239,8 @@ class ComplexQueryTranslator
         $query = preg_replace('/\s+/', ' ', str_replace('`', '', $query));
 
         // Match table name
-        preg_match('/CREATE TABLE IF NOT EXISTS (\w+)\s*\((.+)\)/i', $query, $matches);
-        if (!$matches || count($matches) < 3) {
+        preg_match('/CREATE TABLE IF NOT EXISTS (\w+)\s*\((.+)\)/i', (string) $query, $matches);
+        if ($matches === [] || count($matches) < 3) {
             throw new \InvalidArgumentException("Invalid CREATE TABLE statement.");
         }
 
@@ -251,7 +252,7 @@ class ComplexQueryTranslator
 
         $resultFields = [];
         foreach ($fields as $field) {
-            $field = trim($field);
+            $field = trim((string) $field);
 
             // Skip constraints
             if (stripos($field, 'PRIMARY KEY') === 0 ||
@@ -265,7 +266,9 @@ class ComplexQueryTranslator
 
             // Match field definition: name type [options...]
             preg_match('/^(\w+)\s+([A-Z]+(?:\(\d+\))?)(.*)$/i', $field, $fmatch);
-            if (!$fmatch) continue;
+            if ($fmatch === []) {
+                continue;
+            }
 
             $name = $fmatch[1];
             $type = strtoupper($fmatch[2]);
@@ -293,8 +296,14 @@ class ComplexQueryTranslator
         $chars = str_split($fieldsStr);
 
         foreach ($chars as $char) {
-            if ($char === '(') $depth++;
-            if ($char === ')') $depth--;
+            if ($char === '(') {
+                $depth++;
+            }
+
+            if ($char === ')') {
+                $depth--;
+            }
+
             if ($char === ',' && $depth === 0) {
                 $fields[] = $buffer;
                 $buffer = '';
@@ -314,10 +323,17 @@ class ComplexQueryTranslator
     {
         if (preg_match('/DEFAULT\s+([^\s]+)/i', $options, $m)) {
             $default = trim($m[1], "'\"");
-            if (strcasecmp($default, 'NULL') === 0) return null;
-            if (is_numeric($default)) return (float)$default;
+            if (strcasecmp($default, 'NULL') === 0) {
+                return null;
+            }
+
+            if (is_numeric($default)) {
+                return (float)$default;
+            }
+
             return $default;
         }
+
         return null;
     }
 }

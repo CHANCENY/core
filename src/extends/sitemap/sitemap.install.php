@@ -13,42 +13,42 @@ use Simp\Core\modules\structures\taxonomy\Term;
 
 function sitemap_route_install(): array
 {
-    return array(
-        'sitemap.xml' => array(
+    return [
+        'sitemap.xml' => [
             'title' => 'Sitemap',
             'description' => 'Sitemap',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => SiteMapController::class,
                 'method' => 'index',
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
                 'authenticated',
                 'anonymous',
                 'content_creator',
                 'manager'
-            ),
-            'options' => array(),
+            ],
+            'options' => [],
             'path' => '/sitemap.xml',
-        ),
-        'sitemap.xml.dashboard' => array(
+        ],
+        'sitemap.xml.dashboard' => [
             'title' => 'Sitemap Settings',
             'description' => 'Sitemap',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => SitemapController::class,
                 'method' => 'dashboard',
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa-solid', 'fa-sitemap']
-            ),
+            ],
             'path' => '/sitemap/dashboard',
-        )
-    );
+        ]
+    ];
 }
 
 function sitemap_template_install(): array
@@ -62,28 +62,22 @@ function sitemap_template_install(): array
 
 function sitemap_sitemap_generator_install(): array
 {
-    return array(
-      'sitemap.node.path' => function(int $page = 0) {
-
+    return [
+      'sitemap.node.path' => fn(int $page = 0): array =>
           // Key paths need urls
-          return array(
-              'title' => 'Contents URLs',
-              'paths' => getContentURLs($page),
-          );
-      },
-      'sitemap.terms.path' => function(int $page = 0) {
-          return array(
-              'title' => 'Terms URLs',
-              'paths' => getTerms()
-          );
-      },
-      'sitemap.others.path' => function(int $page = 0) {
-          return array(
-              'title' => 'Others URLs',
-              'paths' => getOthers()
-          );
-      }
-    );
+          [
+          'title' => 'Contents URLs',
+          'paths' => getContentURLs($page),
+      ],
+      'sitemap.terms.path' => fn(int $page = 0): array => [
+          'title' => 'Terms URLs',
+          'paths' => getTerms()
+      ],
+      'sitemap.others.path' => fn(int $page = 0): array => [
+          'title' => 'Others URLs',
+          'paths' => getOthers()
+      ]
+    ];
 }
 
 function sitemap_menu_install(array &$menus): void
@@ -99,13 +93,11 @@ function getContentURLs(int $page): array
     $content_types = $settings->get('content_type');
 
     if (empty($content_types)) {
-        return array();
+        return [];
     }
 
     $node_storage = Node::nodeStorage('');
-    $params = array_map(function($item) {
-        return ":placeholder_".$item;
-    },array_keys($content_types));
+    $params = array_map(fn(int|string $item): string => ":placeholder_".$item,array_keys($content_types));
 
     $values = array_combine($params, array_values($content_types));
 
@@ -113,16 +105,16 @@ function getContentURLs(int $page): array
     $node_storage->addWhere("bundle IN (".implode(',',$params).")",$values);
     $node_storage->execute();
 
-    $paths = array();
+    $paths = [];
 
     /**@var Node $node**/
     foreach ($node_storage as $node) {
 
-        $paths[] = array(
+        $paths[] = [
             'title' => $node->getTitle(),
-            'modified' => date('c',strtotime($node->getUpdated())),
+            'modified' => date('c',strtotime((string) $node->getUpdated())),
             'url' => Route::url('system.structure.content.node',['nid'=>$node->getNid()])
-        );
+        ];
 
     }
 
@@ -137,28 +129,28 @@ function getTerms(): array
     $terms = $settings->get('terms');
 
     if (empty($terms)) {
-        return array();
+        return [];
     }
 
-    $terms_storage = Term::termStorage('');
+    $terms_storage = Term::termStorage();
 
-    $params = array_map(function($item) {
-        return ":placeholder_".$item;
-    },array_keys($terms));
+    $params = array_map(fn(int|string $item): string => ":placeholder_".$item,array_keys($terms));
 
     $values = array_combine($params, array_values($terms));
 
     $terms_storage->addWhere("vid IN (".implode(',',$params).")",$values);
     $terms_storage->execute();
-    $paths = array();
+
+    $paths = [];
     foreach ($terms_storage as $term) {
-        $paths[] = array(
+        $paths[] = [
             'title' => $term['label'],
-            'modified' => date('c',strtotime($term['created_at'])),
+            'modified' => date('c',strtotime((string) $term['created_at'])),
             'url' => Route::url('system.vocabulary.term.view',['name'=>$term['name']]),
             'priority' => 0.64,
-        );
+        ];
     }
+
     return $paths;
 }
 
@@ -177,7 +169,7 @@ function getOthers(): array
 
     $routes_all = Route::getRoutes();
 
-    $paths = array();
+    $paths = [];
 
     // site date formatted for lastmod
     $now = (new \DateTime())->format('c');
@@ -201,17 +193,14 @@ function getOthers(): array
 
     foreach ($routes_all as $route) {
 
-        if ($route instanceof Route) {
+        if ($route instanceof Route && (!in_array($route->route_id, $ignore) && in_array('anonymous', $route->access) && in_array('GET',$route->method) && !str_contains($route->route_path, '['))) {
 
-            if (!in_array($route->route_id, $ignore) && in_array('anonymous', $route->access) && in_array('GET',$route->method) && !str_contains($route->route_path, '['))
-            {
-                $paths[] = [
-                    'title' => $route->route_title,
-                    'modified' => $now,
-                    'url' => $route->route_path,
-                    'priority' => 0.64
-                ];
-            }
+            $paths[] = [
+                'title' => $route->route_title,
+                'modified' => $now,
+                'url' => $route->route_path,
+                'priority' => 0.64
+            ];
 
         }
 

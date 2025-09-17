@@ -16,7 +16,9 @@ class FakerManager
 {
 
     protected array $fillable_fields = [];
+
     protected array $populated_data = [];
+
     public function __construct(string $content_type)
     {
         $content_type_data = ContentDefinitionManager::contentDefinitionManager()->getContentType($content_type);
@@ -25,10 +27,11 @@ class FakerManager
                 'title',
             ];
             foreach ($content_type_data['storage'] as $storage) {
-                $this->fillable_fields[] = substr($storage,6,strlen($storage));
+                $this->fillable_fields[] = substr((string) $storage,6,strlen((string) $storage));
             }
         }
     }
+
     public function getFillableFields(): array
     {
         return $this->fillable_fields;
@@ -54,6 +57,7 @@ class FakerManager
                 foreach ($this->fillable_fields as $key=>$field) {
                     $this->populated_data[$i][$key] = $faker->$field();
                 }
+
                 $this->populated_data[$i] = [...$this->populated_data[$i], ...$append_values];
             }
         }
@@ -61,6 +65,7 @@ class FakerManager
             foreach ($this->fillable_fields as $key=>$field) {
                 $this->populated_data[$key] = $faker->$field();
             }
+
             $this->populated_data = [...$this->populated_data, ...$append_values];
         }
     }

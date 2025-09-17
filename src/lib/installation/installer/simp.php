@@ -21,7 +21,6 @@ if (!file_exists($vendor)) {
 require_once $vendor;
 
 /**
- * @return void
  * @throws PhpfastcacheCoreException
  * @throws PhpfastcacheDriverCheckException
  * @throws PhpfastcacheDriverException
@@ -61,7 +60,7 @@ function extracted($argv): void
 try{
 
     extracted($argv);
-}catch (Throwable $e){
+}catch (Throwable $throwable){
     echo PHP_EOL . "sorry console not working properly" . PHP_EOL;
-    \Simp\Core\modules\logger\ErrorLogger::logger()->logError($e);
+    \Simp\Core\modules\logger\ErrorLogger::logger()->logError($throwable);
 }

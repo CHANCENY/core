@@ -8,13 +8,16 @@ use Simp\Core\modules\database\Database;
 class DatabaseLogger
 {
     protected array $logs = [];
+
     protected PDO $con;
+
     public function __construct(int $limit = 50, int $offset = 0)
     {
         $this->con = Database::database()->con();
-        $query = "SELECT * FROM database_activity ORDER BY created DESC LIMIT $limit OFFSET $offset";
+        $query = sprintf('SELECT * FROM database_activity ORDER BY created DESC LIMIT %d OFFSET %d', $limit, $offset);
         $query = $this->con->prepare($query);
         $query->execute();
+
         $logs = $query->fetchAll();
         foreach ($logs as $log) {
             $log['executed_time'] = $this->humanReadableTime($log['executed_time']);
@@ -22,7 +25,7 @@ class DatabaseLogger
         }
     }
 
-    function humanReadableTime(float $seconds): string {
+    public function humanReadableTime(float $seconds): string {
         if ($seconds >= 1) {
             return number_format($seconds, 2) . " seconds";
         } elseif ($seconds >= 0.001) {

@@ -40,7 +40,8 @@ class App
 {
     protected Response|JsonResponse|RedirectResponse $response;
 
-    protected $currentRoute = null;
+    protected $currentRoute;
+
     /**
      * @throws PhpfastcacheDriverNotFoundException
      * @throws PhpfastcacheExtensionNotInstalledException
@@ -65,15 +66,15 @@ class App
             $error = $development->get('logger');
             if (!empty($error['enabled']) && $error['enabled'] === 'yes') {
                 // add error handlers
-                set_exception_handler([$this, 'exceptionHandler']);
-                set_error_handler([$this, 'errorHandler']);
+                set_exception_handler($this->exceptionHandler(...));
+                set_error_handler($this->errorHandler(...));
             }
 
             else {
 
                 // Set handlers what response error page
-                set_exception_handler([$this, 'exceptionHandlerResponse']);
-                set_error_handler([$this, 'errorHandler']);
+                set_exception_handler($this->exceptionHandlerResponse(...));
+                set_error_handler($this->errorHandler(...));
             }
 
         }
@@ -108,20 +109,12 @@ class App
 
         if ($exception instanceof \ErrorException) {
             // Only ErrorException has getSeverity()
-            switch ($exception->getSeverity()) {
-                case E_NOTICE:
-                    $error_handler->logInfo($exception);
-                    break;
-                case E_WARNING:
-                    $error_handler->logWarning($exception);
-                    break;
-                case E_ERROR:
-                    $error_handler->logError($exception);
-                    break;
-                default:
-                    $error_handler->logDebug($exception);
-                    break;
-            }
+            match ($exception->getSeverity()) {
+                E_NOTICE => $error_handler->logInfo($exception),
+                E_WARNING => $error_handler->logWarning($exception),
+                E_ERROR => $error_handler->logError($exception),
+                default => $error_handler->logDebug($exception),
+            };
         } else {
             // For ParseError, TypeError, generic Error, Exception, etc.
             $error_handler->logError($exception);
@@ -148,7 +141,7 @@ class App
         }
 
         // For non-serious errors, log or display as needed
-        error_log("Non-serious error [$errno]: $errstr in $errfile on line $errline");
+        error_log(sprintf('Non-serious error [%d]: %s in %s on line %d', $errno, $errstr, $errfile, $errline));
 
         // Return true to prevent PHP's default handler
         return true;
@@ -172,7 +165,7 @@ class App
 
         $module_handler = ModuleHandler::factory();
         $system = new SystemDirectory;
-      
+
         $middleware_file = $system->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'defaults' . DIRECTORY_SEPARATOR .
             'middleware' . DIRECTORY_SEPARATOR . 'middleware.yml';
 
@@ -182,7 +175,7 @@ class App
 
 
         // auto path
-        $auto_path_alias = array();
+        $auto_path_alias = [];
         if($module_handler->isModuleEnabled('auto_path')) {
             $auto_path_alias = AutoPathAlias::injectAliases();
         }
@@ -213,7 +206,7 @@ class App
 
                     if (count($methods) > 0) {
                         foreach ($methods as $method) {
-                            $method_single = strtolower($method);
+                            $method_single = strtolower((string) $method);
                             /**@var Response $response**/
                            $response[] = $router->$method_single($path, $name,$controller, $options);
                         }
@@ -222,36 +215,34 @@ class App
 
             }
 
-            if (!empty($auto_path_alias)) {
-                foreach ($auto_path_alias as $route_key => $route) {
-                    /**@var Route $route**/
-                    $this->currentRoute = $route;
+            foreach ($auto_path_alias as $route_key => $route) {
+                /**@var Route $route**/
+                $this->currentRoute = $route;
 
-                    // check methods
-                    $methods = $route->method;
-                    $path = $route->route_path;
-                    $name = $route->controller_method;
-                    $controller = $route->controller. "@" . $name;
+                // check methods
+                $methods = $route->method;
+                $path = $route->route_path;
+                $name = $route->controller_method;
+                $controller = $route->controller. "@" . $name;
 
-                    $options = [
-                        'access' => $route->access,
-                        'route' => $route,
-                        'key' => $route_key,
-                    ];
+                $options = [
+                    'access' => $route->access,
+                    'route' => $route,
+                    'key' => $route_key,
+                ];
 
-                    if (count($methods) > 0) {
-                        foreach ($methods as $method) {
-                            $method_single = strtolower($method);
-                            /**@var Response $response**/
-                            $response[] = $router->$method_single($path, $name,$controller, $options);
-                        }
+                if (count($methods) > 0) {
+                    foreach ($methods as $method) {
+                        $method_single = strtolower((string) $method);
+                        /**@var Response $response**/
+                        $response[] = $router->$method_single($path, $name,$controller, $options);
                     }
                 }
             }
 
             $response = array_filter($response);
             $response = reset($response);
-            $response = $response ? $response : new Response("Page not found", 404);
+            $response = $response ?: new Response("Page not found", 404);
             $response?->send(true);
         }
         else {
@@ -259,6 +250,7 @@ class App
             $response = new Response("Page not found", 404);
             $response->send(true);
         }
+
         return $response;
 
     }
@@ -286,7 +278,7 @@ class App
 
         $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
         if ($origin) {
-            header("Access-Control-Allow-Origin: $origin");
+            header('Access-Control-Allow-Origin: ' . $origin);
             header("Vary: Origin");
         }
 
@@ -295,7 +287,7 @@ class App
         // Dynamically reflect back requested headers
         $requestedHeaders = $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'] ?? '';
         if ($requestedHeaders) {
-            header("Access-Control-Allow-Headers: $requestedHeaders");
+            header('Access-Control-Allow-Headers: ' . $requestedHeaders);
         }
 
         // Optional: Cache preflight for 1 day
@@ -313,21 +305,21 @@ class App
            Activity::factory()->listeners($request,$route, $this->response);
            MailQueueActivity::factory()->listeners($request,$route, $this->response);
            DatabaseActivity::factory()->listeners($request,$route, $this->response);
-       }catch (Throwable $exception){}
+       }catch (Throwable){}
     }
 
     private function setHeadersForCors(): void
     {
         $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
         if ($origin) {
-            header("Access-Control-Allow-Origin: $origin");
+            header('Access-Control-Allow-Origin: ' . $origin);
             header("Vary: Origin");
             header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 
             // Dynamically reflect back requested headers
             $requestedHeaders = $_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'] ?? '';
             if ($requestedHeaders) {
-                header("Access-Control-Allow-Headers: $requestedHeaders");
+                header('Access-Control-Allow-Headers: ' . $requestedHeaders);
             }
         }
     }

@@ -8,12 +8,19 @@ use Simp\Core\modules\database\Database;
 class FormSettings
 {
     protected string $title;
+
     protected string $confirmation;
+
     protected int $limit;
+
     protected string $embedded;
+
     protected string $slug;
+
     protected string $status;
+
     protected string $notify;
+
     protected string $require_login;
 
     /**
@@ -25,6 +32,7 @@ class FormSettings
         $statement = Database::database()->con()->prepare($query);
         $statement->bindValue(':form_name', $this->form_name);
         $statement->execute();
+
         $settings = $statement->fetch();
         if ($settings) {
             $this->title = $settings['title'];
@@ -116,15 +124,6 @@ class FormSettings
     }
 
     /**
-     * @param string $query
-     * @param string $title
-     * @param string $confirmation
-     * @param int $limit
-     * @param string $embedded
-     * @param string $slug
-     * @param string $status
-     * @param string $notify
-     * @param string $require_login
      * @return false|\PDOStatement
      */
     public function getF(string $query, string $title, string $confirmation, int $limit, string $embedded, string $slug, string $status, string $notify, string $require_login): \PDOStatement|false
@@ -158,7 +157,7 @@ class FormSettings
 
     public function isFormActive(): bool
     {
-        return  !empty($this->slug) && $this->status == 'published';
+        return  $this->slug !== '' && $this->slug !== '0' && $this->status === 'published';
 
     }
 

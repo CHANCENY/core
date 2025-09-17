@@ -30,8 +30,11 @@ use Symfony\Component\Yaml\Yaml;
 class ThemeManager
 {
     protected array $themes = [];
+
     protected ?string $currentTheme = null;
+
     protected array $current_theme_files = [];
+
     /**
      * @var mixed|null
      */
@@ -47,8 +50,8 @@ class ThemeManager
     {
         $system = new SystemDirectory();
         $themes_base = $system->theme_dir;
-        
-        $files = array_diff(scandir($themes_base) ?? [], ['.', '..']);
+
+        array_diff(scandir($themes_base) ?? [], ['.', '..']);
 
         // handle multi-site themes
         $request = Request::createFromGlobals();
@@ -64,7 +67,7 @@ class ThemeManager
         if (MultiSiteSupport::isMultiSiteSupportEnabled()) {
             $theme_used = $multi_site_support->getThemeByDomain($domain);
 
-            if ($theme_used) {
+            if ($theme_used !== null && $theme_used !== []) {
 
                 $this->currentTheme = $multi_site_support->getThemeIdByDomain($domain);
                 $this->current_theme_files = $multi_site_support->getCurrentThemeFiles();
@@ -73,10 +76,10 @@ class ThemeManager
         }
 
         $GLOBALS['theme_manager'] = $this;
-        
+
     }
 
-    protected function recursive_dir_iterator($dir): void
+    protected function recursive_dir_iterator(string $dir): void
     {
         $files = array_diff(scandir($dir) ?? [], ['.', '..']);
         foreach ($files as $file) {
@@ -115,21 +118,17 @@ class ThemeManager
      * This method updates the list of Twig files associated with the current
      * theme. It accepts an array where the keys represent file identifiers
      * and the values contain data about each Twig file.
-     *
-     * @param string $currentTheme
      */
     public function setCurrentTheme(string $currentTheme): void
     {
         $this->currentTheme = $currentTheme;
     }
 
-    /**
-     * @param array $current_theme_files
-     */
     public function setCurrentThemeFiles(array $current_theme_files): void
     {
         $this->current_theme_files = $current_theme_files;
     }
+
     public function getThemes(): array
     {
         return $this->themes;
@@ -142,10 +141,7 @@ class ThemeManager
 
     public static function manager(): ThemeManager
     {
-        if (isset($GLOBALS['theme_manager'])) {
-            return $GLOBALS['theme_manager'];
-        }
-        return new ThemeManager();
+        return $GLOBALS['theme_manager'] ?? new ThemeManager();
     }
 
     public function getTheme(mixed $theme)

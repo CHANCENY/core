@@ -20,9 +20,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class ExtendAddFrom extends FormBase
 {
 
-    /**
-     * @var false
-     */
     private bool $validated = true;
 
     public function getFormId(): string
@@ -75,7 +72,7 @@ class ExtendAddFrom extends FormBase
     {
         if ($this->validated) {
             $file = $form['file_extension']->getValue();
-            $r = json_decode($file,true);
+            $r = json_decode((string) $file,true);
             $file = reset($r);
 
             if (empty($file)) {
@@ -84,10 +81,11 @@ class ExtendAddFrom extends FormBase
                 $redirect->send();
                 return;
             }
+
             $file = File::load($file);
 
             $name = pathinfo($file->getUri(), PATHINFO_FILENAME);
-            if (!empty(ModuleHandler::factory()->getModule($name))) {
+            if (ModuleHandler::factory()->getModule($name) !== []) {
                 Messager::toast()->addError('Module already exists');
                 $redirect = new RedirectResponse('/admin/extend/add');
                 $redirect->send();
@@ -121,12 +119,14 @@ class ExtendAddFrom extends FormBase
                             @rmdir($file);
                         }
                     }
+
                     @rmdir($location . DIRECTORY_SEPARATOR . $name);
                     Messager::toast()->addError('Module validation failed');
                     $redirect = new RedirectResponse('/admin/extend/add');
                     $redirect->send();
                     return;
                 }
+
                 Messager::toast()->addMessage('Module validated successfully');
                 $module_handler = ModuleHandler::factory();
                 $module_handler->installModule($name);

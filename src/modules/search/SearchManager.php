@@ -19,11 +19,15 @@ class SearchManager
 {
 
     protected array $settings = [];
+
     protected string $location = '';
+
     private string $search_query;
+
     private array $placeholders = [];
+
     private array $results;
-    private array $database_queries = [];
+
 
     public function __construct()
     {
@@ -32,10 +36,12 @@ class SearchManager
         if (!is_dir($search_config)) {
             mkdir($search_config);
         }
+
         $search_config .=  DIRECTORY_SEPARATOR . 'search';
         if (!is_dir($search_config)) {
             mkdir($search_config);
         }
+
         $search_config .= DIRECTORY_SEPARATOR . 'search.yml';
         if (!file_exists($search_config)) {
             @touch($search_config);
@@ -54,7 +60,7 @@ class SearchManager
     public function addSetting(string $key, array $value): bool
     {
         $this->settings[$key] = $value;
-        return !empty(file_put_contents($this->location, Yaml::dump($this->settings,Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
+        return !in_array(file_put_contents($this->location, Yaml::dump($this->settings,Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)), [0, false], true);
 
     }
 
@@ -62,6 +68,7 @@ class SearchManager
     {
         return $this->settings;
     }
+
     public function getLocation(): string {
         return $this->location;
     }
@@ -74,8 +81,9 @@ class SearchManager
     {
         if (isset($this->settings[$key])) {
             unset($this->settings[$key]);
-            return !empty(file_put_contents($this->location, Yaml::dump($this->settings,Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
+            return !in_array(file_put_contents($this->location, Yaml::dump($this->settings,Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)), [0, false], true);
         }
+
         return false;
     }
 
@@ -91,6 +99,7 @@ class SearchManager
                         $fields = array_merge($fields, $this->getContentTypeFields($source));
                     }
                 }
+
                 $fields = array_combine(array_values($fields), array_values($fields));
                 return [
                     'node_data:title' => 'Title',
@@ -119,24 +128,24 @@ class SearchManager
                 $query = Database::database()->con()->prepare("SHOW TABLES");
                 $query->execute();
                 $rows = $query->fetchAll(PDO::FETCH_COLUMN);
-                $new_rows = array_filter($rows, function ($row) {
+                $new_rows = array_filter($rows, function ($row): bool {
                     $excludes = ['users', 'user_profile', 'user_roles', 'file_managed', 'node_data'];
                     return !in_array($row, $excludes);
                 });
                 return array_combine(array_values($new_rows), array_values($new_rows));
             }
         }
+
         return [];
     }
 
     public function getDatabaseSearchableColumns(string $source): array
     {
-        $query = Database::database()->con()->prepare("SHOW COLUMNS FROM $source");
+        $query = Database::database()->con()->prepare('SHOW COLUMNS FROM ' . $source);
         $query->execute();
+
         $rows = $query->fetchAll(PDO::FETCH_COLUMN);
-        $new_rows = array_map(function ($row) use ($source) {
-            return "$source:$row";
-        },$rows);
+        $new_rows = array_map(fn($row): string => sprintf('%s:%s', $source, $row),$rows);
         return array_combine(array_values($new_rows), array_values($new_rows));
     }
 
@@ -144,9 +153,7 @@ class SearchManager
     {
         $fields = ContentDefinitionManager::contentDefinitionManager()->getContentType($source);
         $storages = $fields['storage'] ?? [];
-        return array_map(function ($field) use ($source) {
-            return $source . ":". substr($field,6, strlen($field));
-        },$storages);
+        return array_map(fn($field): string => $source . ":". substr((string) $field,6, strlen((string) $field)),$storages);
     }
 
     public function buildSearchQuery(string $key, Request $request): string|array|null
@@ -156,14 +163,14 @@ class SearchManager
 
             if (isset($definition['type']) && $definition['type'] == 'content_type') {
 
-                $select_part = array_map(function ($field) {
+                $select_part = array_map(function ($field): string {
                     $list = explode(':', $field);
-                    return $list[0] !== 'node_data' ? "node__{$list[1]}.{$list[1]}__value AS {$list[1]}" : "node_data.{$list[1]} AS {$list[1]}";
+                    return $list[0] !== 'node_data' ? sprintf('node__%s.%s__value AS %s', $list[1], $list[1], $list[1]) : sprintf('node_data.%s AS %s', $list[1], $list[1]);
                 }, $definition['fields']);
 
-                $tables = array_map(function ($field) {
+                $tables = array_map(function ($field): string {
                     $list = explode(':', $field);
-                    return $list[0] !== 'node_data' ? "node__{$list[1]}" : $list[0];
+                    return $list[0] !== 'node_data' ? 'node__' . $list[1] : $list[0];
                 },$definition['fields']);
 
                 $tables = array_unique($tables);
@@ -178,10 +185,10 @@ class SearchManager
                 $others = [];
                 foreach ($tables as $key=>$table) {
                     if ($key === 0) {
-                        $tables_part = "`$table` ";
+                        $tables_part = sprintf('`%s` ', $table);
                     }
                     else {
-                        $others[] = "`$table` ON {$table}.nid = node_data.nid";
+                        $others[] = sprintf('`%s` ON %s.nid = node_data.nid', $table, $table);
                     }
                 }
 
@@ -192,9 +199,7 @@ class SearchManager
                 }
 
                 // Where part
-                $bundles = array_map(function ($source) {
-                    return "'{$source}'";
-                },$definition['sources']);
+                $bundles = array_map(fn($source): string => sprintf("'%s'", $source),$definition['sources']);
 
                 $join_statement .= " WHERE node_data.bundle IN (" . implode(", ", $bundles) . ")";
                 $search_fields = [];
@@ -202,25 +207,26 @@ class SearchManager
                 foreach ($definition['filter_definitions'] as $key => $value) {
 
                     if (array_key_exists($key, $definition['exposed'] ?? []) && $definition['exposed'][$key] === true) {
-                        $list = explode(':', $key);
-                        $table = $list[0] !== 'node_data' ? "node__{$list[1]}" : $list[0];
+                        $list = explode(':', (string) $key);
+                        $table = $list[0] !== 'node_data' ? 'node__' . $list[1] : $list[0];
                         $placeholder = $list[1];
                         $this->placeholders[] = $key;
 
                         if ($value === 'contains' || $value === 'starts_with' || $value === 'ends_with') {
-                            $search_fields[] = "$table.{$list[1]} LIKE :{$placeholder}";
+                            $search_fields[] = sprintf('%s.%s LIKE :%s', $table, $list[1], $placeholder);
                         }
                         elseif ($value === 'equals') {
-                            $search_fields[] = "$table.{$list[1]} = :{$placeholder}";
+                            $search_fields[] = sprintf('%s.%s = :%s', $table, $list[1], $placeholder);
                         }
                         elseif ($value === 'not_equals') {
-                            $search_fields[] = "$table.{$list[1]} != :{$placeholder}";
+                            $search_fields[] = sprintf('%s.%s != :%s', $table, $list[1], $placeholder);
                         }
                     }
                 }
+
                 $search_fields = implode(" OR ", $search_fields);
-                if (!empty($search_fields)) {
-                    $join_statement .= " AND ({$search_fields})";
+                if ($search_fields !== '' && $search_fields !== '0') {
+                    $join_statement .= sprintf(' AND (%s)', $search_fields);
                 }
 
 
@@ -230,20 +236,20 @@ class SearchManager
                 $offset = $definition['offset'] ?? 0;
                 $page = (int) max(1, $request->get('page', 1));
                 $offset = ($page - 1) * $limit;
-                $limit_line = "LIMIT {$limit} OFFSET {$offset}";
-                $join_statement .= " {$limit_line}";
+                $limit_line = sprintf('LIMIT %s OFFSET %s', $limit, $offset);
+                $join_statement .= ' ' . $limit_line;
                 $this->search_query = $join_statement;
                 return $join_statement;
             }
 
             elseif (isset($definition['type']) && $definition['type'] == 'user_type') {
 
-                $select_part = array_map(function ($field) {
+                $select_part = array_map(function ($field): string {
                     $list = explode(':', $field);
-                    return  "{$list[0]}.{$list[1]} AS {$list[1]}";
+                    return  sprintf('%s.%s AS %s', $list[0], $list[1], $list[1]);
                 }, $definition['fields']);
 
-                $tables = array_map(function ($field) {
+                $tables = array_map(function ($field): string {
                     $list = explode(':', $field);
                     return $list[0];
                 },$definition['fields']);
@@ -259,39 +265,42 @@ class SearchManager
                 foreach ($definition['filter_definitions'] as $key => $value) {
 
                     if (array_key_exists($key, $definition['exposed'] ?? []) && $definition['exposed'][$key] === true) {
-                        $list = explode(':', $key);
+                        $list = explode(':', (string) $key);
                         $table = $list[0];
                         $placeholder = $list[1];
                         $this->placeholders[] = $key;
 
                         if ($value === 'contains' || $value === 'starts_with' || $value === 'ends_with') {
-                            $search_fields[] = "$table.{$list[1]} LIKE :{$placeholder}";
+                            $search_fields[] = sprintf('%s.%s LIKE :%s', $table, $list[1], $placeholder);
                         }
                         elseif ($value === 'equals') {
-                            $search_fields[] = "$table.{$list[1]} = :{$placeholder}";
+                            $search_fields[] = sprintf('%s.%s = :%s', $table, $list[1], $placeholder);
                         }
                         elseif ($value === 'not_equals') {
-                            $search_fields[] = "$table.{$list[1]} != :{$placeholder}";
+                            $search_fields[] = sprintf('%s.%s != :%s', $table, $list[1], $placeholder);
                         }
                     }
                 }
+
                 $search_fields = implode(" OR ", $search_fields);
-                if (!empty($search_fields)) {
-                    $join_statement .= " WHERE {$search_fields}";
+                if ($search_fields !== '' && $search_fields !== '0') {
+                    $join_statement .= ' WHERE ' . $search_fields;
                 }
+
                 $join_statement .= " GROUP BY users.uid";
 
                 $limit = $definition['limit'] ?? 50;
                 $offset = $definition['offset'] ?? 0;
                 $page = (int) max(1, $request->get('page', 1));
                 $offset = ($page - 1) * $limit;
-                $limit_line = "LIMIT {$limit} OFFSET {$offset}";
-                $join_statement .= " {$limit_line}";
+                $limit_line = sprintf('LIMIT %s OFFSET %s', $limit, $offset);
+                $join_statement .= ' ' . $limit_line;
                 $this->search_query = $join_statement;
                 return $join_statement;
             }
 
         }
+
         return null;
     }
 
@@ -300,29 +309,31 @@ class SearchManager
         $definition = $this->getSetting($key);
         $place_holders_values = [];
         foreach ($this->placeholders as $placeholder) {
-            $list = explode(':', $placeholder);
+            $list = explode(':', (string) $placeholder);
             $name  = end($list);
             $place_holders_values[$placeholder] = $request->get($name);
         }
+
         $query = Database::database()->con()->prepare($this->search_query);
         foreach ($place_holders_values as $key => $value) {
 
-            $list = explode(':', $key);
+            $list = explode(':', (string) $key);
             $name  = end($list);
             $filter = $definition['filter_definitions'][$key] ?? "equals";
             if ($filter === 'contains') {
-                $query->bindValue(":{$name}", "%{$value}%");
+                $query->bindValue(':' . $name, sprintf('%%%s%%', $value));
             }
             elseif ($filter === 'starts_with') {
-                $query->bindValue(":{$name}", "%{$value}");
+                $query->bindValue(':' . $name, '%' . $value);
             }
             elseif ($filter === 'ends_with') {
-                $query->bindValue(":{$name}", "{$value}%");
+                $query->bindValue(':' . $name, $value . '%');
             }
             elseif ($filter === 'equals' || $filter === 'not_equals') {
-                $query->bindParam(":{$name}", $value);
+                $query->bindParam(':' . $name, $value);
             }
         }
+
         $query->execute();
         $this->results = $query->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -371,7 +382,7 @@ class SearchManager
         foreach ($definition['exposed'] as $key => $value) {
 
             if ($value === true) {
-                $list = explode(':', $key);
+                $list = explode(':', (string) $key);
 
                 if ($definition['type'] === 'content_type' && $list[0] !== 'node_data') {
                     $field = $anonymous::find($list[0], $list[1]);
@@ -393,6 +404,7 @@ class SearchManager
             }
 
         }
+
         return View::view('default.view.search_form_build', ['exposed_fields' => $field_names, 'search_key' => $search_key]);
     }
 }

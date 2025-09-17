@@ -12,9 +12,10 @@ use Simp\Core\lib\themes\View;
 use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\roles\RoleManager;
 
-class Menus
+class Menus implements \Stringable
 {
     protected array $menus = [];
+
     protected RoleManager $roleManager;
 
     /**
@@ -131,21 +132,19 @@ class Menus
         return new self();
     }
 
-    /**
-     * @return string
-     */
     public function __toString(): string
     {
         $menu_links = [];
-        foreach ($this->menus as $key => $menu) {
+        foreach ($this->menus as $menu) {
 
             try{
                 /**@var Menu $menu */
                 $menu_links[] = View::view('default.view.menu_item', ['menu'=>$menu]);
-            }catch (\Throwable $e){
+            }catch (\Throwable){
             }
 
         }
+
         return implode('', $menu_links);
     }
 }

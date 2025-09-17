@@ -8,11 +8,12 @@ use Simp\Core\lib\routes\Route;
  class RestDataSource implements RestDataSourceInterface
 {
 
-    protected array $results = [];
+    protected array $results = ['Api route is active'];
+
     protected int $status = 200;
+
     public function __construct(Route $route, array $options)
     {
-        $this->results = ['Api route is active'];
     }
 
     public function getResponse(): array

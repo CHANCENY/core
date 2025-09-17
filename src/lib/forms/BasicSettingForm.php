@@ -13,6 +13,7 @@ class BasicSettingForm extends FormBase
 {
 
     private bool $validated = true;
+
     public function getFormId(): string
     {
        return 'basic_setting';
@@ -206,7 +207,7 @@ class BasicSettingForm extends FormBase
                         'KR' => 'South Korea',
                         'KW' => 'Kuwait',
                         'KG' => 'Kyrgyzstan',
-                        'LA' => 'Lao People\'s Democratic Republic',
+                        'LA' => "Lao People's Democratic Republic",
                         'LV' => 'Latvia',
                         'LB' => 'Lebanon',
                         'LS' => 'Lesotho',
@@ -433,9 +434,7 @@ class BasicSettingForm extends FormBase
     {
         if ($this->validated) {
             unset($form['submit']);
-            $basic_setting = array_map(function ($value) {
-                return $value->getValue();
-            }, $form);
+            $basic_setting = array_map(fn($value) => $value->getValue(), $form);
 
             $settings = [
                 ...$basic_setting['site'],

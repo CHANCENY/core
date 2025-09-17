@@ -2,19 +2,17 @@
 
 namespace Simp\Core\modules\structures\views;
 
-class ViewDataObject
+class ViewDataObject implements \Stringable
 {
     protected array $data = [];
+
     public function __construct(array $data)
     {
         foreach ($data as $key=>$row) {
-            if (isset($this->data[$key])) {
-                $this->data[$key] = array_merge($this->data[$key], $row[$key]);
-            }else {
-                $this->data[$key] = $row;
-            }
+            $this->data[$key] = isset($this->data[$key]) ? array_merge($this->data[$key], $row[$key]) : $row;
         }
     }
+
     public function getData(): array {
         return $this->data;
     }
@@ -29,6 +27,7 @@ class ViewDataObject
         if (is_array($found) && count($found) === 1) {
             return $found[0];
         }
+
         return $found;
     }
 
@@ -44,6 +43,6 @@ class ViewDataObject
 
     public function __toString(): string
     {
-        return json_encode($this->data);
+        return (string) json_encode($this->data);
     }
 }

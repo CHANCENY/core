@@ -16,6 +16,7 @@ use Symfony\Component\Yaml\Yaml;
 class ModuleHandler extends SystemDirectory
 {
     protected array $modules = [];
+
     protected string $default_module_dir = '';
 
     public function __construct()
@@ -27,6 +28,7 @@ class ModuleHandler extends SystemDirectory
         if (!is_dir($default_modules)) {
             @mkdir($default_modules, 0777, true);
         }
+
         $this->default_module_dir = $default_modules;
         $this->modules = array_diff(scandir($this->default_module_dir) ?? [], ['.', '..']);
 
@@ -57,6 +59,7 @@ class ModuleHandler extends SystemDirectory
             }
 
         }
+
         $this->modules = $unfiltered_modules;
 
     }
@@ -110,11 +113,11 @@ class ModuleHandler extends SystemDirectory
         $content_type_install = $name . '_content_type_install';
         if (function_exists($content_type_install)) {
             $content_types = $content_type_install();
-            if (is_array($content_types) && count($content_types) > 0) {
+            if (is_array($content_types) && $content_types !== []) {
 
                 foreach ($content_types as $name=>$content_type) {
                     $content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($name);
-                    if (empty($content_type)) {
+                    if ($content_type === null || $content_type === []) {
                         ContentDefinitionManager::contentDefinitionManager()->addContentType($name, $content_type);
                     }
                 }
@@ -127,22 +130,21 @@ class ModuleHandler extends SystemDirectory
         $views_install = $name . '_views_install';
         if (function_exists($views_install)) {
             $views = $views_install();
-            if (is_array($views) && count($views) > 0) {
+            if (is_array($views) && $views !== []) {
                 foreach ($views as $name=>$view) {
                     $view_old = ViewsManager::viewsManager()->getView($name);
-                    if (empty($view_old)) {
+                    if ($view_old === []) {
                         ViewsManager::viewsManager()->addView($name, $view);
                         $displays = $view['displays'] ?? [];
                         foreach ($displays as $display) {
                             $display_old = ViewsManager::viewsManager()->getDisplay($display);
-                            if (empty($display_old)) {
-                                if (!empty($views['display_settings'][$display])) {
-                                    ViewsManager::viewsManager()->addViewDisplay($name, $views['display_settings'][$display]);
-                                }
+                            if ($display_old === [] && !empty($views['display_settings'][$display])) {
+                                ViewsManager::viewsManager()->addViewDisplay($name, $views['display_settings'][$display]);
                             }
                         }
                     }
                 }
+
                 Messager::toast()->addMessage("Views created successfully");
             }
         }
@@ -153,7 +155,7 @@ class ModuleHandler extends SystemDirectory
 
     public function getModulesRoutes(): array {
 
-        $routes = array();
+        $routes = [];
         foreach($this->modules as $name=>$module) {
              $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
             if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
@@ -164,12 +166,13 @@ class ModuleHandler extends SystemDirectory
                   }
             }
         }
+
         return $routes;
     }
 
     public function getModuleTemplates(): array
     {
-        $templates = array();
+        $templates = [];
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
             if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
@@ -180,6 +183,7 @@ class ModuleHandler extends SystemDirectory
                   }
             }
         }
+
         return \array_unique($templates);
     }
 
@@ -195,11 +199,12 @@ class ModuleHandler extends SystemDirectory
         if (!file_exists($extension)) {
             touch($extension);
         }
+
         $extend = Yaml::parseFile($extension) ?? [];
 
         $extend[$name] = true;
         $this->installModule($name);
-        return !empty(\file_put_contents($extension, Yaml::dump($extend, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
+        return !in_array(\file_put_contents($extension, Yaml::dump($extend, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)), [0, false], true);
     }
 
     public static function factory(): ModuleHandler
@@ -212,6 +217,7 @@ class ModuleHandler extends SystemDirectory
         if (!file_exists($extension)) {
             touch($extension);
         }
+
         $extend = Yaml::parseFile($extension) ?? [];
         return !empty($extend[$name]);
     }
@@ -222,15 +228,16 @@ class ModuleHandler extends SystemDirectory
         if (!file_exists($extension)) {
             touch($extension);
         }
+
         $extend = Yaml::parseFile($extension) ?? [];
 
         $extend[$name] = false;
-        return !empty(\file_put_contents($extension, Yaml::dump($extend, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
+        return !in_array(\file_put_contents($extension, Yaml::dump($extend, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)), [0, false], true);
     }
 
     public function getFieldExtension(): array
     {
-        $fields = array();
+        $fields = [];
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
             if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
@@ -241,6 +248,7 @@ class ModuleHandler extends SystemDirectory
                 }
             }
         }
+
         return \array_unique($fields);
     }
 
@@ -257,23 +265,23 @@ class ModuleHandler extends SystemDirectory
                 foreach ($assets as $key=>$asset) {
 
                    foreach ($asset as $file) {
-                       $extension = pathinfo($file, PATHINFO_EXTENSION);
+                       $extension = pathinfo((string) $file, PATHINFO_EXTENSION);
                        if ($key === 'head') {
                            if ($extension === 'css') {
-                               $GLOBALS['theme']['head'][] = "<link rel='stylesheet' href='{$file}'>";
+                               $GLOBALS['theme']['head'][] = sprintf("<link rel='stylesheet' href='%s'>", $file);
                            }
                            elseif ($extension === 'js') {
-                               $GLOBALS['theme']['head'][] = "<script src='{$file}'></script>";
+                               $GLOBALS['theme']['head'][] = sprintf("<script src='%s'></script>", $file);
                            }
                        }
 
                        elseif ($key === 'footer') {
 
                            if ( $extension === 'css') {
-                               $GLOBALS['theme']['footer'][] = "<link rel='stylesheet' href='{$file}'>";
+                               $GLOBALS['theme']['footer'][] = sprintf("<link rel='stylesheet' href='%s'>", $file);
                            }
                            elseif ( $extension === 'js') {
-                               $GLOBALS['theme']['footer'][] = "<script src='{$file}'></script>";
+                               $GLOBALS['theme']['footer'][] = sprintf("<script src='%s'></script>", $file);
                            }
 
                        }
@@ -290,7 +298,7 @@ class ModuleHandler extends SystemDirectory
 
     public function getConsoleCommands(): array
     {
-        $commands = array();
+        $commands = [];
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
             if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
@@ -301,12 +309,13 @@ class ModuleHandler extends SystemDirectory
                   }
             }
         }
+
         return $commands;
     }
 
     public function getServicesProvider(): array
     {
-        $services = array();
+        $services = [];
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
             if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
@@ -317,12 +326,13 @@ class ModuleHandler extends SystemDirectory
                   }
             }
         }
+
         return $services;
     }
 
     public function getMiddlewares(): array
     {
-        $middlewares = array();
+        $middlewares = [];
         foreach($this->modules as $name=>$module) {
             $module_installer = $module['path'] . DIRECTORY_SEPARATOR . $name. '.install.php';
             if (file_exists($module_installer) && $this->isModuleEnabled($name)) {
@@ -333,6 +343,7 @@ class ModuleHandler extends SystemDirectory
                   }
             }
         }
+
         return $middlewares;
     }
 

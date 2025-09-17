@@ -34,7 +34,7 @@ class MongodbForm extends FormBase
     public function submitForm(array $form): void
     {
         if ($this->validated) {
-            $data = array_map(function($value){ return $value?->getValue(); }, $form);
+            $data = array_map(fn($value) => $value?->getValue(), $form);
             if (!empty($data['submit'])){
                 unset($data['submit']);
             }

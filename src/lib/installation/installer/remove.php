@@ -17,7 +17,7 @@ $json = null;
 if ($fid) {
     $file = \Simp\Core\modules\files\entity\File::load($fid);
 
-    if ($file) {
+    if ($file instanceof \Simp\Core\modules\files\entity\File) {
         $result = $file->delete();
 
         if ($result) {

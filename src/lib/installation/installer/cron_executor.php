@@ -18,7 +18,7 @@ try{
 
     $encoded = $argv[1] ?? null;
 
-    if (!$encoded) {
+    if ($encoded === null || $encoded === '' || $encoded === '0') {
         echo "No data received.\n";
         exit(1);
     }
@@ -38,6 +38,6 @@ try{
         'message' => $response->message,
     ]);
 
-}catch (Throwable $e){
+}catch (Throwable){
 
 }

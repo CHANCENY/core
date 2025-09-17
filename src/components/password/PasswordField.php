@@ -9,8 +9,10 @@ use Simp\Fields\FieldTypeSupportException;
 class PasswordField extends FieldBase
 {
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
 
     public function __construct(array $field, string $request_method, array $post = [], array $params = [], array $files = [])
     {
@@ -24,8 +26,6 @@ class PasswordField extends FieldBase
             'name',
             'id'
         ];
-
-        $this->validation_message = '';
 
         foreach ($required as $field_key) {
             if (!array_key_exists($field_key, $field)) {
@@ -51,11 +51,11 @@ class PasswordField extends FieldBase
                 if (!empty($this->field['sanitize'])) {
                     if (is_array($value)) {
                         foreach ($value as $k=>$sub_value) {
-                            $value[$k] = htmlspecialchars(strip_tags($sub_value));
+                            $value[$k] = htmlspecialchars(strip_tags((string) $sub_value));
                         }
                     }
                     else {
-                        $value = htmlspecialchars(strip_tags($value));
+                        $value = htmlspecialchars(strip_tags((string) $value));
                     }
                 }
 
@@ -64,7 +64,7 @@ class PasswordField extends FieldBase
 
         }
 
-        if ($request_method === 'GET' && !empty($params)) {
+        if ($request_method === 'GET' && $params !== []) {
 
             $value = $params[$field['name']] ?? null;
             if ($value !== null) {
@@ -72,11 +72,11 @@ class PasswordField extends FieldBase
                 if (!empty($this->field['sanitize'])) {
                     if (is_array($value)) {
                         foreach ($value as $k=>$sub_value) {
-                            $value[$k] = htmlspecialchars(strip_tags($sub_value));
+                            $value[$k] = htmlspecialchars(strip_tags((string) $sub_value));
                         }
                     }
                     else {
-                        $value = htmlspecialchars(strip_tags($value));
+                        $value = htmlspecialchars(strip_tags((string) $value));
                     }
                 }
 
@@ -112,7 +112,7 @@ class PasswordField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -127,7 +127,7 @@ class PasswordField extends FieldBase
 
     public function getValue(): string|int|float|null|array|bool
     {
-        return !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
+        return empty($this->submission['value']) ? $this->field['default_value'] ?? '' : $this->submission['value'];
     }
 
     public function get(string $field_name): float|int|bool|array|string|null

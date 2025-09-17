@@ -30,14 +30,14 @@ class SearchFormConfiguration extends FormBase
     {
         $key = Service::get('request')->get('key','');
         $search = SearchManager::searchManager()->getSetting($key);
-        $form['search_wrapper'] = array(
+        $form['search_wrapper'] = [
             'type' => 'fieldset',
             'name' => 'search_wrapper',
             'id' => 'search_wrapper',
             'class' => ['form-wrapper'],
             'handler' => FieldSetField::class,
             'label' => '',
-            'inner_field' => array(
+            'inner_field' => [
                 'search_name' =>  [
                     'type' => 'text',
                     'name' => 'search_name',
@@ -71,8 +71,8 @@ class SearchFormConfiguration extends FormBase
                     'required' => true,
                     'default_value' => $search['template'] ?? null,
                 ]
-            )
-        );
+            ]
+        ];
 
         $form['submit'] = [
             'type' => 'submit',
@@ -123,12 +123,13 @@ class SearchFormConfiguration extends FormBase
 
             if (!empty($data['search_name'])) {
                 $name = strtolower(str_replace(' ', '-', $data['search_name']));
-                $name = !empty($search_key) ? $search_key : $name;
+                $name = empty($search_key) ? $name : $search_key;
                 $new_data['name'] = $data['search_name'];
 
                 if (!empty($data['search_type'])) {
                     $new_data['type'] = $data['search_type'];
                 }
+
                 if (!empty($data['search_result_template'])) {
                     $new_data['template'] = $data['search_result_template'];
                 }
@@ -137,6 +138,7 @@ class SearchFormConfiguration extends FormBase
                     $setting = SearchManager::searchManager()->getSetting($search_key);
                     $new_data = array_merge($setting, $new_data);
                 }
+
                 if (SearchManager::searchManager()->addSetting($name, $new_data)) {
                     Messager::toast()->addMessage("Added search setting");
                     (new RedirectResponse('/admin/search/settings',302))->send();

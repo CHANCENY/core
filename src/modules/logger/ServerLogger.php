@@ -9,15 +9,17 @@ use Simp\Core\modules\database\Database;
 class ServerLogger
 {
     protected array $logs = [];
+
     protected PDO $con;
 
     public function __construct(int $limit = 50, int $offset = 0)
     {
         $this->con = Database::database()->con();
-        $query = "SELECT * FROM activity ORDER BY created DESC LIMIT $limit OFFSET $offset";
+        $query = sprintf('SELECT * FROM activity ORDER BY created DESC LIMIT %d OFFSET %d', $limit, $offset);
         $query = $this->con->prepare($query);
         $query->execute();
-        $this->logs = array_map(function ($item) {
+
+        $this->logs = array_map(function (array $item): array {
             $item['memory'] = $this->readableMemory($item['memory']);
             $item['start'] = $this->date($item['start']);
             $item['elapsed'] = $this->date($item['elapsed']);
@@ -44,9 +46,9 @@ class ServerLogger
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $filters['count'] = $result['total'] ?? 0;
-        } catch (PDOException $e) {
+        } catch (PDOException $pdoException) {
             // Log the error or handle it accordingly
-            $filters['error'] = $e->getMessage();
+            $filters['error'] = $pdoException->getMessage();
         }
 
         return $filters;

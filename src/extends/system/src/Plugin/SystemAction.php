@@ -13,7 +13,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class SystemAction
 {
-    public static function rebuildCore()
+    public static function rebuildCore(): void
     {
         $system = new SystemDirectory();
 
@@ -23,10 +23,11 @@ class SystemAction
         $destinationDefaults = $system->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . "defaults";
 
         $sourceDefaults = is_dir($vendorDir) ? $vendorDir : (is_dir($srcDir) ? $srcDir : null);
-        if ($sourceDefaults) {
+        if ($sourceDefaults !== null && $sourceDefaults !== '' && $sourceDefaults !== '0') {
             if (!is_dir($destinationDefaults)) {
                 mkdir($destinationDefaults, 0777, true);
             }
+
             self::recursiveCopy($sourceDefaults, $destinationDefaults);
         }
 
@@ -36,10 +37,11 @@ class SystemAction
         $assetsSource = is_dir($vendorAssets) ? $vendorAssets : (is_dir($srcAssets) ? $srcAssets : null);
 
         $destinationAssets = $system->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'assets';
-        if ($assetsSource) {
+        if ($assetsSource !== null && $assetsSource !== '' && $assetsSource !== '0') {
             if (!is_dir($destinationAssets)) {
                 mkdir($destinationAssets, 0777, true);
             }
+
             self::recursiveCopy($assetsSource, $destinationAssets);
         }
     }
@@ -51,7 +53,9 @@ class SystemAction
         @mkdir($dst, 0777, true);
 
         while (($file = readdir($dir)) !== false) {
-            if ($file === '.' || $file === '..') continue;
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
 
             $srcPath = $src . DIRECTORY_SEPARATOR . $file;
             $dstPath = $dst . DIRECTORY_SEPARATOR . $file;
@@ -75,7 +79,7 @@ class SystemAction
 
         $source = is_dir($vendorDir) ? $vendorDir : (is_dir($srcDir) ? $srcDir : null);
 
-        if (!$source) {
+        if ($source === null || $source === '' || $source === '0') {
             return;
         }
 
@@ -94,11 +98,15 @@ class SystemAction
 
     protected static function deleteRecursive(string $dir): void
     {
-        if (!is_dir($dir)) return;
+        if (!is_dir($dir)) {
+            return;
+        }
 
         $items = scandir($dir);
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') continue;
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
 
             $path = $dir . DIRECTORY_SEPARATOR . $item;
             if (is_dir($path)) {
@@ -126,7 +134,7 @@ class SystemAction
         }
 
         // Recursive function to delete files and folders
-        $deleteFolder = function ($dir) use (&$deleteFolder) {
+        $deleteFolder = function (string $dir) use (&$deleteFolder): void {
             $files = array_diff(scandir($dir), ['.', '..']);
             foreach ($files as $file) {
                 $path = $dir . DIRECTORY_SEPARATOR . $file;
@@ -136,6 +144,7 @@ class SystemAction
                     unlink($path);
                 }
             }
+
             rmdir($dir);
         };
 
@@ -146,7 +155,7 @@ class SystemAction
     }
 
 
-    public static function copyInstallers()
+    public static function copyInstallers(): void
     {
         $system = new SystemDirectory();
         $filesToCopy = [
@@ -168,7 +177,7 @@ class SystemAction
         $srcDir    = $system->root_dir . DIRECTORY_SEPARATOR . "src/lib/installation/installer";
         $sourceDir = is_dir($vendorDir) ? $vendorDir : (is_dir($srcDir) ? $srcDir : null);
 
-        if (!$sourceDir) {
+        if ($sourceDir === null || $sourceDir === '' || $sourceDir === '0') {
             return; // no source found
         }
 
@@ -201,11 +210,11 @@ class SystemAction
         self::clearCache();
     }
 
-    public static function persistContentTypes()
+    public static function persistContentTypes(): void
     {
         $content_types = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
 
-        foreach ($content_types as $key=>$content_type) {
+        foreach (array_keys($content_types) as $key) {
             $storage_manager = ContentDefinitionStorage::contentDefinitionStorage($key);
             $storage_manager->storageDefinitionsPersistent();
         }

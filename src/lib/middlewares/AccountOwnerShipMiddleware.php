@@ -58,7 +58,7 @@ class AccountOwnerShipMiddleware implements Middleware
                 'system.account.edit',
                 'system.account.delete'
             ];
-            
+
             if (in_array($route_id, $account_id)) {
 
                 if (CurrentUser::currentUser()->isIsAdmin() || CurrentUser::currentUser()->isIsManager()) {
@@ -72,15 +72,17 @@ class AccountOwnerShipMiddleware implements Middleware
                         $access_interface->access_granted = false;
                         $access_interface->redirect = $redirect;
                     }
+
                     return $next($request, $access_interface);
                 }
 
                 elseif (CurrentUser::currentUser()->isIsAuthenticated()) {
 
-                    if (CurrentUser::currentUser()->getUser()->getUid() == $user_loaded->getUid()) {
+                    if (CurrentUser::currentUser()->getUser()->getUid() === $user_loaded->getUid()) {
                         $access_interface->access_granted = true;
                         return $next($request, $access_interface);
                     }
+
                     $access_interface->access_granted = false;
                     $access_interface->redirect = $redirect;
                     return $next($request, $access_interface);
@@ -88,6 +90,7 @@ class AccountOwnerShipMiddleware implements Middleware
 
             }
         }
+
         return $next($request, $access_interface);
     }
 }

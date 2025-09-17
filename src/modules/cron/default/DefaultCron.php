@@ -16,7 +16,8 @@ class DefaultCron implements CronSubscriber
         try{
             $this->blockedUsers();
             $this->removeUnReferenceNode();
-        }catch (\Throwable $exception){}
+        }catch (\Throwable){}
+
         $end = time(); // seconds only
         $execution_time = $end - $start;
 
@@ -34,7 +35,7 @@ class DefaultCron implements CronSubscriber
     {
         $query = "DELETE FROM users WHERE status = 0";
         $database = Database::database();
-        if ($database) {
+        if ($database instanceof \Simp\Core\modules\database\Database) {
             $query = $database->con()->prepare($query);
             $query->execute();
         }
@@ -44,10 +45,10 @@ class DefaultCron implements CronSubscriber
     {
         $content_types = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $types = array_keys($content_types);
-        if ($types) {
+        if ($types !== []) {
             $query = "DELETE FROM node_data WHERE bundle NOT IN ('" . implode("','", $types) . "')";
             $database = Database::database();
-            if ($database) {
+            if ($database instanceof \Simp\Core\modules\database\Database) {
                 $query = $database->con()->prepare($query);
                 $query->execute();
             }

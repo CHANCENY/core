@@ -8,6 +8,7 @@ use Symfony\Component\Yaml\Yaml;
 class VocabularyManager
 {
     protected array $vocabularies = [];
+
     protected string $location;
 
     public function __construct()
@@ -17,9 +18,11 @@ class VocabularyManager
         if (!is_dir($system->setting_dir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'taxonomy')) {
             @mkdir($system->setting_dir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'taxonomy');
         }
+
         if (!file_exists($this->location)) {
             @touch($this->location);
         }
+
         $this->vocabularies = Yaml::parseFile($this->location) ?? [];
     }
 
@@ -32,19 +35,19 @@ class VocabularyManager
                 'label' => $name
             ];
             $d = Yaml::dump($this->vocabularies, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
-            return !empty(file_put_contents($this->location, $d));
+            return !in_array(file_put_contents($this->location, $d), [0, false], true);
         }
 
         $this->vocabularies[$name_neural]['label'] = $name;
         $d = Yaml::dump($this->vocabularies, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
-        return !empty(file_put_contents($this->location, $d));
+        return !in_array(file_put_contents($this->location, $d), [0, false], true);
     }
 
     protected function createName(string $name): string
     {
         $name = preg_replace('/[^a-zA-Z0-9_]/', '_', $name);
-        $name = preg_replace('/\s+/', '_', $name);
-        return preg_replace('/_+/', '_', $name);
+        $name = preg_replace('/\s+/', '_', (string) $name);
+        return preg_replace('/_+/', '_', (string) $name);
     }
 
     public static function factory(): VocabularyManager
@@ -57,8 +60,9 @@ class VocabularyManager
         if (isset($this->vocabularies[$vid])) {
             unset($this->vocabularies[$vid]);
             $d = Yaml::dump($this->vocabularies, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
-            return !file_put_contents($this->location, $d);
+            return in_array(file_put_contents($this->location, $d), [0, false], true);
         }
+
         return false;
     }
 
@@ -78,8 +82,9 @@ class VocabularyManager
         if (!isset($this->vocabularies[$name_neural])) {
             $this->vocabularies[$name_neural]['label'] = $label;
         }
+
         $d = Yaml::dump($this->vocabularies);
-        return !empty(file_put_contents($this->location, $d));
+        return !in_array(file_put_contents($this->location, $d), [0, false], true);
     }
 
 }

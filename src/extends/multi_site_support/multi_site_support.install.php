@@ -36,82 +36,82 @@ function multi_site_support_template_install(): array
 function multi_site_support_route_install(): array
 {
 
-    return array(
-        'multi_site_support.dashboard' => array(
+    return [
+        'multi_site_support.dashboard' => [
             'title' => 'Multi Site Support',
             'path' => '/admin/multi-site-support/dashboard',
-            'method' => array('GET', 'POST'),
-            'access' => array('administrator'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'access' => ['administrator'],
+            'controller' => [
                 'class' => MultiSiteSupportController::class,
                 'method' => 'index'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa-solid fa-sitemap']
-            )
-        ),
-        'multi_site_support.action.save' => array(
+            ]
+        ],
+        'multi_site_support.action.save' => [
             'title' => 'Multi Site Support Save',
             'path' => '/admin/multi-site-support/save',
-            'method' => array('POST'),
-            'access' => array('administrator'),
-            'controller' => array(
+            'method' => ['POST'],
+            'access' => ['administrator'],
+            'controller' => [
                 'class' => MultiSiteSupportController::class,
                 'method' => 'save'
-            ),
-            'options' => array()
-        ),
-        'multi_site_support.action.delete' => array(
+            ],
+            'options' => []
+        ],
+        'multi_site_support.action.delete' => [
             'title' => 'Multi Site Support Delete',
             'path' => '/admin/multi-site-support/[id:string]/delete',
-            'method' => array('GET'),
-            'access' => array('administrator'),
-            'controller' => array(
+            'method' => ['GET'],
+            'access' => ['administrator'],
+            'controller' => [
                 'class' => MultiSiteSupportController::class,
                 'method' => 'delete'
-            ),
-            'options' => array()
-        ),
-        'multi_site_support.blocked' => array(
+            ],
+            'options' => []
+        ],
+        'multi_site_support.blocked' => [
             'title' => 'Site Support Blocked',
             'path' => '/domain/blocked',
-            'method' => array('GET'),
-            'access' => array('anonymous'),
-            'controller' => array(
+            'method' => ['GET'],
+            'access' => ['anonymous'],
+            'controller' => [
                 'class' => MultiSiteSupportController::class,
                 'method' => 'blocked'
-            ),
-            'options' => array()
-        )
-    );
+            ],
+            'options' => []
+        ]
+    ];
 }
 
 
 function multi_site_support_library_install(string $library_name): array
 {
-    return array(
-        'multi_site_support.assets' => array(
+    return [
+        'multi_site_support.assets' => [
             'head' => [
                 '/core/modules/multi_site_support/assets/multi-main.css'
             ],
             'footer' => [
                 '/core/modules/multi_site_support/assets/multi-main.js'
             ]
-        ),
-        'multi_site_support.blocked' => array(
+        ],
+        'multi_site_support.blocked' => [
             'head' => [
                 '/core/modules/multi_site_support/assets/multi-blocked.css'
             ],
             'footer' => [
             ]
-        )
-    )[$library_name] ?? [];
+        ]
+    ][$library_name] ?? [];
 }
 
 function multi_site_support_middleware_install(): array
 {
-    return array(
+    return [
         \Simp\Core\extends\multi_site_support\src\Middleware\MultiSiteSupportMiddleware::class,
-    );
+    ];
 
 }

@@ -9,7 +9,9 @@ use Symfony\Component\Yaml\Yaml;
 class ViewsManager extends SystemDirectory
 {
     protected array $views = [];
+
     protected string $view = '';
+
     protected array $pages = [];
 
     public function __construct() {
@@ -19,6 +21,7 @@ class ViewsManager extends SystemDirectory
         if (!is_dir($this->view)) {
             @mkdir($this->view);
         }
+
         $list = array_diff(scandir($this->view) ?? [], ['.', '..']);
         foreach ($list as $file) {
             $full_path = $this->view . DIRECTORY_SEPARATOR . $file;
@@ -27,16 +30,16 @@ class ViewsManager extends SystemDirectory
                 $this->views[$name] = Yaml::parseFile($full_path);
             }
         }
-        if ($this->views) {
-            foreach ($this->views as $name => $view) {
-                foreach ($view['displays'] as $k=>$display) {
-                    $full_path = $this->view . DIRECTORY_SEPARATOR . 'view-display' . DIRECTORY_SEPARATOR . $display. '.yml';
-                    if (file_exists($full_path)) {
-                        $this->views[$name]['displays'][$k] = Yaml::parseFile($full_path);
-                    }
+
+        foreach ($this->views as $name => $view) {
+            foreach ($view['displays'] as $k=>$display) {
+                $full_path = $this->view . DIRECTORY_SEPARATOR . 'view-display' . DIRECTORY_SEPARATOR . $display. '.yml';
+                if (file_exists($full_path)) {
+                    $this->views[$name]['displays'][$k] = Yaml::parseFile($full_path);
                 }
             }
         }
+
         $views_routes = $this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'views-routes.yml';
         if (file_exists($views_routes)) {
             $this->pages = Yaml::parseFile($views_routes) ?? [];
@@ -58,7 +61,7 @@ class ViewsManager extends SystemDirectory
         $view['machine_name'] = $name;
         $this->views[$name] = $view;
         $view_path = $this->view . DIRECTORY_SEPARATOR . $name . '.yml';
-        return !empty(file_put_contents($view_path, Yaml::dump($view, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)));
+        return !in_array(file_put_contents($view_path, Yaml::dump($view, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)), [0, false], true);
     }
 
     public function removeView(string $name): bool
@@ -75,11 +78,13 @@ class ViewsManager extends SystemDirectory
                         file_put_contents($routes, Yaml::dump($route_data));
                     }
                 }
+
                 if (file_exists($full_path)) {
                     unlink($full_path);
                 }
             }
         }
+
         return @unlink($this->view . DIRECTORY_SEPARATOR . $name . '.yml');
     }
 
@@ -95,9 +100,9 @@ class ViewsManager extends SystemDirectory
             @mkdir($display_path);
         }
 
-        $display_name = "views_{$view_name}_{$display['display_name']}";
+        $display_name = sprintf('views_%s_%s', $view_name, $display['display_name']);
         $display['display_name'] = $display_name;
-        $route_id = "{$display['display_name']}";
+        $route_id = $display['display_name'];
 
         $route = [
             'title' => $display['name'],
@@ -126,7 +131,7 @@ class ViewsManager extends SystemDirectory
             $display['view'] = $view_name;
             file_put_contents($display_path .DIRECTORY_SEPARATOR. $display_name. '.yml', Yaml::dump($display,Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
             $view = $this->getView($view_name);
-            $old = array_map(function ($display) { return $display['display_name'] ?? null; },$view['displays']);
+            $old = array_map(fn(array $display) => $display['display_name'] ?? null,$view['displays']);
             $old = array_filter($old);
             $view['displays'] = array_values($old);
             $view['displays'][] = $display_name;
@@ -144,6 +149,7 @@ class ViewsManager extends SystemDirectory
         if (file_exists($full_path)) {
             return Yaml::parseFile($full_path) ?? [];
         }
+
         return [];
     }
 
@@ -161,10 +167,12 @@ class ViewsManager extends SystemDirectory
                     }
                 }
             }
+
             $this->addView($view_name, $view);
             $line_file = $this->view. DIRECTORY_SEPARATOR . 'view-display'. DIRECTORY_SEPARATOR.$name. '.yml';
             return @unlink($line_file);
         }
+
         return true;
     }
 
@@ -175,10 +183,8 @@ class ViewsManager extends SystemDirectory
     }
 
     /**
-     * @param string $display_name
      * @param string $key comprise with content_type_name|field_name
      * @param string $section this could be fields, sort_criteria, filter_criteria.
-     * @return bool
      */
     public function removeDisplayFieldSetting(string $display_name, string $key, string $section): bool
     {
@@ -187,6 +193,7 @@ class ViewsManager extends SystemDirectory
             unset($display[$section][$key]);
             return $this->addFieldDisplay($display_name, $display);
         }
+
         return true;
     }
 }

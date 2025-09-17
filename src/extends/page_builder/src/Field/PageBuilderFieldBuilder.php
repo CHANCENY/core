@@ -17,13 +17,7 @@ use Twig\Error\SyntaxError;
 class PageBuilderFieldBuilder implements FieldBuilderInterface
 {
 
-    private string $field_type;
-
     /**
-     * @param Request $request
-     * @param string $field_type
-     * @param array $options
-     * @return string
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
@@ -34,7 +28,6 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
      */
     public function build(Request $request, string $field_type, array $options = []): string
     {
-        $this->field_type = $field_type;
         $field = self::extensionInfo($field_type);
         $options['show_types'] = [
           'Iframe',
@@ -48,7 +41,6 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
 
     public function fieldArray(Request $request, string $field_type, string $entity_type): array
     {
-        $this->field_type = $field_type;
         return match ($field_type) {
             'page_builder' => $this->parseFileInputFieldSetting($request, $entity_type)
         };
@@ -56,7 +48,6 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
 
     public function extensionInfo(string $type): array
     {
-        $this->field_type = $type;
         return match ($type) {
             'page_builder' => ['title' => 'Page Contents', 'description' => 'Field takes data from page builder','type' => 'page_builder'],
         };
@@ -86,6 +77,7 @@ class PageBuilderFieldBuilder implements FieldBuilderInterface
                 'show_as' =>$data['show'] ?? "normal",
             ];
         }
+
         return $field_data;
     }
 }

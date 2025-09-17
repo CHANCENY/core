@@ -23,8 +23,10 @@ use Twig\Error\SyntaxError;
 class PageFieldBuilderField extends FieldBase
 {
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
 
     /**
      * @throws Exception
@@ -44,8 +46,6 @@ class PageFieldBuilderField extends FieldBase
             'id',
             'name',
         ];
-
-        $this->validation_message = '';
 
         foreach ($required as $field_key) {
             if (!array_key_exists($field_key, $field)) {
@@ -69,13 +69,14 @@ class PageFieldBuilderField extends FieldBase
             if (isset($post[$field['name'].'_hidden_pids'])) {
                 $value = $post[$field['name'].'_hidden_pids'];
             }
+
             if ($value !== null) {
                 $this->submission['value'] = $value;
             }
 
         }
 
-        if ($request_method === 'GET' && !empty($params)) {
+        if ($request_method === 'GET' && $params !== []) {
 
             $value = $params[$field['name']] ?? null;
             if ($value !== null) {
@@ -102,7 +103,7 @@ class PageFieldBuilderField extends FieldBase
 
     public function getId(): string
     {
-        return !empty($this->field['id']) ? $this->field['id'] : FieldManager::createFieldName($this->getLabel());
+        return empty($this->field['id']) ? FieldManager::createFieldName($this->getLabel()) : $this->field['id'];
     }
 
     public function getClassList(): array
@@ -112,7 +113,7 @@ class PageFieldBuilderField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -127,7 +128,7 @@ class PageFieldBuilderField extends FieldBase
 
     public function getValue(): string|int|float|null|array|bool
     {
-        return !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
+        return empty($this->submission['value']) ? $this->field['default_value'] ?? '' : $this->submission['value'];
     }
 
     public function get(string $field_name): float|int|bool|array|string|null
@@ -136,8 +137,6 @@ class PageFieldBuilderField extends FieldBase
     }
 
     /**
-     * @param bool $wrapper
-     * @return string
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
@@ -162,8 +161,8 @@ class PageFieldBuilderField extends FieldBase
         $wrapper_id = $this->getName(). "-wrapper-".uniqid();
 
         $line = "";
-        if ($page->getTitle()) {
-            $line = "{$page->getTitle()} ({$page->getName()}) v{$page->getVersion()} status: active {$status}";
+        if (!in_array($page->getTitle(), ['', '0'], true)) {
+            $line = sprintf('%s (%s) v%d status: active %s', $page->getTitle(), $page->getName(), $page->getVersion(), $status);
         }
 
 

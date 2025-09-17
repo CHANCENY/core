@@ -21,12 +21,19 @@ class Route
 {
 
     public string $route_title;
+
     public string $route_path;
+
     public array $method = [];
+
     public string $controller;
+
     public string $controller_method;
+
     public array $access;
+
     public string $route_type;
+
     public array $options;
 
     public function __construct(public readonly string $route_id, private readonly array $route_data)
@@ -108,17 +115,14 @@ class Route
     {
         $routes = Caching::init()->get('system.routes.keys');
         $found = array_filter( $routes, function ($item) use ($url) {
-            $route = Caching::init()?->get($item);
+            $route = Caching::init()->get($item);
             return $route?->route_path === $url ? $route : null;
         });
         $key = reset($found);
-        return $key ? Caching::init()?->get($key) : null;
+        return $key ? Caching::init()->get($key) : null;
     }
 
     /**
-     * @param Route $route
-     * @param array $controller_method_arguments
-     * @return Response|JsonResponse|RedirectResponse
      * @throws ReflectionException
      *
      */
@@ -126,6 +130,7 @@ class Route
     {
         $controller = new ReflectionClass($route->getController());
         $controller = $controller->newInstance();
+
         $method = $route->getControllerMethod();
         $options = [
             'request'=> $controller_method_arguments['request'] ?? Service::get('request'),
@@ -144,10 +149,11 @@ class Route
      */
     public static function fromRouteName(string $route_name): ?Route
     {
-        $route = Caching::init()?->get($route_name);
+        $route = Caching::init()->get($route_name);
         if ($route) {
             return $route;
         }
+
         return null;
     }
 
@@ -161,7 +167,7 @@ class Route
         return $this->options;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return $this->route_data;
     }
@@ -181,28 +187,28 @@ class Route
                 $alias = AutoPathAlias::createRouteId($options['nid']);
                 $options['is_alias'] = true;
                 $found = self::url($alias, $options, $params);
-                if (!empty($found)) {
+                if ($found !== null && $found !== '' && $found !== '0') {
                     return $found;
                 }
             }
 
-            if (!empty($id)) {
+            if ($id !== '' && $id !== '0') {
                 $route = Caching::init()->get($id);
                 if (empty($route) && ModuleHandler::factory()->isModuleEnabled('auto_path')) {
                     $routes = AutoPathAlias::injectAliases();
                     $route = $routes[$id] ?? null;
                 }
+
                 if ($route instanceof Route) {
                     $pattern = $route->getRoutePath();
-                    $generatePath = function (string $pattern, array $values): string {
-                        return self::getStr($pattern, $values);
-                    };
+                    $generatePath = (fn(string $pattern, array $values): string => self::getStr($pattern, $values));
                     $with_value_pattern = $generatePath($pattern, $options);
 
 
-                    return empty($params) ? $with_value_pattern : $with_value_pattern . '?'. http_build_query($params);
+                    return $params === [] ? $with_value_pattern : $with_value_pattern . '?'. http_build_query($params);
                 }
             }
+
             return null;
         };
         return $builder($route_name, $options, $params);
@@ -226,6 +232,7 @@ class Route
                 }
             }
         }
+
         return implode('/', $segments);
     }
 
@@ -238,9 +245,7 @@ class Route
     public static function getRoutes(): array
     {
         $routes = Caching::init()->get('system.routes.keys');
-         return array_map(function ($item) {
-            return Caching::init()?->get($item);
-        },$routes);
+         return array_map(fn($item): mixed => Caching::init()->get($item),$routes);
     }
 
 }

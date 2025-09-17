@@ -12,6 +12,7 @@ use Symfony\Component\Yaml\Yaml;
 class ContentDefinitionManager extends SystemDirectory
 {
     protected array $content_types = [];
+
     protected string $content_file;
 
     public function __construct()
@@ -30,6 +31,7 @@ class ContentDefinitionManager extends SystemDirectory
                 $this->content_types[$list_n] = $content;
             }
         }
+
         $this->content_file = $file;
     }
 
@@ -42,7 +44,7 @@ class ContentDefinitionManager extends SystemDirectory
         return $this->content_types[$name] ?? null;
     }
 
-    private function savable($name, array $all) {
+    private function savable(string $name, array $all) {
         return $all[$name] ?? [];
     }
 
@@ -60,15 +62,17 @@ class ContentDefinitionManager extends SystemDirectory
             $storage = ContentDefinitionStorage::contentDefinitionStorage($name);
             $storages = $this->content_types['storage'] ?? [];
             foreach($storages as $store) {
-                $name_t = substr($store, 5, strlen($store));
+                $name_t = substr((string) $store, 5, strlen((string) $store));
                 $name_t = trim($name_t, '_');
                 $storage->removeStorageDefinition($name_t);
             }
+
             $query = "DELETE FROM node_data WHERE bundle = :name";
             $query = Database::database()->con()->prepare($query);
             $query->bindParam(':name', $name);
             $query->execute();
         }
+
         return @unlink($this->content_file. DIRECTORY_SEPARATOR. $name . '.yml');
     }
 
@@ -84,6 +88,7 @@ class ContentDefinitionManager extends SystemDirectory
             }
 
         }
+
         return false;
     }
 
@@ -106,7 +111,7 @@ class ContentDefinitionManager extends SystemDirectory
                 }
                 else {
                    try{
-                       $index = array_search('node__' . $key, $this->content_types[$name]['storage']);
+                       $index = array_search('node__' . $key, $this->content_types[$name]['storage'], true);
                        if ($index !== false) {
                            unset($this->content_types[$name]['display_setting'][$key]);
                            unset($this->content_types[$name]['storage'][$index]);
@@ -125,7 +130,7 @@ class ContentDefinitionManager extends SystemDirectory
             $recursively_remove_inner_fields($reference['inner_field']);
         }
 
-        $index = array_search('node__' . $field_name, $this->content_types[$name]['storage']);
+        $index = array_search('node__' . $field_name, $this->content_types[$name]['storage'], true);
         if ($index !== false) {
            try{
                unset($this->content_types[$name]['display_setting'][$field_name]);
@@ -137,12 +142,8 @@ class ContentDefinitionManager extends SystemDirectory
                ErrorLogger::logger()->logError($e);
            }
         }
-
-        if (file_put_contents($this->content_file . DIRECTORY_SEPARATOR . $name . '.yml',
-         Yaml::dump($this->savable($name, $this->content_types),Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK))) {
-            return true;
-        }
-        return false;
+        return (bool) file_put_contents($this->content_file . DIRECTORY_SEPARATOR . $name . '.yml',
+         Yaml::dump($this->savable($name, $this->content_types),Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
     }
 
     public function removeInnerField(string $name,string $parent_field, string $field_name): bool
@@ -151,18 +152,15 @@ class ContentDefinitionManager extends SystemDirectory
             unset($this->content_types[$name]['fields'][$parent_field]['inner_field'][$field_name]);
         }
 
-        $index = array_search('node__' . $field_name, $this->content_types[$name]['storage']);
+        $index = array_search('node__' . $field_name, $this->content_types[$name]['storage'], true);
         if ($index !== false) {
             unset($this->content_types[$name]['storage'][$index]);
             $delete_query = ContentDefinitionStorage::contentDefinitionStorage($name)->getStorageDropStatement($field_name);
             $sta = Database::database()->con()->prepare($delete_query);
             $sta->execute();
         }
-        if (file_put_contents($this->content_file . DIRECTORY_SEPARATOR . $name . '.yml', 
-        Yaml::dump($this->savable($name, $this->content_types),Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK))) {
-            return true;
-        }
-        return false;
+        return (bool) file_put_contents($this->content_file . DIRECTORY_SEPARATOR . $name . '.yml', 
+        Yaml::dump($this->savable($name, $this->content_types),Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
     }
 
     public function getContentTypeStorage(): string
@@ -175,19 +173,20 @@ class ContentDefinitionManager extends SystemDirectory
         return new self();
     }
 
-    public function getFieldByName(int|string|null $field)
+    public function getFieldByName(int|string|null $field): array
     {
-        if (empty($field)) {
+        if ($field === 0 || ($field === '' || $field === '0') || $field === null) {
             return [];
         }
 
         $field_found = [];
-        foreach ($this->content_types as $content_t=>$content_type) {
+        foreach (array_keys($this->content_types) as $content_t) {
             $field_found = $this->getField($content_t, $field);
-            if (!empty($field_found)) {
+            if ($field_found !== null && $field_found !== []) {
                 return $field_found;
             }
         }
+
         return [];
     }
 }

@@ -21,7 +21,7 @@ use Simp\Core\modules\user\roles\RoleManager;
 use Simp\Core\modules\user\trait\StaticHelperTrait;
 use Simp\Mail\Mail\Envelope;
 
-class User
+class User implements \Stringable
 {
     use StaticHelperTrait;
     public function __construct(protected ?int $uid, protected ?string $name, protected ?string $mail,
@@ -34,10 +34,12 @@ class User
         $query = Database::database()->con()->prepare($query);
         $query->bindValue('uid', $uid, PDO::PARAM_INT);
         $query->execute();
+
         $result = $query->fetch(PDO::FETCH_ASSOC);
         if (empty($result)) {
             return null;
         }
+
         return new User(...$result);
     }
 
@@ -67,10 +69,12 @@ class User
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':mail', $mail, PDO::PARAM_STR);
         $query->execute();
+
         $result = $query->fetch(PDO::FETCH_ASSOC);
         if (empty($result)) {
             return null;
         }
+
         return new User(...$result);
     }
 
@@ -80,15 +84,16 @@ class User
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':name', $name, PDO::PARAM_STR);
         $query->execute();
+
         $result = $query->fetch(PDO::FETCH_ASSOC);
         if (empty($result)) {
             return null;
         }
+
         return new User(...$result);
     }
 
     /**
-     * @param array $data
      * @return User|false|null
      * False is returned if name or mail already exist.
      * Null if keys name, mail, password, time_zone are not set
@@ -122,9 +127,11 @@ class User
         if ($account_setting?->get('verification_email') === 'yes') {
             $emails['verifying'] = "Hello [user:name] you have created account on  [site:name] and you need to verify your email address. Please click the link below to verify your email address. [site:url]/user/verify/[user:verify_token]";
         }
-        if (trim($account_setting?->get('account_creation_message',''))) {
+
+        if (!in_array(trim((string) $account_setting?->get('account_creation_message','')), ['', '0'], true)) {
             $emails['creation'] = $account_setting?->get('account_creation_message','');
         }
+
         if ($account_setting?->get('notifications')) {
             $emails['notifications'] = "Hello new user has created account on [site:name]. Please click the link below to view the new user. [site:url]/user/[user:uid]";
         }
@@ -134,12 +141,13 @@ class User
         if (!empty($data['name']) && !empty($data['mail']) && !empty($data['password']) && !empty($data['time_zone'])) {
 
             // Hash password
-            $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+            $data['password'] = password_hash((string) $data['password'], PASSWORD_BCRYPT);
 
             // checking the if email or name exist already.
-            if (self::loadByMail($data['mail']) !== null || self::loadByName($data['name']) !== null) {
+            if (self::loadByMail($data['mail']) instanceof \Simp\Core\modules\user\entity\User || self::loadByName($data['name']) instanceof \Simp\Core\modules\user\entity\User) {
                 return false;
             }
+
             $config = ConfigManager::config()->getConfigFile("account.setting");
             if ($config?->get('verification_email') === 'no') {
                 $data['status'] = 1;
@@ -147,6 +155,7 @@ class User
             else {
                 $data['status'] = $config?->get('allow_account_creation') === 'visitor-pending' ? 0 : 1;
             }
+
             $statement = $connection->prepare($query);
             $statement->bindParam(':name', $data['name'], PDO::PARAM_STR);
             $statement->bindParam(':mail', $data['mail'], PDO::PARAM_STR);
@@ -196,29 +205,33 @@ class User
             $statement->execute();
 
             $user = self::load($uid);
-           if ($emails) {
+           if ($emails !== []) {
 
-               if ($emails['verifying']) {
+               if ($emails['verifying'] !== '' && $emails['verifying'] !== '0') {
                   MailQueueManager::factory()->add(Envelope::create(
                       'Verifying your email address',
                       TokenManager::token()->resolver($emails['verifying'], ['site'=>SiteManager::factory(), 'user'=>$user]),
                   )->addToAddresses([$user->getMail()]));
                }
+
                if ($emails['creation']) {
                    MailQueueManager::factory()->add( Envelope::create(
                        'Account creation',
                        TokenManager::token()->resolver($emails['creation'], ['site'=>SiteManager::factory(), 'user'=>$user]),
                    )->addToAddresses([$user->getName()]));
                }
-               if ($emails['notifications']) {
+
+               if ($emails['notifications'] !== '' && $emails['notifications'] !== '0') {
                    MailQueueManager::factory()->add(Envelope::create(
                        'New user',
                        TokenManager::token()->resolver($emails['notifications'], ['site'=>SiteManager::factory(), 'user'=>$user, 'settings'=>$account_setting]),
                    )->addToAddresses([$account_setting?->get('notifications')]));
                }
            }
+
            return $user;
         }
+
         return null;
     }
 
@@ -229,6 +242,7 @@ class User
                 new Role(0, 'anonymous', 0,'anonymous', 'anonymous'),
             ];
         }
+
         return $this->roleManager()->getRoles();
     }
 
@@ -237,14 +251,17 @@ class User
         if ($this->uid === 0) {
             return new Profile(0,'Guest','Profile',0,0,null,null,0,'en');
         }
+
         $query = "SELECT * FROM `user_profile` WHERE `uid` = :uid";
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':uid', $this->uid, PDO::PARAM_INT);
         $query->execute();
+
         $result = $query->fetch(PDO::FETCH_ASSOC);
         if (empty($result)) {
             return null;
         }
+
         return new Profile(...$result);
     }
 
@@ -255,7 +272,7 @@ class User
 
     public function getName(): ?string
     {
-        $account_setting = ConfigManager::config()->getConfigFile("account.setting");
+        ConfigManager::config()->getConfigFile("account.setting");
         return $this->name;
     }
 
@@ -276,6 +293,7 @@ class User
 
         $token = random_bytes(32);
         $token = bin2hex($token);
+
         $query = "INSERT INTO verify_email_token (token, uid) VALUES (:token, :uid) ON DUPLICATE KEY UPDATE token = :token_update";
         $query = Database::database()->con()->prepare($query);
         $query->bindParam(':token', $token, PDO::PARAM_STR);
@@ -313,7 +331,7 @@ class User
 
     public function __toString(): string
     {
-        return $this->name;
+        return (string) $this->name;
     }
 
     public function setName(?string $name): void
@@ -354,9 +372,10 @@ class User
         return $query->execute();
     }
 
-    public static function filter(string $name) {
+    public static function filter(string $name): array {
         $query = "SELECT * FROM users WHERE name LIKE :name OR mail LIKE :mail";
         $query = Database::database()->con()->prepare($query);
+
         $name = '%'.strip_tags($name).'%';
         $query->bindParam(':name', $name);
         $query->bindParam(':mail', $name);

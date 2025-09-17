@@ -17,17 +17,7 @@ use Simp\Core\modules\user\entity\User;
 class FakerManager
 {
     protected array $populated_data = [];
-    public function __construct()
-    {
-        $this->fillable_fields = [
-            'name',
-            'email',
-            'password',
-            'status',
-            'time_zone',
-            'roles',
-        ];
-    }
+
 
     public function populateData(array $append_values = [], int $total = 1): void
     {

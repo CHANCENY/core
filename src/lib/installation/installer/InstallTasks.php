@@ -18,7 +18,7 @@ class InstallTasks
 
         $source = is_dir($vendorDir) ? $vendorDir : (is_dir($srcDir) ? $srcDir : null);
 
-        if (!$source) {
+        if ($source === null || $source === '' || $source === '0') {
             return;
         }
 
@@ -37,8 +37,8 @@ class InstallTasks
         if (!is_dir($destination)) {
             mkdir($destination, 0777, true);
         }
+
         self::recursiveCopy($assets, $destination);
-        return;
     }
 
     protected static function recursiveCopy(string $src, string $dst): void
@@ -47,7 +47,9 @@ class InstallTasks
         @mkdir($dst, 0777, true);
 
         while (($file = readdir($dir)) !== false) {
-            if ($file === '.' || $file === '..') continue;
+            if ($file === '.' || $file === '..') {
+                continue;
+            }
 
             $srcPath = $src . DIRECTORY_SEPARATOR . $file;
             $dstPath = $dst . DIRECTORY_SEPARATOR . $file;
@@ -62,7 +64,7 @@ class InstallTasks
         closedir($dir);
     }
 
-    public static function moveModules()
+    public static function moveModules(): void
     {
         $system = new \Simp\Core\lib\installation\SystemDirectory();
         $vendorDir = $system->root_dir . "/vendor/simp/core/src/extends";
@@ -71,7 +73,7 @@ class InstallTasks
 
         $source = is_dir($vendorDir) ? $vendorDir : (is_dir($srcDir) ? $srcDir : null);
 
-        if (!$source) {
+        if ($source === null || $source === '' || $source === '0') {
             return;
         }
 
@@ -90,11 +92,15 @@ class InstallTasks
 
     protected static function deleteRecursive(string $dir): void
     {
-        if (!is_dir($dir)) return;
+        if (!is_dir($dir)) {
+            return;
+        }
 
         $items = scandir($dir);
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') continue;
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
 
             $path = $dir . DIRECTORY_SEPARATOR . $item;
             if (is_dir($path)) {

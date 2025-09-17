@@ -33,6 +33,7 @@ class System
     {
         return new Response(View::view('default.view.system.module.dashboard'));
     }
+
     public function system_rebuild(...$args): RedirectResponse
     {
         extract($args);
@@ -66,7 +67,7 @@ class System
         return new RedirectResponse($request->headers->get('referer') ?? '/');
     }
 
-    public function content_types(...$args)
+    public function content_types(...$args): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         extract($args);
         SystemAction::persistContentTypes();

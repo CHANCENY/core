@@ -21,7 +21,7 @@ class PdfLink
     {
         $fid = $this->getPdf();
 
-        if (empty($fid)) {
+        if ($fid === null || $fid === 0) {
             $system = new SystemDirectory;
             $baseDir   = $system->private_dir;
             $save_path = 'public://contents/pdfs';
@@ -30,6 +30,7 @@ class PdfLink
             if (!is_dir($save_path)) {
                 mkdir($save_path, 0777, true);
             }
+
             if (!is_dir($temp_path)) {
                 mkdir($temp_path, 0777, true);
             }
@@ -76,7 +77,7 @@ class PdfLink
                         'uid'       => CurrentUser::currentUser()->getUser()->getUid(),
                     ]);
 
-                    if ($file) {
+                    if ($file instanceof \Simp\Core\modules\files\entity\File) {
                         $fid      = $file->getFid();
                         $query    = "INSERT INTO page_builder_pdf_links (pid, fid) VALUES (:pid, :fid)";
                         $statement = Database::database()->con()->prepare($query);
@@ -100,6 +101,7 @@ class PdfLink
         $statement = Database::database()->con()->prepare($query);
         $statement->bindValue('pid', $this->page->id());
         $statement->execute();
+
         $pdf = $statement->fetch();
         return $pdf['fid'] ?? null;
     }

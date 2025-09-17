@@ -27,7 +27,7 @@ function form_builder_route_install(): array
         $settings = FormSettings::factory($form['name']);
 
         $permissions = ['anonymous'];
-        if ($settings->getRequireLogin()) {
+        if (!in_array($settings->getRequireLogin(), ['', '0'], true)) {
             $permissions = ['authenticated', 'administrator', 'content_creator', 'manager'];
         }
 
@@ -35,11 +35,11 @@ function form_builder_route_install(): array
             $routes['form_builder.form.'.$form['name']] = [
                 'title' => $settings->getTitle(),
                 'path' => $settings->getSlug(),
-                'controller' => array(
+                'controller' => [
                     'class' => SubmissionHandler::class,
                     'method' => 'formSubmission'
-                ),
-                'method' => array('POST','GET'),
+                ],
+                'method' => ['POST','GET'],
                 'access' => $permissions,
                 'options' => [
                     'form_name' => $form['name'],
@@ -49,137 +49,137 @@ function form_builder_route_install(): array
         }
     }
 
-    return array(
+    return [
         ...$routes,
-        'form_builder.dashboard' => array(
+        'form_builder.dashboard' => [
             'title' => 'Form Builder',
             'path' => '/admin/form-builder',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'dashboard'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa-solid','fa-building']
-            ),
-        ),
-        'form_builder.saver' => array(
+            ],
+        ],
+        'form_builder.saver' => [
             'title' => 'Form Builder',
             'path' => '/admin/form-builder/save',
-            'method' => array('POST'),
-            'controller' => array(
+            'method' => ['POST'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'save'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.list' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.list' => [
             'title' => 'Forms',
             'path' => '/admin/form-builder/list',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'list'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.delete' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.delete' => [
             'title' => 'Form Delete',
             'path' => '/admin/form-builder/[name:string]/delete',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'delete'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.edit' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.edit' => [
             'title' => 'Form Edit',
             'path' => '/admin/form-builder/[name:string]/edit',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'edit'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.form.settings' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.form.settings' => [
             'title' => 'Form Settings',
             'path' => '/admin/form-builder/[name:string]/settings',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'form_settings'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.form.submission' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.form.submission' => [
             'title' => 'Form Submission',
             'path' => '/admin/form-builder/[name:string]/submission',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'form_submission'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.form.submission.delete' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.form.submission.delete' => [
             'title' => 'Form Submission Delete',
             'path' => '/admin/form-builder/[name:string]/submission/[sid:int]/delete',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'form_submission_delete'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.form.submission.edit' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.form.submission.edit' => [
             'title' => 'Form Submission Edit',
             'path' => '/admin/form-builder/[name:string]/submission/[sid:int]/edit',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'form_submission_edit'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.form.submission.view' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.form.submission.view' => [
             'title' => 'Form Submission View',
             'path' => '/admin/form-builder/[name:string]/submission/[sid:int]/view',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => FormBuilderController::class,
                 'method' => 'form_submission_view'
-            ),
-            'access' => array('administrator'),
-            'options' => array()
-        ),
-        'form_builder.form.submission.node' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => []
+        ],
+        'form_builder.form.submission.node' => [
             'title' => 'Form Submission Node',
             'path' => '/admin/form-builder/[name:string]/submission/node/[nid:int]/field/[field:string]',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => SubmissionHandler::class,
                 'method' => 'form_submission_node'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
                 'authenticated',
                 'content_creator',
                 'manager',
                 'anonymous'
-            ),
-        )
-    );
+            ],
+        ]
+    ];
 }
 
 function form_builder_template_install(): array {
@@ -216,29 +216,32 @@ function form_builder_menu_install(array &$menus): void
                     ...$route_settings->toArray()
                 ]
             ];
-            $route['route_data']['path'] = "/admin/form-builder/{$form['name']}/settings";
+            $route['route_data']['path'] = sprintf('/admin/form-builder/%s/settings', $form['name']);
             $route['route_data']['title'] = $form['title'];
             $ch_menu = new Menu($route);
-            if (!empty(Route::fromRouteName('form_builder.form.'.$form['name']))) {
+            if (Route::fromRouteName('form_builder.form.'.$form['name']) instanceof \Simp\Core\lib\routes\Route) {
                 $form_menu = new Menu('form_builder.form.'.$form['name']);
                 $route_submission = Route::fromRouteName('form_builder.form.submission')->toArray();
-                $route_submission['path'] = "/admin/form-builder/{$form['name']}/submission";
+                $route_submission['path'] = sprintf('/admin/form-builder/%s/submission', $form['name']);
                 $route_submission['title'] = "Submissions";
                 $ch_menu->addChild($form_menu);
                 $ch_menu->addChild(new Menu(['route_id' => 'form_builder.form.submission', 'route_data' => $route_submission]));
             }
+
             $list_menu->addChild($ch_menu);
         }
+
         $menu_form_builder->addChild($list_menu);
 
         $menus['system.config']->addChild($menu_form_builder);
     }
+
    // dd($menus);
 
 }
 
 
-function form_builder_database_install()
+function form_builder_database_install(): void
 {
     $query = "CREATE TABLE IF NOT EXISTS `form_settings` (id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, form_name VARCHAR(200) NOT NULL, 
               title VARCHAR(200) NOT NULL, status VARCHAR(200) NOT NULL, slug VARCHAR(200) NOT NULL, notify VARCHAR(200) NULL, submit_limit INT DEFAULT 5,
@@ -266,9 +269,9 @@ function form_builder_database_install()
 
 function form_builder_field_install(): array
 {
-    return array(
+    return [
         'form_builder' => FormBuilderFieldBuilder::class,
-    );
+    ];
 }
 
 function form_builder_library_install(string $library_name): array

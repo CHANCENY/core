@@ -57,21 +57,16 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Adds a join to the query.
-     * @param string $table
-     * @param string $alias
-     * @param string $condition
      * @return $this
      */
     public function addJoin(string $table, string $alias, string $condition): self
     {
-        $this->termStorageQuery['joins'][] = "JOIN {$table} {$alias} ON {$condition}";
+        $this->termStorageQuery['joins'][] = sprintf('JOIN %s %s ON %s', $table, $alias, $condition);
         return $this;
     }
 
     /**
      * Adds a where clause to the query.
-     * @param string $condition
-     * @param array $params
      * @return $this
      */
     public function addWhere(string $condition, array $params = []): self
@@ -80,48 +75,42 @@ class TermStorage implements IteratorAggregate
         foreach ($params as $key => $value) {
             $this->parameters[$key] = $value;
         }
+
         return $this;
     }
 
     /**
      * Adds an order by clause to the query.
-     * @param string $column
-     * @param string $direction
      * @return $this
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
-        $this->termStorageQuery['order'] = "ORDER BY {$column} {$direction}";
+        $this->termStorageQuery['order'] = sprintf('ORDER BY %s %s', $column, $direction);
         return $this;
     }
 
     /**
      * Adds a limit clause to the query.
-     * @param int $limit
      * @return $this
      */
     public function limit(int $limit): self
     {
-        $this->termStorageQuery['limit'] = "LIMIT {$limit}";
+        $this->termStorageQuery['limit'] = 'LIMIT ' . $limit;
         return $this;
     }
 
     /**
      * Adds an offset clause to the query.
-     * @param int $offset
      * @return $this
      */
     public function offset(int $offset): self
     {
-        $this->termStorageQuery['offset'] = "OFFSET {$offset}";
+        $this->termStorageQuery['offset'] = 'OFFSET ' . $offset;
         return $this;
     }
 
     /**
      * Executes the built query and hydrates Term entities.
-     *
-     * @param string $connector
-     * @return self
      */
     public function execute(string $connector = 'AND'): self
     {
@@ -131,19 +120,24 @@ class TermStorage implements IteratorAggregate
         if (!empty($this->termStorageQuery['joins'])) {
             $sql[] = implode(' ', $this->termStorageQuery['joins']);
         }
+
         if (!empty($this->termStorageQuery['where'])) {
-            $sql[] = 'WHERE ' . implode(" $connector ", $this->termStorageQuery['where']);
+            $sql[] = 'WHERE ' . implode(sprintf(' %s ', $connector), $this->termStorageQuery['where']);
         }
+
         if (!empty($this->termStorageQuery['group'] ?? '')) {
             $sql[] = $this->termStorageQuery['group'];
         }
+
         if (!empty($this->termStorageQuery['order'])) {
             $sql[] = $this->termStorageQuery['order'];
         }
+
         if (!empty($this->termStorageQuery['limit'])) {
             // ensure this is like "LIMIT 3", not a placeholder
             $sql[] = $this->termStorageQuery['limit'];
         }
+
         if (!empty($this->termStorageQuery['offset'])) {
             $sql[] = $this->termStorageQuery['offset'];
         }
@@ -156,7 +150,7 @@ class TermStorage implements IteratorAggregate
         // Bind ONLY placeholders that actually exist in the SQL.
         foreach ($this->parameters as $key => $value) {
             $placeholder = ':' . ltrim((string)$key, ':$');
-            if (strpos($this->sql, $placeholder) === false) {
+            if (in_array(str_contains($this->sql, $placeholder), [0, false], true)) {
                 continue; // skip params not present in SQL
             }
 
@@ -194,8 +188,6 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Returns the first entity or null.
-     *
-     * @return Term|null
      */
     public function first(): ?Term
     {
@@ -204,18 +196,14 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Returns the last entity or null.
-     *
-     * @return Term|null
      */
     public function last(): ?Term
     {
-        return !empty($this->entities) ? end($this->entities) : null;
+        return $this->entities === [] ? null : end($this->entities);
     }
 
     /**
      * Retrieve entities as an iterator (foreach support).
-     *
-     * @return Traversable
      */
     public function getIterator(): Traversable
     {
@@ -232,8 +220,6 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Retrieves the parameters associated with the current instance.
-     *
-     * @return array
      */
     public function getParameters(): array
     {
@@ -245,7 +231,6 @@ class TermStorage implements IteratorAggregate
      * If $fromDatabase = true, run a COUNT(*) query directly in DB.
      *
      * @param bool $fromDatabase Whether to count via SQL (true) or loaded entities (false).
-     * @return int
      */
     public function count(bool $fromDatabase = false): int
     {
@@ -266,6 +251,7 @@ class TermStorage implements IteratorAggregate
             foreach ($this->parameters as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
+
             $stmt->execute();
             return (int) $stmt->fetchColumn();
         }
@@ -340,8 +326,6 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Filter Terms that are published.
-     *
-     * @return self
      */
     public function published(): self
     {
@@ -352,7 +336,6 @@ class TermStorage implements IteratorAggregate
      * Filter Terms by author ID.
      *
      * @param int $uid The user ID of the author.
-     * @return self
      */
     public function byAuthor(int $uid): self
     {
@@ -361,9 +344,6 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Filter Terms by a specific content type (bundle).
-     *
-     * @param string $bundle
-     * @return self
      */
     public function byBundle(string $bundle): self
     {
@@ -372,9 +352,6 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Filter Terms created after a certain timestamp.
-     *
-     * @param int $timestamp
-     * @return self
      */
     public function createdAfter(int $timestamp): self
     {
@@ -383,9 +360,6 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Filter Terms created before a certain timestamp.
-     *
-     * @param int $timestamp
-     * @return self
      */
     public function createdBefore(int $timestamp): self
     {
@@ -396,11 +370,10 @@ class TermStorage implements IteratorAggregate
      * Filter Terms created within the last given number of days.
      *
      * @param int $days Number of days to look back. Default is 7.
-     * @return self
      */
     public function recent(int $days = 7): self
     {
-        $timestamp = strtotime("-{$days} days");
+        $timestamp = strtotime(sprintf('-%d days', $days));
         return $this->createdAfter($timestamp);
     }
 
@@ -408,7 +381,6 @@ class TermStorage implements IteratorAggregate
      * Filter Terms updated after a certain timestamp.
      *
      * @param int $timestamp UNIX timestamp to filter Terms updated after.
-     * @return self
      */
     public function updatedAfter(int $timestamp): self
     {
@@ -419,7 +391,6 @@ class TermStorage implements IteratorAggregate
      * Filter Terms updated before a certain timestamp.
      *
      * @param int $timestamp UNIX timestamp to filter Terms updated before.
-     * @return self
      */
     public function updatedBefore(int $timestamp): self
     {
@@ -431,11 +402,10 @@ class TermStorage implements IteratorAggregate
      *
      * @param int $termId The taxonomy term ID to filter Terms by.
      * @param string $field The field in Term table that stores term reference. Defaults to 'tid'.
-     * @return self
      */
     public function byTerm(int $termId, string $field = 'tid'): self
     {
-        return $this->addWhere("{$field} = :termId", ['termId' => $termId]);
+        return $this->addWhere($field . ' = :termId', ['termId' => $termId]);
     }
 
     /**
@@ -444,11 +414,10 @@ class TermStorage implements IteratorAggregate
      *
      * @param string $field The field/property to count items in (must be array or Countable).
      * @param string $direction 'ASC' or 'DESC'. Default 'DESC'.
-     * @return self
      */
     public function orderByFieldCountPhp(string $field, string $direction = 'DESC'): self
     {
-        usort($this->entities, function ($a, $b) use ($field, $direction) {
+        usort($this->entities, function ($a, $b) use ($field, $direction): int {
 
             /**@var Term $a **/
             /**@var Term $b **/
@@ -456,24 +425,16 @@ class TermStorage implements IteratorAggregate
             $a_data = [];
             $b_data = [];
 
-            if (empty($a->get($field)[0])) {
-                $a_data = [];
-            }
-            else {
-                $a_data = $a->get($field);
-            }
+            $a_data = empty($a->get($field)[0]) ? [] : $a->get($field);
 
-            if (empty($b->get($field)[0])) {
-                $b_data = [];
-            }
-            else {
-                $b_data = $b->get($field);
-            }
+            $b_data = empty($b->get($field)[0]) ? [] : $b->get($field);
 
             $countA =  count($a_data);
             $countB =  count($b_data);
+            if ($countA === $countB) {
+                return 0;
+            }
 
-            if ($countA === $countB) return 0;
             return ($direction === 'ASC') ? ($countA <=> $countB) : ($countB <=> $countA);
         });
 
@@ -486,16 +447,16 @@ class TermStorage implements IteratorAggregate
         $alias = $table . '_cnt';
 
         // Build subquery to count the field per Term, with proper alias
-        $subquery = "(SELECT nid, COUNT($field) AS field_count FROM $table GROUP BY nid) AS $alias";
+        $subquery = sprintf('(SELECT nid, COUNT(%s) AS field_count FROM %s GROUP BY nid) AS %s', $field, $table, $alias);
 
         // Add LEFT JOIN with the subquery
-        $this->termStorageQuery['joins'][] = "LEFT JOIN $subquery ON $alias.nid = term_data.nid";
+        $this->termStorageQuery['joins'][] = sprintf('LEFT JOIN %s ON %s.nid = term_data.nid', $subquery, $alias);
 
         // Update SELECT to include all term_data fields plus the count from subquery
-        $this->termStorageQuery['start'] = "SELECT term_data.*, $alias.field_count FROM term_data";
+        $this->termStorageQuery['start'] = sprintf('SELECT term_data.*, %s.field_count FROM term_data', $alias);
 
         // Order by the counted field
-        $this->termStorageQuery['order'] = "ORDER BY $alias.field_count $direction";
+        $this->termStorageQuery['order'] = sprintf('ORDER BY %s.field_count %s', $alias, $direction);
 
         return $this;
     }
@@ -509,7 +470,7 @@ class TermStorage implements IteratorAggregate
     {
         // Step 1: Get total rows
         $this->termStorageQuery['start'] = "SELECT COUNT(*) AS total FROM term_data";
-        $limit = !empty($this->termStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->termStorageQuery['limit']) : 20;
+        $limit = empty($this->termStorageQuery['limit']) ? 20 : (int) str_replace('LIMIT ', '', $this->termStorageQuery['limit']);
         $this->termStorageQuery['limit'] = "";
         $this->execute();
 
@@ -517,9 +478,6 @@ class TermStorage implements IteratorAggregate
 
         // Step 2: Calculate total pages
         $totalPages = (int) ceil($total / $limit);
-
-        // Step 3: Calculate offset
-        $offset = ($page - 1) * $limit;
 
         $this->execute();
 
@@ -534,14 +492,12 @@ class TermStorage implements IteratorAggregate
 
     /**
      * Randomizes the order of Terms in the query.
-     *
-     * @return self
      */
-    public function pickRandom()
+    public function pickRandom(): static
     {
-        $this->termStorageQuery['order'] = !empty($this->termStorageQuery['order']) ?
-            $this->termStorageQuery['order'] . ', RAND()' :
-            'ORDER BY RAND()';
+        $this->termStorageQuery['order'] = empty($this->termStorageQuery['order']) ?
+            'ORDER BY RAND()' :
+            $this->termStorageQuery['order'] . ', RAND()';
         return $this;
     }
 

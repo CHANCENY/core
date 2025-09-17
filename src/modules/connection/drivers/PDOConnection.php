@@ -20,8 +20,8 @@ class PDOConnection implements ConnectionInterface
     {
         try {
             $this->pdo = Database::database()->con();
-        } catch (PDOException $e) {
-            throw new RuntimeException("MySQL Connection failed: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            throw new RuntimeException("MySQL Connection failed: " . $pdoException->getMessage(), $pdoException->getCode(), $pdoException);
         }
     }
 
@@ -38,8 +38,8 @@ class PDOConnection implements ConnectionInterface
         try {
             $stmt = $this->pdo->prepare($query);
             return $stmt->execute($params);
-        } catch (PDOException $e) {
-            throw new RuntimeException("Insert failed: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            throw new RuntimeException("Insert failed: " . $pdoException->getMessage(), $pdoException->getCode(), $pdoException);
         }
     }
 
@@ -56,8 +56,8 @@ class PDOConnection implements ConnectionInterface
         try {
             $stmt = $this->pdo->prepare($query);
             return $stmt->execute($params);
-        } catch (PDOException $e) {
-            throw new RuntimeException("Update failed: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            throw new RuntimeException("Update failed: " . $pdoException->getMessage(), $pdoException->getCode(), $pdoException);
         }
     }
 
@@ -74,8 +74,8 @@ class PDOConnection implements ConnectionInterface
         try {
             $stmt = $this->pdo->prepare($query);
             return $stmt->execute($params);
-        } catch (PDOException $e) {
-            throw new RuntimeException("Delete failed: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            throw new RuntimeException("Delete failed: " . $pdoException->getMessage(), $pdoException->getCode(), $pdoException);
         }
     }
 
@@ -93,16 +93,14 @@ class PDOConnection implements ConnectionInterface
             $stmt = $this->pdo->prepare($query);
             $stmt->execute($params);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new RuntimeException("Select failed: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            throw new RuntimeException("Select failed: " . $pdoException->getMessage(), $pdoException->getCode(), $pdoException);
         }
     }
 
     /**
      * Executes a SQL statement and returns the execution status.
      *
-     * @param string $query
-     * @param array $params
      * @return bool Returns true if the execution was successful, or false otherwise.
      * @throws RuntimeException If the execution fails, a runtime exception is thrown with an error message.
      */
@@ -110,8 +108,8 @@ class PDOConnection implements ConnectionInterface
     {
         try {
             return $this->pdo->exec($query) !== false;
-        } catch (PDOException $e) {
-            throw new RuntimeException("Execution failed: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            throw new RuntimeException("Execution failed: " . $pdoException->getMessage(), $pdoException->getCode(), $pdoException);
         }
     }
 
@@ -123,7 +121,7 @@ class PDOConnection implements ConnectionInterface
      */
     public function drop(string $table): bool
     {
-        $sql = "DROP TABLE IF EXISTS `$table`";
+        $sql = sprintf('DROP TABLE IF EXISTS `%s`', $table);
         return $this->execute($sql);
     }
 
@@ -149,7 +147,7 @@ class PDOConnection implements ConnectionInterface
         try {
             $this->pdo->exec($query);
             return true;
-        } catch (\PDOException $e) {
+        } catch (\PDOException) {
             // Log or rethrow as needed
             return false;
         }
@@ -158,9 +156,9 @@ class PDOConnection implements ConnectionInterface
     public function dropTable(string $table): bool
     {
         try {
-            $this->pdo->exec("DROP TABLE IF EXISTS `$table`");
+            $this->pdo->exec(sprintf('DROP TABLE IF EXISTS `%s`', $table));
             return true;
-        } catch (\PDOException $e) {
+        } catch (\PDOException) {
             // Log or rethrow as needed
             return false;
         }

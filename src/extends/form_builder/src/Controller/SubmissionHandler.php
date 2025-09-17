@@ -31,7 +31,7 @@ class SubmissionHandler
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function formSubmission(...$args)
+    public function formSubmission(...$args): \Symfony\Component\HttpFoundation\Response
     {
         extract($args);
 
@@ -57,7 +57,7 @@ class SubmissionHandler
             }
         }
 
-        if (!empty($form_settings) && !empty($form_config)) {
+        if ($form_settings instanceof \Simp\Core\extends\form_builder\src\Plugin\FormSettings && $form_config !== []) {
 
             $embedded_html = $form_settings->getEmbedded();
 
@@ -71,7 +71,7 @@ class SubmissionHandler
             $form_base->getFormBase()->setFormAcceptCharset($form_config['attributes']['accept-charset']);
             $form_base->getFormBase()->isFormSilent($form_config['attributes']['is_silent']);
 
-            $content = !empty($embedded_html) && strpos($embedded_html, '[__form__]') ? str_replace('[__form__]',$form_base, $embedded_html) : $form_base;
+            $content = $embedded_html !== '' && $embedded_html !== '0' && strpos($embedded_html, '[__form__]') ? str_replace('[__form__]',$form_base, $embedded_html) : $form_base;
 
             return new Response(View::view('default.view.form_builder.submission.handler',
                 [
@@ -123,7 +123,7 @@ class SubmissionHandler
             $form_base->getFormBase()->setFormAcceptCharset($form_config['attributes']['accept-charset']);
             $form_base->getFormBase()->isFormSilent($form_config['attributes']['is_silent']);
 
-            $content = !empty($embedded_html) && strpos($embedded_html, '[__form__]') ? str_replace('[__form__]',$form_base, $embedded_html) : $form_base;
+            $content = $embedded_html !== '' && $embedded_html !== '0' && strpos($embedded_html, '[__form__]') ? str_replace('[__form__]',$form_base, $embedded_html) : $form_base;
 
             return new Response(View::view('default.view.form_builder.submission.handler',
                 [

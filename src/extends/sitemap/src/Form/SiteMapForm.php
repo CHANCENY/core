@@ -46,12 +46,8 @@ class SiteMapForm extends FormBase
             $routes_list[$route->route_id] = $route->route_title;
         }
 
-        $types = array_map(function ($type) {
-            return $type['name'] ?? $type['title'] ?? null;
-        }, $types);
-        $terms = array_map(function ($term) {
-            return $term['label'];
-        }, $terms);
+        $types = array_map(fn(array $type) => $type['name'] ?? $type['title'] ?? null, $types);
+        $terms = array_map(fn(array $term) => $term['label'], $terms);
 
         $form['content_type'] = [
             'type' => 'select',
@@ -119,9 +115,7 @@ class SiteMapForm extends FormBase
 
     public function submitForm(array $form): void
     {
-        $data = array_map(function ($item) {
-            return $item->getValue();
-        }, $form);
+        $data = array_map(fn($item) => $item->getValue(), $form);
 
         unset($data['markup']);
         unset($data['submit']);

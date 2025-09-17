@@ -46,6 +46,7 @@ class MarkUpFieldBuilder implements FieldBuilderInterface
             $field_data['handler'] = $this->getFieldHandler();
             $field_data['limit'] = (int)($data['limit'] ?? 1);
         }
+
         return $field_data;
     }
 

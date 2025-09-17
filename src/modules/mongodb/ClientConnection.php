@@ -48,21 +48,20 @@ class ClientConnection
      * including optional authentication credentials. On successful connection,
      * initializes the MongoDB client. In case of an error, an exception is thrown.
      *
-     * @return void
      * @throws RuntimeException If the connection to the MongoDB server fails.
      */
     protected function connect(): void
     {
         try {
             if ($this->username && $this->password) {
-                $uri = "mongodb://{$this->username}:{$this->password}@{$this->host}:{$this->port}/?authSource={$this->authSource}";
+                $uri = sprintf('mongodb://%s:%s@%s:%d/?authSource=%s', $this->username, $this->password, $this->host, $this->port, $this->authSource);
             } else {
-                $uri = "mongodb://{$this->host}:{$this->port}";
+                $uri = sprintf('mongodb://%s:%d', $this->host, $this->port);
             }
 
             $this->client = new Client($uri);
-        } catch (Exception $e) {
-            throw new RuntimeException("MongoDB connection failed: " . $e->getMessage());
+        } catch (Exception $exception) {
+            throw new RuntimeException("MongoDB connection failed: " . $exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -95,9 +94,10 @@ class ClientConnection
     public static function clientConnection(): ClientConnection
     {
         $credentials = ClientCredentials::credentials()->getCredentials();
-        if (empty($credentials)) {
+        if ($credentials === []) {
             throw new RuntimeException("MongoDB credentials not found.");
         }
+
         return new self(
             $credentials['host'],
             $credentials['database'],

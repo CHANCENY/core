@@ -103,15 +103,16 @@ class SystemController
         $name = $request->get('content_name');
         $value = $request->get('search');
         $content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($name);
-        if ($content_type) {
+        if ($content_type !== null && $content_type !== []) {
             $permission = $content_type['permission'] ?? [];
             $user_roles = CurrentUser::currentUser()?->getUser()?->getRoles();
             $flag = false;
-            if ($user_roles) {
-                $roles = array_map(function($role){return $role->getRoleName(); }, $user_roles);
-                if(array_intersect($permission, $roles)) {
+            if ($user_roles !== null && $user_roles !== []) {
+                $roles = array_map(fn($role) => $role->getRoleName(), $user_roles);
+                if(array_intersect($permission, $roles) !== []) {
                     $flag = true;
                 }
+
                 if (CurrentUser::currentUser()->isIsAdmin()) {
                     $flag = true;
                 }
@@ -123,19 +124,21 @@ class SystemController
             if($flag) {
 
                 $users = User::filter($value);
-                if (!empty($users)) {
+                if ($users !== []) {
                     $users = array_column($users, 'name');
                 }
+
                 return new JsonResponse($users, 200);
             }
         }
+
         return new JsonResponse(['user'=>1],200);
     }
 
     public function system_reference_filter(...$args): JsonResponse
     {
         extract($args);
-        $content = json_decode($request->getContent());
+        $content = json_decode((string) $request->getContent());
         if ($content->value && $content->settings) {
 
             if(isset($content->settings->type) && $content->settings->type === 'user') {
@@ -145,6 +148,7 @@ class SystemController
                         unset($users[$key]);
                     }
                 }
+
                 $users = array_values($users);
                 $lists = [];
                 foreach ($users as $user) {
@@ -157,32 +161,35 @@ class SystemController
             elseif(isset($content->settings->type) && !empty($content->settings->reference_entity) && $content->settings->type === 'node') {
                 $content_type = $content->settings->reference_entity;
                 $nodes = Node::filter($content->value, $content_type);
-                $nodes = array_map(function ($node) { return $node->toArray(); }, $nodes);
+                $nodes = array_map(fn($node) => $node->toArray(), $nodes);
                 $nodes = array_values($nodes);
                 $lists = [];
                 foreach ($nodes as $node) {
                     $lists[] = ['id'=>$node['nid'], 'title'=>$node['title']];
                 }
+
                 return new JsonResponse(['result'=> $lists], 200);
             }
 
             elseif (isset($content->settings->type) && $content->settings->type === 'file') {
                 $files = File::search($content->value);
-                $files = array_map(function ($file) { return $file->toArray(); }, $files);
+                $files = array_map(fn($file) => $file->toArray(), $files);
                 $files = array_values($files);
                 $lists = [];
                 foreach ($files as $file) {
                     $lists[] = ['id'=>$file['fid'], 'title'=>$file['name']];
                 }
+
                 return new JsonResponse(['result'=> $lists], 200);
             }
 
             elseif (isset($content->settings->type) && $content->settings->type === 'term') {
                 $terms = Term::search($content->value);
-                $list = array_map(function ($term) { return ['id'=>$term['id'], 'title'=>$term['label']]; }, $terms);
+                $list = array_map(fn(array $term): array => ['id'=>$term['id'], 'title'=>$term['label']], $terms);
                 return new JsonResponse(['result'=> $list], 200);
             }
         }
+
         return new JsonResponse(['result'=>'ok']);
     }
 
@@ -197,6 +204,7 @@ class SystemController
         /**@var Request $request**/
         $limit = $request->get('limit', 10);
         $limit = empty($limit) ? 10 : $limit;
+
         $filters = User::filters('users', $limit);
         $users = User::parseFilter(User::class, 'users', $filters, $request, User::class);
         return new Response(View::view('default.view.people',['users' => $users, 'filters' => $filters]));
@@ -204,7 +212,6 @@ class SystemController
 
     /**
      * @param ...$args
-     * @return RedirectResponse|Response
      * @throws LoaderError
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
@@ -262,9 +269,9 @@ class SystemController
         $name = $request->get('name');
         $file_path = (new AssetsManager())->getAssetsFile($name,false);
 
-        if (!empty($file_path) && file_exists($file_path)) {
+        if ($file_path !== '' && $file_path !== '0' && file_exists($file_path)) {
             $mime_type = mime_content_type($file_path);
-            $mime_type = str_ends_with($name, '.js') ? 'application/javascript' : $mime_type;
+            $mime_type = str_ends_with((string) $name, '.js') ? 'application/javascript' : $mime_type;
             $response = new Response(
                 file_get_contents($file_path),
             );
@@ -272,6 +279,7 @@ class SystemController
             $response->setStatusCode(200);
             return $response;
         }
+
         return new Response('', 404);
     }
 
@@ -289,7 +297,6 @@ class SystemController
 
     /**
      * @param mixed ...$args
-     * @return RedirectResponse|Response
      * @throws LoaderError
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
@@ -319,13 +326,13 @@ class SystemController
         if ($auth->logout()) {
             return new RedirectResponse('/');
         }
+
         return new RedirectResponse($request->server->get('REDIRECT_URL'));
     }
 
 
     /**
      * @param ...$args
-     * @return RedirectResponse|Response
      * @throws Exception
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
@@ -348,18 +355,19 @@ class SystemController
             $auth = AuthUser::auth();
             if ($auth->authenticateViaGoogle($user)) {
                 $auth->finalizeAuthenticate(false);
-                Messager::toast()->addMessage("Welcome back, {$auth->getUser()->getName()}!");
+                Messager::toast()->addMessage(sprintf('Welcome back, %s!', $auth->getUser()->getName()));
                 return new RedirectResponse('/');
             }
+
             Messager::toast()->addError("Sorry login via google account has failed.");
             return new RedirectResponse('/user/login');
         }
+
         return new Response('');
     }
 
     /**
      * @param ...$args
-     * @return RedirectResponse|Response
      * @throws GuzzleException
      * @throws IdentityProviderException
      * @throws PhpfastcacheCoreException
@@ -380,13 +388,14 @@ class SystemController
             $auth = AuthUser::auth();
             if ($auth->authenticateViaGithub($git_user)) {
                 $auth->finalizeAuthenticate(false);
-                Messager::toast()->addMessage("Welcome back, {$auth->getUser()->getName()}!");
+                Messager::toast()->addMessage(sprintf('Welcome back, %s!', $auth->getUser()->getName()));
                 return new RedirectResponse('/');
             }else {
                 Messager::toast()->addError("Sorry login via github account has failed.");
                 return new RedirectResponse('/user/login');
             }
         }
+
         return new RedirectResponse('/');
     }
 
@@ -495,8 +504,9 @@ class SystemController
         $name = $request->get('machine_name');
         $content = ContentDefinitionManager::contentDefinitionManager()->getContentType($name);
         if ($content && ContentDefinitionManager::contentDefinitionManager()->removeContentType($name)) {
-            Messager::toast()->addMessage("Content type \"$name\" successfully removed.");
+            Messager::toast()->addMessage(sprintf('Content type "%s" successfully removed.', $name));
         }
+
         return new RedirectResponse('/admin/structure/types');
     }
 
@@ -521,12 +531,13 @@ class SystemController
                 $settings = $content['display_setting'] ?? [];
                 $storages = $content['storage'] ?? [];
                 foreach($storages as $storage) {
-                    $name_field = substr($storage, 5, strlen($storage));
+                    $name_field = substr((string) $storage, 5, strlen((string) $storage));
                     $name_field = trim($name_field, '_');
                     $settings[$name_field]['display_label'] = $data[$name_field . ':display_label'] ?? $settings[$name_field]['display_label'] ?? null;
                     $settings[$name_field]['display_as'] = $data[$name_field . ':display_as'] ?? $settings[$name_field]['display_as'] ?? null;
                     $settings[$name_field]['display_enabled'] = $data[$name_field . ':display_enabled'] ?? $settings[$name_field]['display_enabled'] ?? null;
                 }
+
                 $content['display_setting'] = $settings;
                 ContentDefinitionManager::contentDefinitionManager()->addContentType($name, $content);
                 Messager::toast()->addMessage("Display setting saved");
@@ -540,8 +551,9 @@ class SystemController
                 return new RedirectResponse('/admin/structure/content-type/'.$name.'/manage');
             }
         }
-        $content['permission'] = $content['permission'] ?? [];
-        $content['display_setting'] = $content['display_setting'] ?? [];
+
+        $content['permission'] ??= [];
+        $content['display_setting'] ??= [];
         return new Response(View::view('default.view.structure_content_type_manage',['content'=>$content,
             'roles'=> RolesRepository::getSelectRoleOptions()]), 200);
     }
@@ -576,21 +588,22 @@ class SystemController
         $handler = FieldManager::fieldManager()->getFieldBuilderHandler($type);
         if ($request->getMethod() === 'POST') {
             $data = $handler->fieldArray($request,$type, $entity_type);
-            if (!empty($data)) {
+            if ($data !== []) {
                 if (ContentDefinitionManager::contentDefinitionManager()->addField(
                     $entity_type,
                     $data['name'],
                     $data,
-                    true,
                 )) {
-                    Messager::toast()->addMessage("Field '$name' has been created");
+                    Messager::toast()->addMessage(sprintf("Field '%s' has been created", $name));
                 }
+
                 $redirect = new RedirectResponse('/admin/structure/content-type/'.$entity_type. '/manage');
                 $redirect->send();
             }else {
                 Messager::toast()->addError("Failed to create field. Please check your input and try again.");
             }
         }
+
         $build = $handler->build($request,$type);
         return new Response(View::view('default.view.structure_content_type_manage_add_type_field',
             ['form'=>$build,'field' => FieldManager::fieldManager()->getFieldInfo($type)]), 200);
@@ -626,16 +639,16 @@ class SystemController
 
         if ($request->getMethod() === 'POST') {
             $data = $handler->fieldArray($request,$field['type'], $entity_type);
-            if (!empty($data)) {
+            if ($data !== []) {
                 $data['name'] = $field_name;
                 if (ContentDefinitionManager::contentDefinitionManager()->addField(
                     $entity_type,
                     $data['name'],
                     $data,
-                    true,
                 )) {
-                    Messager::toast()->addMessage("Field '$name' has been updated");
+                    Messager::toast()->addMessage(sprintf("Field '%s' has been updated", $name));
                 }
+
                 $redirect = new RedirectResponse('/admin/structure/content-type/'.$entity_type. '/manage');
                 $redirect->send();
             }else {
@@ -667,8 +680,9 @@ class SystemController
         $name = $request->get('machine_name');
         $field_name = $request->get('field_name');
         if (ContentDefinitionManager::contentDefinitionManager()->removeField($name,$field_name)) {
-            Messager::toast()->addMessage("Content type field \"$field_name\" successfully removed.");
+            Messager::toast()->addMessage(sprintf('Content type field "%s" successfully removed.', $field_name));
         }
+
         return new RedirectResponse('/admin/structure/content-type/'.$name.'/manage');
     }
 
@@ -694,6 +708,7 @@ class SystemController
             Messager::toast()->addWarning("Content type not found.");
             return new RedirectResponse('/');
         }
+
         $content = ContentDefinitionManager::contentDefinitionManager()->getContentType($content);
         return new Response(View::view('default.view.content_node_add',['_form'=>$form_base, 'content' => $content]), 200);
     }
@@ -765,12 +780,13 @@ class SystemController
                 $settings = $content['display_setting'] ?? [];
                 $storages = $content['storage'] ?? [];
                 foreach ($storages as $storage) {
-                    $name_field = substr($storage, 5, strlen($storage));
+                    $name_field = substr((string) $storage, 5, strlen((string) $storage));
                     $name_field = trim($name_field, '_');
                     $settings[$name_field]['display_label'] = $data[$name_field . ':display_label'] ?? $settings[$name_field]['display_label'] ?? null;
                     $settings[$name_field]['display_as'] = $data[$name_field . ':display_as'] ?? $settings[$name_field]['display_as'] ?? null;
                     $settings[$name_field]['display_enabled'] = $data[$name_field . ':display_enabled'] ?? $settings[$name_field]['display_enabled'] ?? null;
                 }
+
                 $content['display_setting'] = $settings;
                 ContentDefinitionManager::contentDefinitionManager()->addContentType($name, $content);
                 Messager::toast()->addMessage("Display setting saved");
@@ -778,7 +794,7 @@ class SystemController
             }
         }
 
-        $content['display_setting'] = $content['display_setting'] ?? [];
+        $content['display_setting'] ??= [];
 
         return new Response(View::view('default.view.content_structure_field_inner_manage',
          ['fields'=>$inner_fields, 'content'=> $fields, 'parent_field'=> $request->get('field_name')]));
@@ -809,8 +825,9 @@ class SystemController
         $field_name = $request->get('field_name');
         $parent_field = $request->get('parent_name');
         if (ContentDefinitionManager::contentDefinitionManager()->removeInnerField($name,$parent_field,$field_name)) {
-            Messager::toast()->addMessage("Content type field \"$field_name\" successfully removed.");
+            Messager::toast()->addMessage(sprintf('Content type field "%s" successfully removed.', $field_name));
         }
+
         return new RedirectResponse('/admin/structure/content-type/'.$name.'/manage');
     }
 
@@ -848,30 +865,24 @@ class SystemController
 
         $nid = $request->get('nid');
 
-        $is_alias = !empty($options['key']) && str_contains($options['key'], 'auto.path.route');
+        $is_alias = !empty($options['key']) && str_contains((string) $options['key'], 'auto.path.route');
 
         $route = $route_finder($args);
 
         $options = $route?->getOptions();
 
-        if ($is_alias) {
-
-            if (str_starts_with($route->route_id,'auto.path.route')) {
-                $actual_route = Route::fromRouteName($options['default']);
-                if (!empty($actual_route)) {
-                    $args['request']->query->set('nid', $options['node']);
-                    return Route::getControllerResponse($actual_route, $args);
-                }
+        if ($is_alias && str_starts_with((string) $route->route_id,'auto.path.route')) {
+            $actual_route = Route::fromRouteName($options['default']);
+            if ($actual_route instanceof \Simp\Core\lib\routes\Route) {
+                $args['request']->query->set('nid', $options['node']);
+                return Route::getControllerResponse($actual_route, $args);
             }
         }
 
-        if (empty($nid)) {
-            if (!empty($route)) {
-                $route_option = $route->options['node'] ?? null;
-
-                if (!empty($route_option)) {
-                    $nid = $route_option;
-                }
+        if (empty($nid) && !empty($route)) {
+            $route_option = $route->options['node'] ?? null;
+            if (!empty($route_option)) {
+                $nid = $route_option;
             }
         }
 
@@ -888,16 +899,14 @@ class SystemController
 
                 $content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
 
-                $permission = !empty($content_type['permission']) ? $content_type['permission'] : [
+                $permission = empty($content_type['permission']) ? [
                     'administrator'
-                ];
+                ] : $content_type['permission'];
 
-                $roles = array_map(function ($role) {
-                    return $role->getName();
-                },CurrentUser::currentUser()->getUser()->roleManager()->getRoles());
+                $roles = array_map(fn($role) => $role->getName(),CurrentUser::currentUser()->getUser()->roleManager()->getRoles());
 
                 // Check if the current user has permissions which are in the permission list
-                if (empty(array_intersect($roles, $permission))) {
+                if (array_intersect($roles, $permission) === []) {
                     return new RedirectResponse(Route::url('system.error.page.denied'));
                 }
             }
@@ -907,7 +916,7 @@ class SystemController
             $definitions = [];
 
             foreach ($entity['storage'] ?? [] as $field) {
-                $name = substr($field,6,strlen($field));
+                $name = substr((string) $field,6,strlen((string) $field));
                 $field = Node::findField($entity['fields'], $name);
                 if (!empty($field['handler'])) {
                     $handler = $field['handler'];
@@ -933,14 +942,15 @@ class SystemController
                     );
                 }
             }
+
             $content_definitions = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
             return new Response(View::view('default.view.content_node_controller',[
                 'node'=>$node,
                 'definitions'=>$definitions,
                 'display' => $content_definitions['display_setting'] ?? []
             ]));
-        }catch (Throwable $exception){
-            ErrorLogger::logger()->logError($exception);
+        }catch (Throwable $throwable){
+            ErrorLogger::logger()->logError($throwable);
             return new Response("<h1>Error</h1><p> sorry website couldn't process your request at the moment.</p>", 500);
         }
     }
@@ -963,6 +973,7 @@ class SystemController
             Messager::toast()->addWarning("Node id not found.");
             return new RedirectResponse('/');
         }
+
         $form_base = new FormBuilder(new ContentTypeDefinitionEditForm());
         $form_base->getFormBase()->setFormMethod('POST');
         $form_base->getFormBase()->setFormEnctype('multipart/form-data');
@@ -971,6 +982,7 @@ class SystemController
             Messager::toast()->addWarning("Node not found");
             return new Response('/');
         }
+
         $content = ContentDefinitionManager::contentDefinitionManager()->getContentType($obj->getBundle());
         return new Response(View::view('default.view.content_node_add',['_form'=>$form_base, 'content' => $content]), 200);
     }
@@ -993,28 +1005,34 @@ class SystemController
         if (CurrentUser::currentUser()->isIsAdmin()) {
             $redirect_path = '/admin/content';
         }
+
         $nid = $request->get('nid');
         if (empty($nid)) {
             Messager::toast()->addWarning("Node id not found.");
             return new RedirectResponse('/');
         }
+
         $node = Node::load($nid);
         if (is_null($node)) {
             Messager::toast()->addWarning("Node not found");
             return new RedirectResponse($redirect_path);
         }
+
         if (empty($request->get('action'))) {
             return new Response(View::view('default.view.confirm.content_node_delete',['node'=>$node]));
         }
+
         $title = $node->getTitle();
         if ((int) $request->get('action') == 3) {
             return new RedirectResponse('/node/'.$node->getNid());
         }
+
         if ($node->delete((int) $request->get('action'))) {
-            Messager::toast()->addMessage("Node \"$title\" successfully deleted.");
+            Messager::toast()->addMessage(sprintf('Node "%s" successfully deleted.', $title));
             return $request->get('action') == 1 ? new RedirectResponse($redirect_path) : new RedirectResponse('/node/'.$node->getNid());
         }
-        Messager::toast()->addWarning("Node \"$title\" was not deleted.");
+
+        Messager::toast()->addWarning(sprintf('Node "%s" was not deleted.', $title));
         return new RedirectResponse('/node/'.$node->getNid());
     }
 
@@ -1085,11 +1103,13 @@ class SystemController
             Messager::toast()->addWarning("View name not found.");
             return new RedirectResponse('/admin/structure/views');
         }
+
         if (ViewsManager::viewsManager()->removeView($view_name)) {
-            Messager::toast()->addMessage("View \"$view_name\" was successfully removed.");
+            Messager::toast()->addMessage(sprintf('View "%s" was successfully removed.', $view_name));
             return new RedirectResponse('/admin/structure/views');
         }
-        Messager::toast()->addWarning("View \"$view_name\" was not removed.");
+
+        Messager::toast()->addWarning(sprintf('View "%s" was not removed.', $view_name));
         return new RedirectResponse('/admin/structure/views');
     }
 
@@ -1111,6 +1131,7 @@ class SystemController
             Messager::toast()->addWarning("View name not found.");
             return new RedirectResponse('/admin/structure/views');
         }
+
         $view = ViewsManager::viewsManager()->getView($view_name);
         $form_base = new FormBuilder(new ViewAddForm());
         $form_base->getFormBase()->setFormMethod('POST');
@@ -1134,29 +1155,28 @@ class SystemController
         extract($args);
 
         $view_name = $request->get('view_name');
-        $content_field = json_decode($request->getContent(), true);
+        $content_field = json_decode((string) $request->getContent(), true);
 
 
 
         if (!empty($content_field['delete_field_setting']) && $content_field['delete_field_setting'] === true) {
             $content_field = $content_field['data'] ?? [];
-            $list = explode('|', $content_field['field']);
+            $list = explode('|', (string) $content_field['field']);
             $section = $list[0] ?? false;
             $display_name = $content_field['display_name'] ?? false;
             $key = $list[1].'|'.$list[2];
 
-            if (empty($display_name) || empty($view_name) || empty($key) || empty($section)) {
+            if (empty($display_name) || empty($view_name) || ($key === '' || $key === '0') || empty($section)) {
                 return new JsonResponse(['result'=>false, 'message'=>'Invalid parameters.']);
             }
+
             $result = ViewsManager::viewsManager()->removeDisplayFieldSetting($display_name,$key,$section);
             return new JsonResponse(['result'=>$result, 'message'=>'Display field setting removed.']);
         }
-        if (!empty($content_field['delete']) && $content_field['delete'] === true) {
 
-            if (!empty($content_field['display_name']) && !empty($view_name)) {
-                $result  = ViewsManager::viewsManager()->removeDisplay($view_name, $content_field['display_name']);
-                return new JsonResponse(['result'=>$result]);
-            }
+        if (!empty($content_field['delete']) && $content_field['delete'] === true && (!empty($content_field['display_name']) && !empty($view_name))) {
+            $result  = ViewsManager::viewsManager()->removeDisplay($view_name, $content_field['display_name']);
+            return new JsonResponse(['result'=>$result]);
         }
 
         if (!empty($content_field) && !isset($content_field['reorder']) && !isset($content_field['setting'])) {
@@ -1178,15 +1198,9 @@ class SystemController
 
             $view_fields = ViewsManager::viewsManager()->getDisplay($content_field['display']);
 
-            uksort($view_fields['fields'], function ($a, $b) use ($fields) {
-                return array_search($a, $fields) - array_search($b, $fields);
-            });
-            uksort($view_fields['sort_criteria'], function ($a, $b) use ($sort_fields) {
-                return array_search($a, $sort_fields) - array_search($b, $sort_fields);
-            });
-            uksort($view_fields['filter_criteria'], function ($a, $b) use ($filter_fields) {
-                return array_search($a, $filter_fields) - array_search($b, $filter_fields);
-            });
+            uksort($view_fields['fields'], fn($a, $b) => array_search($a, $fields, true) - array_search($b, $fields, true));
+            uksort($view_fields['sort_criteria'], fn($a, $b) => array_search($a, $sort_fields, true) - array_search($b, $sort_fields, true));
+            uksort($view_fields['filter_criteria'], fn($a, $b) => array_search($a, $filter_fields, true) - array_search($b, $filter_fields, true));
 
             $content_field['more_display_settings']['custom_params'] = explode(',', $content_field['more_display_settings']['custom_params'] ?? '');
             $content_field['more_display_settings']['custom_params'] = array_map('trim', $content_field['more_display_settings']['custom_params'] ?? []);
@@ -1203,7 +1217,7 @@ class SystemController
             $data = $content_field['data'] ?? [];
             $target = $data['target'] ?? '';
             if (!empty($target)) {
-                $list = explode('|', $target);
+                $list = explode('|', (string) $target);
                $view_fields = ViewsManager::viewsManager()->getDisplay($data['display_name']);
                $view_fields[$list[0]][$list[1].'|'.end($list)]['settings'] = $data['settings'] ?? [];
                $result = ViewsManager::viewsManager()->addFieldDisplay($data['display_name'], $view_fields);
@@ -1222,7 +1236,7 @@ class SystemController
             if (!empty($data['display_name']) && !empty($data['display_url']) && !empty($data['response_type'])) {
 
                 $view = ViewsManager::viewsManager()->getView($view_name);
-                $name = strtolower($data['display_name']);
+                $name = strtolower((string) $data['display_name']);
                 $name = str_replace(' ', '_', $name);
                 $display = [
                     'name' => $data['display_name'],
@@ -1237,9 +1251,9 @@ class SystemController
                     'filter_criteria'=> [],
                     'sort_criteria' => []
                 ];
-                $list = explode('/',  $data['display_url']);
-                if (!empty($list)) {
-                    $place_holders = array_map(function ($part) {
+                $list = explode('/',  (string) $data['display_url']);
+                if ($list !== []) {
+                    $place_holders = array_map(function ($part): ?string {
                         if (str_starts_with($part,'[') && str_ends_with($part,']')) {
                             $part = substr($part, 1, -1);
                             $list = explode(':', $part);
@@ -1254,8 +1268,8 @@ class SystemController
                 }
 
                 if (ViewsManager::viewsManager()->addViewDisplay($view_name, $display)) {
-                    Messager::toast()->addMessage("Display \"$view_name\" was successfully added.");
-                    return new RedirectResponse("/admin/structure/views/view/$view_name/displays");
+                    Messager::toast()->addMessage(sprintf('Display "%s" was successfully added.', $view_name));
+                    return new RedirectResponse(sprintf('/admin/structure/views/view/%s/displays', $view_name));
                 }
             }
 
@@ -1264,6 +1278,7 @@ class SystemController
         $view = ViewsManager::viewsManager()->getView($view_name);
         $types = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $types = array_keys($types);
+
         $contents = $view['content_type'] === 'all' ? $types : [$view['content_type']];
         $list = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $fields = [];
@@ -1271,7 +1286,7 @@ class SystemController
         foreach ($list as $content) {
             $storages = $content['storage'] ?? [];
             foreach ($storages as $storage) {
-                $name = substr($storage,6, strlen($storage));
+                $name = substr((string) $storage,6, strlen((string) $storage));
                 $field = Node::findField($content['fields'] ?? [], $name);
                 $fields[$content['machine_name'].'|'.$name] = $content['name']. ': '.  $field['label'] ?? $name;
             }
@@ -1323,6 +1338,7 @@ class SystemController
             Messager::toast()->addMessage("Search settings successfully removed.");
             return new RedirectResponse("/admin/search/settings");
         }
+
         Messager::toast()->addMessage("Search settings was not removed.");
         return new RedirectResponse("/admin/search/settings");
     }
@@ -1333,7 +1349,7 @@ class SystemController
         $key = $request->get('key');
 
         if ($request->getMethod() === 'POST') {
-            $data = json_decode($request->getContent(), true);
+            $data = json_decode((string) $request->getContent(), true);
 
             if (isset($data['action']) && $data['action'] === 'content_type_new') {
                 $content_type = $data['data'] ?? null;
@@ -1389,17 +1405,20 @@ class SystemController
                             unset($search_setting['fields'][$key]);
                         }
                     }
+
                     foreach ($search_setting['filter_definitions'] ?? [] as $key => $field) {
                         if ($key === $value) {
                             unset($search_setting['filter_definitions'][$key]);
                         }
                     }
+
                     foreach ($search_setting['exposed'] ?? [] as $key => $field) {
                         if ($key === $value) {
                             unset($search_setting['exposed'][$key]);
                         }
                     }
                 }
+
                 $key = $request->get('key');
                 return new JsonResponse(['success' => SearchManager::searchManager()->addSetting($key, $search_setting)]);
             }
@@ -1415,6 +1434,7 @@ class SystemController
             }
 
         }
+
         $content_types = array_keys(ContentDefinitionManager::contentDefinitionManager()->getContentTypes());
         $searchable_fields = SearchManager::searchManager()->getSourceSearchableField($key);
 
@@ -1442,13 +1462,15 @@ class SystemController
         if (empty($search_key)) {
             return new RedirectResponse("/");
         }
+
         $search_handler = SearchManager::searchManager();
         $search_handler->buildSearchQuery($search_key,$request);
         $search_handler->runQuery($search_key, $request);
+
         $settings = $search_handler->getSetting($search_key);
 
-        $fields = array_map(function ($field) {
-            $list = explode(':', $field);
+        $fields = array_map(function ($field): string {
+            $list = explode(':', (string) $field);
             return end($list);
         }, $settings['fields']);
 
@@ -1470,6 +1492,7 @@ class SystemController
                 return new RedirectResponse('/admin/integration/rest');
             }
         }
+
         $versions = JsonRestManager::factory()->getVersions();
         return new Response(View::view('default.view.integration_configure_rest',['versions'=>$versions]));
     }
@@ -1496,24 +1519,25 @@ class SystemController
             $data = [];
             $data['route_type'] = 'rest_'.$version['version_key'];
             $data['title'] = $request->request->get('route_title');
-            $data['path'] = "/{$version['version_key']}/". trim($request->request->get('route_path'), '/');
+            $data['path'] = sprintf('/%s/', $version['version_key']). trim((string) $request->request->get('route_path'), '/');
             $data['method']  = [$request->request->get('route_method')];
             $data['access'] = $request->request->all('permission');
             $data['controller'] = [
               'class' => JsonRestController::class,
               'method' => 'handle_api_request',
             ];
-            $key = "{$version['version_key']}.".strtolower(str_replace(' ', '.', $data['title']));
+            $key = $version['version_key'] . '.'.strtolower(str_replace(' ', '.', $data['title']));
             if(JsonRestManager::factory()->addVersionRoute($key, $data)) {
                 Messager::toast()->addMessage("Route successfully added.");
                 return new RedirectResponse('/admin/integration/rest/version/'.$version['version_key']);
             }
+
             Messager::toast()->addError("Route was not added.");
             return new RedirectResponse('/admin/integration/rest/version/'.$version['version_key']);
         }
 
         elseif ($request->getMethod() === 'DELETE') {
-            $data = json_decode($request->getContent(), true);
+            $data = json_decode((string) $request->getContent(), true);
             if (!empty($data['route'])) {
                 JsonRestManager::factory()->removeVersionRoute($data['route']);
                 return new JsonResponse(['success'=>true]);
@@ -1528,6 +1552,7 @@ class SystemController
             }else {
                 Messager::toast()->addError("Route data source was not added.");
             }
+
             return new RedirectResponse('/admin/integration/rest/version/'.$version['version_key']);
         }
 
@@ -1554,8 +1579,9 @@ class SystemController
         extract($args);
         $version = $request->get('version_id');
         if (JsonRestManager::factory()->deleteVersion($version)) {
-            Messager::toast()->addMessage("Version $version was successfully deleted.");
+            Messager::toast()->addMessage(sprintf('Version %s was successfully deleted.', $version));
         }
+
         return new RedirectResponse('/admin/integration/rest');
     }
 

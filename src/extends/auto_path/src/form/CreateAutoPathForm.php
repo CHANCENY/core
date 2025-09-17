@@ -23,6 +23,7 @@ class CreateAutoPathForm extends FormBase
 {
 
     protected bool $validated = true;
+
     public function getFormId(): string
     {
        return 'create_auto_path';
@@ -38,7 +39,7 @@ class CreateAutoPathForm extends FormBase
     {
         $content_types = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $options = array_keys($content_types);
-        $values = array_map(function($item){ return $item['name']; },$content_types);
+        $values = array_map(fn(array $item) => $item['name'],$content_types);
         $form['type'] = [
             'type' => 'select',
             'label' => 'Type',
@@ -83,6 +84,7 @@ class CreateAutoPathForm extends FormBase
                     $tokens .= "<li>[node:".$item."]</li>";
                 }
             }
+
             $field_names = [];
             $form['fields_wrapper']['inner_field'][$content_type['machine_name'].'_details'] = [
                 'type' => 'details',
@@ -100,6 +102,7 @@ class CreateAutoPathForm extends FormBase
                 'handler' => MarkupField::class
             ];
         }
+
         $form['path'] = [
             'type' => 'text',
             'label' => 'Path',
@@ -109,10 +112,9 @@ class CreateAutoPathForm extends FormBase
             'description' => 'Give the path pattern to the auto path',
             'required' => true,
         ];
-
-        $routes = [];
         $routes = Caching::init()->get('system.routes.keys');
-        $mapped_routes = array();
+
+        $mapped_routes = [];
 
         foreach ($routes as $route) {
             $route = Caching::init()->get($route);
@@ -148,6 +150,7 @@ class CreateAutoPathForm extends FormBase
             $form['path']->setError('Path is required.');
             $this->validated = false;
         }
+
         if (empty($form['type']->getValue())) {
             $form['type']->setError('Type is required.');
             $this->validated = false;
@@ -172,8 +175,9 @@ class CreateAutoPathForm extends FormBase
             $type = $form['type']->getValue();
             $route = $form['route']->getValue();
             if (AutoPathAlias::factory()->addAlias($pattern, $type,$route)) {
-                Messager::toast()->addMessage("Auto Path alias '$pattern' has been created");
+                Messager::toast()->addMessage(sprintf("Auto Path alias '%s' has been created", $pattern));
             }
+
             $redirect = new RedirectResponse('/admin/auto-path/list');
             $redirect->setStatusCode(302);
             $redirect->send();

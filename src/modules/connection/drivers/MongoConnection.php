@@ -21,6 +21,7 @@ use Simp\Core\modules\mongodb\ClientCredentials;
 class MongoConnection implements ConnectionInterface
 {
     protected Client $client;
+
     protected Database $db;
 
 
@@ -35,8 +36,6 @@ class MongoConnection implements ConnectionInterface
      * Executes a database operation based on the provided query.
      *
      *                     Supported types are: 'create', 'insert', 'select', 'update', and 'delete'.
-     * @param array|string $query
-     * @param array $params
      * @return mixed The result of the specified operation.
      * @throws Exception
      */
@@ -48,7 +47,7 @@ class MongoConnection implements ConnectionInterface
             'select' => $this->select($query),
             'update' => $this->update($query),
             'delete' => $this->delete($query),
-            default => throw new InvalidArgumentException("Unsupported query type: {$query['type']}"),
+            default => throw new InvalidArgumentException('Unsupported query type: ' . $query['type']),
         };
     }
 
@@ -92,8 +91,6 @@ class MongoConnection implements ConnectionInterface
      * Inserts a document into the specified collection.
      *
      *                     It should include keys 'database', 'table', and 'values'.
-     * @param string $query
-     * @param array $params
      * @return bool The result of the insert operation, typically including metadata about the operation performed.
      * @throws Exception
      */
@@ -113,8 +110,6 @@ class MongoConnection implements ConnectionInterface
      *                     - 'table' (string): The name of the table (collection) to query.
      *                     - 'where' (array, optional): The filter criteria for the query.
      *                     - 'columns' (array): The columns to select (use ['*'] to select all columns).
-     * @param string $query
-     * @param array $params
      * @return array A list of documents matching the query, represented as an array.
      * @throws Exception
      */
@@ -125,7 +120,6 @@ class MongoConnection implements ConnectionInterface
         $collection = $this->getCollection($query['database'], $query['collection']);
 
         $filter = $query['filter'] ?? [];
-        $projection = $query['projection'] === ['*'] ? [] : array_fill_keys($query['projection'], 1);
 
         foreach ($filter as $key => $value) {
             $filter[$key] = $params[$key] ?? '';
@@ -141,8 +135,6 @@ class MongoConnection implements ConnectionInterface
      *                     - 'table': The collection name.
      *                     - 'where': An optional filter array to identify the documents to update.
      *                     - 'values': The values to update in the specified documents.
-     * @param string $query
-     * @param array $params
      * @return bool The result of the update operation.
      * @throws Exception
      */
@@ -154,9 +146,11 @@ class MongoConnection implements ConnectionInterface
         foreach ($filter as $key => $value) {
             $filter[$key] = $params[$key] ?? '';
         }
+
         if (!isset($query['update'])) {
             return false;
         }
+
         return $collection->updateMany($filter, $query['update']) instanceof UpdateResult;
     }
 
@@ -167,8 +161,6 @@ class MongoConnection implements ConnectionInterface
      *                     - 'database': The name of the database.
      *                     - 'table': The name of the collection (table).
      *                     - 'where' (optional): The filter criteria for selecting documents to delete.
-     * @param string $query
-     * @param array $params
      * @return bool The result of the delete operation, typically containing details about the operation.
      * @throws Exception
      */
@@ -196,7 +188,7 @@ class MongoConnection implements ConnectionInterface
         try {
             $this->db->dropCollection($table);
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -216,8 +208,9 @@ class MongoConnection implements ConnectionInterface
                     return true;
                 }
             }
+
             return false;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }
@@ -235,7 +228,7 @@ class MongoConnection implements ConnectionInterface
             $parsed = $translator->parseCreateTable($query);
             $this->db->createCollection($parsed['collection']);
             return true;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }

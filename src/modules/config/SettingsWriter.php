@@ -9,6 +9,7 @@ use Simp\Core\lib\installation\SystemDirectory;
 class SettingsWriter
 {
     protected string $filePath;
+
     protected array $settings;
 
     /**
@@ -24,19 +25,15 @@ class SettingsWriter
 
     /**
      * Writes the settings to the file.
-     *
-     * @return bool
      */
     public function write(): bool
     {
         $phpCode = $this->generatePhpCode();
-        return !empty(file_put_contents($this->filePath, $phpCode));
+        return !in_array(file_put_contents($this->filePath, $phpCode), [0, false], true);
     }
 
     /**
      * Generates the full PHP code to write into the file.
-     *
-     * @return string
      */
     protected function generatePhpCode(): string
     {

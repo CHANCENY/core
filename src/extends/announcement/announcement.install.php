@@ -76,8 +76,6 @@ function announcement_template_install(): array
 function announcement_twig_function_install(): array
 {
     return [
-        new TwigFunction('announcement_unread_count', function () {
-            return Announcement::factory()->getUnreadAnnouncementsCount();
-        })
+        new TwigFunction('announcement_unread_count', fn(): int => Announcement::factory()->getUnreadAnnouncementsCount())
     ];
 }

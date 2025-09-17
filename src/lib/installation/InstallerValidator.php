@@ -41,7 +41,7 @@ class InstallerValidator extends SystemDirectory
         $this->config = self::bootSettings($this);
     }
 
-    public static function bootSettings(SystemDirectory $systemDirectory)
+    public static function bootSettings(SystemDirectory $systemDirectory): array
     {
         return [
             'required_php_version' => '8.1',
@@ -89,11 +89,12 @@ class InstallerValidator extends SystemDirectory
             if (!is_dir($dir)) {
                 try {
                     mkdir($dir, 0777, true);
-                } catch (\Throwable $e) {
+                } catch (\Throwable) {
                     $results['writable_dirs'][$dir] = false;
                     continue;
                 }
             }
+
             $results['writable_dirs'][$dir] = is_writable($dir);
         }
 
@@ -104,11 +105,15 @@ class InstallerValidator extends SystemDirectory
     {
         $results = $this->validate();
 
-        if (!$results['php_version']) return false;
+        if (!$results['php_version']) {
+            return false;
+        }
 
         foreach (['extensions', 'functions', 'writable_dirs'] as $type) {
             foreach ($results[$type] as $ok) {
-                if (!$ok) return false;
+                if (!$ok) {
+                    return false;
+                }
             }
         }
 
@@ -123,7 +128,7 @@ class InstallerValidator extends SystemDirectory
             exit(1);
         }
 
-        $system = new SystemDirectory();
+        new SystemDirectory();
 
         // Copy install.php to core directory
         $this->copyInstaller();
@@ -167,7 +172,7 @@ class InstallerValidator extends SystemDirectory
             return 0;
         }
 
-        $system = new SystemDirectory();
+        new SystemDirectory();
 
         // Copy install.php to core directory
         $this->copyInstaller();
@@ -177,15 +182,17 @@ class InstallerValidator extends SystemDirectory
     }
 
 
-    public function bootStorage()
+    public function bootStorage(): bool
     {
         if (Caching::init()->get('system.booted')) {
             return true;
         }
+
         if (is_dir($this->webroot_dir . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'defaults')) {
             $this->bootCache();
             Caching::init()->set('system.booted', true);
         }
+
         return false;
     }
 
@@ -216,12 +223,7 @@ class InstallerValidator extends SystemDirectory
 
         $flag = [];
         foreach ($filesToCopy as $file) {
-            if (file_exists($destinationDir . DIRECTORY_SEPARATOR . $file)) {
-                $flag[] = true;
-            }
-            else {
-                $flag[] = false;
-            }
+            $flag[] = file_exists($destinationDir . DIRECTORY_SEPARATOR . $file);
         }
 
         if (in_array(true, $flag) && !in_array(false, $flag)) {
@@ -254,6 +256,7 @@ class InstallerValidator extends SystemDirectory
             @mkdir($this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'views', 0777, true);
             @touch($views_routes);
         }
+
         if (!is_dir($this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'general')) {
             @mkdir($this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'general', 0777, true);
             @touch($general_routes);
@@ -263,6 +266,7 @@ class InstallerValidator extends SystemDirectory
         if (file_exists($views_routes)) {
             $routes = Yaml::parseFile($views_routes) ?? [];
         }
+
         if (file_exists($general_routes)) {
             $routes = array_merge($routes, Yaml::parseFile($general_routes) ?? []);
         }
@@ -270,8 +274,7 @@ class InstallerValidator extends SystemDirectory
         // Modules routes
         $module = ModuleHandler::factory();
         $modules_routes = $module->getModulesRoutes();
-        $routes = \array_merge($routes, $modules_routes);
-        return $routes;
+        return \array_merge($routes, $modules_routes);
     }
 
     /**
@@ -308,7 +311,7 @@ class InstallerValidator extends SystemDirectory
             $routes = Yaml::parseFile($default_route);
         }
 
-        if ($routes_custom = $this->developerCustomRoutes()) {
+        if (($routes_custom = $this->developerCustomRoutes()) !== []) {
             $routes = array_merge($routes, $routes_custom);
         }
 
@@ -316,6 +319,7 @@ class InstallerValidator extends SystemDirectory
             $route = new Route($key, $route);
             Caching::init()->set($key, $route);
         }
+
         Caching::init()->set('system.routes.keys', array_keys($routes));
     }
 
@@ -337,6 +341,7 @@ class InstallerValidator extends SystemDirectory
                     $keys[] = $key_name;
                     $file_path = new TwigResolver($file_path);
                 }
+
                 Caching::init()->set($key_name, $file_path);
             }
         }
@@ -359,7 +364,7 @@ class InstallerValidator extends SystemDirectory
                 $list_name = explode('.', $file);
                 $type = end($list_name) === 'twig' ? 'view' : 'file';
                 $list_n = array_slice($list_name, 0, -1);
-                $key_name = "$theme.$type." . implode('.', $list_n);
+                $key_name = sprintf('%s.%s.', $theme, $type) . implode('.', $list_n);
 
                 if ($type === 'view') {
                     $keys[] = $key_name;
@@ -382,6 +387,7 @@ class InstallerValidator extends SystemDirectory
         if (!is_dir($settings)) {
             mkdir($settings);
         }
+
         $settings .= DIRECTORY_SEPARATOR . $directory_name;
         if (!is_dir($settings)) {
             mkdir($settings);
@@ -404,7 +410,7 @@ class InstallerValidator extends SystemDirectory
     {
         // ModuleHandler getModules installed
         $module_handler = ModuleHandler::factory();
-        $modules = $module_handler->getModules();
+        $module_handler->getModules();
 
         // Get module variables
         if (Database::database()->isTableExist('environment_variables')) {
@@ -452,6 +458,7 @@ class InstallerValidator extends SystemDirectory
                 $this->recursive_theme_caching($file_path, $file, $keys);
             }
         }
+
         return $keys;
     }
 

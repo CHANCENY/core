@@ -34,7 +34,6 @@ class UserAccountFormController
 {
     /**
      * @param ...$args
-     * @return Response
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
@@ -48,10 +47,10 @@ class UserAccountFormController
         $config = ConfigManager::config()->getConfigFile('account.setting');
         $current = CurrentUser::currentUser();
         $redirect = new RedirectResponse('/');
-        if ($config?->get('allow_account_creation') === 'administrator' && empty($current?->isIsAdmin())) {
+        if ($config?->get('allow_account_creation') === 'administrator' && $current?->isIsAdmin() !== true) {
             $redirect->send();
         }
-        elseif ($config?->get('allow_account_creation') === 'visitor' && !empty($current?->isIsAdmin())) {
+        elseif ($config?->get('allow_account_creation') === 'visitor' && $current?->isIsAdmin() === true) {
             Messager::toast()->addWarning("Access denied for this user");
             $redirect->send();
         }
@@ -106,6 +105,7 @@ class UserAccountFormController
             Messager::toast()->addError("Invalid hash");
             return new RedirectResponse('/');
         }
+
         $form_base = new FormBuilder(new ForgotPasswordResetForm());
         $form_base->getFormBase()->setFormMethod('POST');
         $form_base->getFormBase()->setFormEnctype('multipart/form-data');
@@ -125,10 +125,11 @@ class UserAccountFormController
         $request_token = $request->get("hash");
         $query = Database::database()->con()->prepare("SELECT * FROM verify_email_token WHERE token = :token");
         $query->execute([':token'=>$request_token]);
+
         $result = $query->fetch();
         if (!empty($result)) {
 
-            $created_time = strtotime($result['created']);
+            $created_time = strtotime((string) $result['created']);
             $now = time();
             $diff = $now - $created_time;
             if ($diff < 3600) {

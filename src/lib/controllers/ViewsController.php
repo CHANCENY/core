@@ -42,6 +42,7 @@ class ViewsController
             Messager::toast()->addError("Page Not Found");
             return new RedirectResponse('/');
         }
+
         $display = Display::display($route_key);
 
         if (!$display->isDisplayExists() || !$display->isViewExists()) {
@@ -53,8 +54,10 @@ class ViewsController
             Messager::toast()->addError("Access Denied");
             return new RedirectResponse('/');
         }
+
         $display->prepareQuery($request);
         $display->runDisplayQuery();
+
         $display_settings = $display->getDisplay();
 
         $view_rows = [];
@@ -64,23 +67,23 @@ class ViewsController
 
             $type = $field['content_type'];
 
-            if (!empty($content_type)) {
+            if ($content_type !== null && $content_type !== []) {
                 $field = self::findField($content_type['fields'], $field['field']);
             }
 
             $view_rows[] = [
                 'name' => $field['name'] ?? $field['field'],
-                'label' => $field['label'] ?? ucfirst($field['field']),
+                'label' => $field['label'] ?? ucfirst((string) $field['field']),
                 'content_type' => $type,
                 'is_label' => !empty($content_type['display_setting'][$field['name'] ?? $field['field']]['display_label']),
-                'display_as' => !empty($content_type['display_setting'][$field['name'] ?? $field['field']]['display_as'])
-                 ? $content_type['display_setting'][$field['name'] ?? $field['field']]['display_as'] : 'p',
+                'display_as' => empty($content_type['display_setting'][$field['name'] ?? $field['field']]['display_as'])
+                 ? 'p' : $content_type['display_setting'][$field['name'] ?? $field['field']]['display_as'],
             ];
         }
 
         $empty_default = null;
-        if (empty($display->getRawResults())) {
-            $empty_default = !empty($display_settings['settings']['default_empty']) ? $display_settings['settings']['default_empty'] : 'No results found';
+        if ($display->getRawResults() === []) {
+            $empty_default = empty($display_settings['settings']['default_empty']) ? 'No results found' : $display_settings['settings']['default_empty'];
         }
 
         $response_type = $display_settings['response_type'] ?? 'application/json';

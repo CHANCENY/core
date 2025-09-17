@@ -17,22 +17,24 @@ class FileFunction
         foreach ($stream as $stream_name=>$class_name) {
             /**@var GlobalStreamWrapper $stream_object**/
             $stream_object = new $class_name();
-            if (str_starts_with($uri, $stream_name)) {
-                $new_line = str_replace("$stream_name:/", $stream_object->getbase_path(), $uri);
+            if (str_starts_with($uri, (string) $stream_name)) {
+                $new_line = str_replace($stream_name . ':/', $stream_object->getbase_path(), $uri);
 
                 if ($webroot) {
                     $webroot = $system->webroot_dir;
                     $new_line = substr($new_line,strlen($webroot),strlen($new_line));
                 }
+
                 return $new_line;
             }
         }
+
         return $uri;
     }
 
     public static function resolve_fid(?int $fid): string
     {
-        if (empty($fid)) {
+        if ($fid === null || $fid === 0) {
             return '';
         }
 
@@ -40,6 +42,7 @@ class FileFunction
         if ($file instanceof File) {
             return FileFunction::reserve_uri($file->getUri());
         }
+
         return '';
     }
 
@@ -56,6 +59,7 @@ class FileFunction
             $size /= 1024;
             $i++;
         }
+
         return round($size, 2) . ' ' . $units[$i];
     }
 
@@ -72,6 +76,6 @@ class FileFunction
         $data = file_get_contents($file_path);
         $base64 = base64_encode($data);
 
-        return "data:$mime_type;base64,$base64";
+        return sprintf('data:%s;base64,%s', $mime_type, $base64);
     }
 }

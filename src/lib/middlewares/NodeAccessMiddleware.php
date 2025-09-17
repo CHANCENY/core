@@ -32,12 +32,13 @@ class NodeAccessMiddleware implements Middleware
 
         $user = CurrentUser::currentUser()?->getUser() ?? null;
         $nid = $request->get('nid', $request->request->get('nid'));
-        $redirect = new RedirectResponse('/error/page/access-denied');
+        new RedirectResponse('/error/page/access-denied');
 
         // Just return if $redirect or $response and access_granted is false is set in $access_interface
         if($access_interface->access_granted === false && (isset($access_interface->response) || isset($access_interface->redirect))) {
             return $next($request, $access_interface);
         }
+
         $route = $access_interface->options['options']['route'] ?? null;
         $route_id = null;
         if ($route instanceof Route) {
@@ -73,16 +74,18 @@ class NodeAccessMiddleware implements Middleware
                         $access_interface->access_granted = false;
                         return $next($request, $access_interface);
                     }
+
                     $access_interface->access_granted = true;
                     return $next($request, $access_interface);
                 }
 
-                if (empty(array_intersect($permission, $roles))) {
+                if (array_intersect($permission, $roles) === []) {
                     $access_interface->access_granted = false;
                     return $next($request, $access_interface);
                 }
             }
         }
+
         return $next($request, $access_interface);
     }
 }

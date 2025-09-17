@@ -20,8 +20,11 @@ use RuntimeException;
 class DatabaseCacheManager
 {
     private static ?DatabaseCacheManager $instance = null;
+
     private ?Caching $caching = null;
+
     private bool $cacheActive = false;
+
     private int $cacheTtl = 3600; // Default TTL (1 hour), make configurable
 
     // Private constructor for Singleton
@@ -60,8 +63,8 @@ class DatabaseCacheManager
                 }
             }
 
-        } catch (Throwable $e) {
-            Database::staticLogger("DatabaseCacheManager Error: Failed to initialize - " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger("DatabaseCacheManager Error: Failed to initialize - " . $throwable->getMessage());
             $this->cacheActive = false;
             $this->caching = null;
             // Optionally re-throw if initialization failure is critical
@@ -71,31 +74,29 @@ class DatabaseCacheManager
 
     // Prevent cloning and unserialization
     private function __clone() {}
+
     public function __wakeup() {
         throw new RuntimeException("Cannot unserialize a singleton.");
     }
 
     /**
      * Gets the singleton instance of the DatabaseCacheManager.
-     *
-     * @return DatabaseCacheManager
      */
     public static function manager(): DatabaseCacheManager
     {
-        if (self::$instance === null) {
+        if (!self::$instance instanceof \Simp\Core\modules\database\DatabaseCacheManager) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
     /**
      * Checks if database caching is globally active based on configuration.
-     *
-     * @return bool
      */
     public function isCacheActive(): bool
     {
-        return $this->cacheActive && ($this->caching !== null);
+        return $this->cacheActive && ($this->caching instanceof \Simp\Core\lib\memory\cache\Caching);
     }
 
     /**
@@ -141,8 +142,8 @@ class DatabaseCacheManager
             // Assuming the Caching wrapper has a 'set' method similar to Phpfastcache
             // Adjust if your Caching class uses different method names or parameters
             return $this->caching->set($cacheTag, $results, $effectiveTtl);
-        } catch (Throwable $e) {
-            Database::staticLogger("DatabaseCacheManager Error (resultCache): Failed to set cache for tag [{$cacheTag}] - " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger(sprintf('DatabaseCacheManager Error (resultCache): Failed to set cache for tag [%s] - ', $cacheTag) . $throwable->getMessage());
             return false;
         }
     }
@@ -162,8 +163,8 @@ class DatabaseCacheManager
         try {
             // Assuming the Caching wrapper has a 'get' method
             return $this->caching->get($cacheTag);
-        } catch (Throwable $e) {
-            Database::staticLogger("DatabaseCacheManager Error (getCache): Failed to get cache for tag [{$cacheTag}] - " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger(sprintf('DatabaseCacheManager Error (getCache): Failed to get cache for tag [%s] - ', $cacheTag) . $throwable->getMessage());
             return null;
         }
     }
@@ -183,8 +184,8 @@ class DatabaseCacheManager
         try {
             // Assuming the Caching wrapper has a 'has' or 'isHit' method
             return $this->caching->has($cacheTag);
-        } catch (Throwable $e) {
-            Database::staticLogger("DatabaseCacheManager Error (isTagCached): Failed to check cache for tag [{$cacheTag}] - " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger(sprintf('DatabaseCacheManager Error (isTagCached): Failed to check cache for tag [%s] - ', $cacheTag) . $throwable->getMessage());
             return false;
         }
     }
@@ -204,8 +205,8 @@ class DatabaseCacheManager
         try {
             // Assuming the Caching wrapper has a 'delete' or similar method
             return $this->caching->delete($cacheTag);
-        } catch (Throwable $e) {
-            Database::staticLogger("DatabaseCacheManager Error (deleteCache): Failed to delete cache for tag [{$cacheTag}] - " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger(sprintf('DatabaseCacheManager Error (deleteCache): Failed to delete cache for tag [%s] - ', $cacheTag) . $throwable->getMessage());
             return false;
         }
     }
@@ -228,10 +229,11 @@ class DatabaseCacheManager
                     $this->caching->delete($tag);
                 }
             }
+
             // Assuming the Caching wrapper has a 'clear' or similar method
             return $this->caching->delete('database_cache_tags');
-        } catch (Throwable $e) {
-            Database::staticLogger("DatabaseCacheManager Error (clearAllCache): Failed to clear cache - " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger("DatabaseCacheManager Error (clearAllCache): Failed to clear cache - " . $throwable->getMessage());
             return false;
         }
     }

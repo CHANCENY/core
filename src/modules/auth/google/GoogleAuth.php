@@ -12,12 +12,15 @@ use Simp\Core\modules\services\Service;
 
 class GoogleAuth
 {
-    private string $client_id;
-    private string $client_secret;
-    private string $redirect_uri;
-    private array $scope;
+    private readonly string $client_id;
 
-    private $client;
+    private readonly string $client_secret;
+
+    private readonly string $redirect_uri;
+
+    private readonly array $scope;
+
+    private readonly \Google\Client $client;
 
     public function __construct()
     {
@@ -32,7 +35,7 @@ class GoogleAuth
         $this->client->setClientSecret($this->client_secret);
 
         $request = Service::get('request');
-        $schema = trim($request->getSchemeAndHttpHost(), '/');
+        $schema = trim((string) $request->getSchemeAndHttpHost(), '/');
         $this->client->setRedirectUri($schema.'/'. trim($this->redirect_uri, '/'));
         $this->client->setScopes($this->scope);
 

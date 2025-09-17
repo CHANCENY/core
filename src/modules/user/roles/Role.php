@@ -4,7 +4,7 @@ namespace Simp\Core\modules\user\roles;
 
 use Simp\Core\modules\database\Database;
 
-class Role
+class Role implements \Stringable
 {
     public function __construct(
                                 protected int $rid,

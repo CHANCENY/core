@@ -44,15 +44,14 @@ final class FormDefinitionBuilder
                 $form_object->setIsJsAllowed($form['is_silent'] ?? false);
                 $form_object->setFormAcceptCharset($form['accept_charset'] ?? 'UTF-8');
                 $form_object->setFormFields($form['fields'] ?? []);
-
-                $builder = new FormBuilder($form_object);
-                return $builder;
+                return new FormBuilder($form_object);
             }
         }
+
         return null;
     }
 
-    public function getFormHandler(string $form_handler_name)
+    public function getFormHandler(string $form_handler_name): ?string
     {
         $handler = null;
 
@@ -87,6 +86,7 @@ final class FormDefinitionBuilder
             default:
                 break;
         }
+
         return $handler;
     }
 

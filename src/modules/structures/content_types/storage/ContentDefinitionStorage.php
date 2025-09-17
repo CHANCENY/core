@@ -10,6 +10,7 @@ use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
 class ContentDefinitionStorage
 {
     protected ?array $content_type;
+
     public function __construct(protected string $content_name)
     {
         $this->content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($content_name);
@@ -56,43 +57,45 @@ class ContentDefinitionStorage
                    $type = "VARCHAR(500)";
                }
 
-               if (!empty($key)) {
+               if ($key !== 0 && ($key !== '' && $key !== '0')) {
                    $entity_field = "`nid` INT NOT NULL";
-                   $constraint = "CONSTRAINT `fk_node__{$key}_nid` FOREIGN KEY (`nid`) REFERENCES `node_data` (`nid`) ON DELETE CASCADE";
-                   $required = !empty($field['required']) ? "NOT NULL" : "NULL";
-                   $default = !empty($field['default_value']) ? "DEFAULT '" . $field['default_value'] . "'" : "NULL";
-                   $comment = !empty($field['description']) ? "COMMENT '" . $field['description'] . "'" : "NULL";
-                   $line = "CREATE TABLE IF NOT EXISTS `node__{$key}` (`{$key}_id` INT PRIMARY KEY AUTO_INCREMENT, $entity_field, `{$key}__value` {$type} $required {$default} {$comment}, $constraint)";
+                   $constraint = sprintf('CONSTRAINT `fk_node__%s_nid` FOREIGN KEY (`nid`) REFERENCES `node_data` (`nid`) ON DELETE CASCADE', $key);
+                   $required = empty($field['required']) ? "NULL" : "NOT NULL";
+                   $default = empty($field['default_value']) ? "NULL" : "DEFAULT '" . $field['default_value'] . "'";
+                   $comment = empty($field['description']) ? "NULL" : "COMMENT '" . $field['description'] . "'";
+                   $line = sprintf('CREATE TABLE IF NOT EXISTS `node__%s` (`%s_id` INT PRIMARY KEY AUTO_INCREMENT, %s, `%s__value` %s %s %s %s, %s)', $key, $key, $entity_field, $key, $type, $required, $default, $comment, $constraint);
                    $query = Database::database()->con()->prepare($line);
                    if ($query->execute()) {
                        $created_tables[] = "node__" . $key;
                    }
                }
            }
-       }catch (Throwable $e) {
-           ErrorLogger::logger()->logError($e);
+       }catch (Throwable $throwable) {
+           ErrorLogger::logger()->logError($throwable);
        }
+
        return true;
     }
 
     public function getStorageDefinition(string $field_name): ?string
     {
-        return $this->content_type['storage']["node__{$field_name}"] ?? null;
+        return $this->content_type['storage']['node__' . $field_name] ?? null;
     }
 
     public function removeStorageDefinition(string $field_name): bool
     {
-        $index = array_search("node__{$field_name}", $this->content_type['storage']);
+        $index = array_search('node__' . $field_name, $this->content_type['storage'], true);
         if ($index !== false) {
             unset($this->content_type['storage'][$index]);
             ContentDefinitionManager::contentDefinitionManager()->addContentType(
                 $this->content_name,
                 $this->content_type,
             );
-            $query = "DROP TABLE IF EXISTS `node__{$field_name}`";
+            $query = sprintf('DROP TABLE IF EXISTS `node__%s`', $field_name);
             $query = Database::database()->con()->prepare($query);
             return $query->execute();
         }
+
         return false;
     }
 
@@ -103,65 +106,72 @@ class ContentDefinitionStorage
         $columns = [];
 
         foreach ($tables as $key => $table) {
-            $name = substr($table, 5);  // Trim the prefix
+            $name = substr((string) $table, 5);  // Trim the prefix
             $name = trim($name, '_');
-            $alias = "P$key";
+            $alias = 'P' . $key;
 
             // Select the value field as-is, without concatenation
-            $columns[] = "{$alias}.{$name}__value AS {$name}";
-            $joins[] = "LEFT JOIN `$table` $alias ON N.nid = $alias.nid";
+            $columns[] = sprintf('%s.%s__value AS %s', $alias, $name, $name);
+            $joins[] = sprintf('LEFT JOIN `%s` %s ON N.nid = %s.nid', $table, $alias, $alias);
         }
 
         $cols = implode(', ', $columns);
         $joinsString = implode(' ', $joins);
 
-        return "SELECT {$cols} FROM `node_data` N {$joinsString} WHERE N.nid = :nid";
+        return sprintf('SELECT %s FROM `node_data` N %s WHERE N.nid = :nid', $cols, $joinsString);
     }
 
 
     public function getStorageInsertStatement(string $field_name): ?string
     {
-        if (empty($this->content_type['storage'])) return null;
-        $index = array_search("node__{$field_name}", $this->content_type['storage']);
-        if ($index !== false) {
-            $name = substr($this->content_type['storage'][$index], 4, strlen($this->content_type['storage'][$index]));
-            $name = trim($name, '_');
-            return "INSERT INTO `node__{$name}` (`nid`, `{$name}__value`) VALUES (:nid, :field_value)";
+        if (empty($this->content_type['storage'])) {
+            return null;
         }
+
+        $index = array_search('node__' . $field_name, $this->content_type['storage'], true);
+        if ($index !== false) {
+            $name = substr((string) $this->content_type['storage'][$index], 4, strlen((string) $this->content_type['storage'][$index]));
+            $name = trim($name, '_');
+            return sprintf('INSERT INTO `node__%s` (`nid`, `%s__value`) VALUES (:nid, :field_value)', $name, $name);
+        }
+
         return null;
     }
 
     public function getStorageUpdateStatement(string $field_name): ?string
     {
-        $index = array_search("node__{$field_name}", $this->content_type['storage']);
+        $index = array_search('node__' . $field_name, $this->content_type['storage'], true);
         if ($index !== false) {
-            $name = substr($this->content_type['storage'][$index], 4, strlen($this->content_type['storage'][$index]));
+            $name = substr((string) $this->content_type['storage'][$index], 4, strlen((string) $this->content_type['storage'][$index]));
             $name = trim($name, '_');
-            return "UPDATE `node__{$name}` SET `{$name}__value` = :field_value WHERE `nid` = :nid";
+            return sprintf('UPDATE `node__%s` SET `%s__value` = :field_value WHERE `nid` = :nid', $name, $name);
         }
+
         return null;
     }
 
     public function getStorageDeleteStatement(string $field_name): ?string
     {
-        $index = array_search("node__{$field_name}", $this->content_type['storage']);
+        $index = array_search('node__' . $field_name, $this->content_type['storage'], true);
         if ($index !== false) {
-            $name = substr($this->content_type['storage'][$index], 4, strlen($this->content_type['storage'][$index]));
+            $name = substr((string) $this->content_type['storage'][$index], 4, strlen((string) $this->content_type['storage'][$index]));
             $name = trim($name, '_');
-            return "DELETE FROM `node__{$name}` WHERE `nid` = :nid";
+            return sprintf('DELETE FROM `node__%s` WHERE `nid` = :nid', $name);
         }
+
         return null;
     }
 
     public function getStorageDropStatement(string $field_name): ?string
     {
 
-        $index = array_search("node__{$field_name}", $this->content_type['storage']);
+        $index = array_search('node__' . $field_name, $this->content_type['storage'], true);
         if ($index !== false) {
-            $name = substr($this->content_type['storage'][$index], 4, strlen($this->content_type['storage'][$index]));
+            $name = substr((string) $this->content_type['storage'][$index], 4, strlen((string) $this->content_type['storage'][$index]));
             $name = trim($name, '_');
-            return "DROP TABLE `node__{$name}`";
+            return sprintf('DROP TABLE `node__%s`', $name);
         }
+
         return null;
     }
 
@@ -172,12 +182,13 @@ class ContentDefinitionStorage
 
     public function getStorageSelectStatement(string $field_name): ?string
     {
-        $index = array_search("node__{$field_name}", $this->content_type['storage']);
+        $index = array_search('node__' . $field_name, $this->content_type['storage'], true);
         if ($index !== false) {
-            $name = substr($this->content_type['storage'][$index], 4, strlen($this->content_type['storage'][$index]));
+            $name = substr((string) $this->content_type['storage'][$index], 4, strlen((string) $this->content_type['storage'][$index]));
             $name = trim($name, '_');
-            return "SELECT * FROM `node__{$name}` WHERE `nid` = :nid AND {$field_name}__value = :field_value";
+            return sprintf('SELECT * FROM `node__%s` WHERE `nid` = :nid AND %s__value = :field_value', $name, $field_name);
         }
+
         return null;
     }
 }

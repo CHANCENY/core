@@ -23,7 +23,8 @@ use Simp\Core\modules\services\Service;
 class UserAccountEditForm extends UserAccountForm
 {
     private bool $validated = true;
-    private User $user;
+
+    private readonly User $user;
 
     public function __construct()
     {
@@ -36,7 +37,7 @@ class UserAccountEditForm extends UserAccountForm
      */
     public function buildForm(array $form): array
     {
-        
+
         $form = parent::buildForm($form);
 
         // set default values
@@ -56,6 +57,7 @@ class UserAccountEditForm extends UserAccountForm
                 $timezone_default = $key;
             }
         }
+
         $form['user_prefer_timezone']['default_value'] = $timezone_default;
 
         $roles = array_map(fn($role) => $role->getName(), $this->user->getRoles());
@@ -86,9 +88,7 @@ class UserAccountEditForm extends UserAccountForm
             }
         }
 
-        $data = array_map(function($item) {
-            return $item->getValue();
-        },$form);
+        $data = array_map(fn($item) => $item->getValue(),$form);
         if (!empty($data['cond_password']['password']) && !empty($data['cond_password']['password_confirm'])) {
 
             if ($data['cond_password']['password'] !== $data['cond_password']['password_confirm']) {
@@ -96,11 +96,9 @@ class UserAccountEditForm extends UserAccountForm
                 $this->validated = false;
             }
 
-            if (!CurrentUser::currentUser()->isIsAdmin()) {
-                if (!password_verify($data['cond_password']['old_password'], $this->user->getPassword())) {
-                    $this->validated = false;
-                    $form['cond_password']['old_password']->setError('Old password is incorrect.');
-                }
+            if (!CurrentUser::currentUser()->isIsAdmin() && !password_verify((string) $data['cond_password']['old_password'], (string) $this->user->getPassword())) {
+                $this->validated = false;
+                $form['cond_password']['old_password']->setError('Old password is incorrect.');
             }
 
         }
@@ -109,23 +107,21 @@ class UserAccountEditForm extends UserAccountForm
     public function submitForm(array $form): void
     {
         if ($this->validated) {
-           $data = array_map(function($item) {
-                return $item->getValue();
-            },$form);
+           $data = array_map(fn($item) => $item->getValue(),$form);
 
            $profile = $this->user->getProfile();
 
-           $this->user->setName(!empty($data['name']) ? $data['name'] : $this->user->getName());
-           $this->user->setMail(!empty($data['mail']) ? $data['mail'] : $this->user->getMail());
+           $this->user->setName(empty($data['name']) ? $this->user->getName() : $data['name']);
+           $this->user->setMail(empty($data['mail']) ? $this->user->getMail() : $data['mail']);
            $this->user->setStatus(intval($data['status']));
 
             if (!empty($data['cond_password']['password']) && !empty($data['cond_password']['password_confirm']))
             {
-                $this->user->setPassword(password_hash($data['cond_password']['password'], PASSWORD_BCRYPT));
-                
+                $this->user->setPassword(password_hash((string) $data['cond_password']['password'], PASSWORD_BCRYPT));
+
             }
-            
-            
+
+
             $timezone = new  TimeZone();
             $list = array_keys($timezone->getSimplifiedTimezone());
             sort($list);

@@ -16,6 +16,7 @@ class DefaultTokenResolver implements ResolverInterface
 {
 
     protected Request $request;
+
     public function __construct()
     {
         $this->request = Service::get('request');
@@ -141,18 +142,18 @@ class DefaultTokenResolver implements ResolverInterface
 
             foreach ($tokens as $token) {
 
-                if (str_contains($token,'get_value?')) {
+                if (str_contains((string) $token,'get_value?')) {
                    $params = $this->request->attributes->all();
                    $params = array_merge($params, $this->request->query->all());
                    foreach ($params as $k => $value) {
-                       $replacements["{$type}:get_value:{$k}"] = is_array($value) ? json_encode($value) : $value;
+                       $replacements[sprintf('%s:get_value:%s', $type, $k)] = is_array($value) ? json_encode($value) : $value;
                    }
                 }
 
-                elseif (str_contains($token,'post_value?')) {
+                elseif (str_contains((string) $token,'post_value?')) {
                    $payload = $this->request->request->all();
                    foreach ($payload as $k => $value) {
-                       $replacements["{$type}:post_value:{$k}"] = is_array($value) ? json_encode($value) : $value;
+                       $replacements[sprintf('%s:post_value:%s', $type, $k)] = is_array($value) ? json_encode($value) : $value;
                    }
                 }
 
@@ -189,17 +190,12 @@ class DefaultTokenResolver implements ResolverInterface
                 $node = $options['node'] ?? null;
                 if ($node instanceof Node) {
 
-                    if (str_contains($token,'field?')) {
-                        $list = explode(':', $token);
+                    if (str_contains((string) $token,'field?')) {
+                        $list = explode(':', (string) $token);
                         $field = end($list);
                         $values = $node->get($field);
-                        $value = "";
-                        if (is_array($values)) {
-                            $value = json_encode($values, JSON_PRETTY_PRINT);
-                        }
-                        else {
-                            $value = $values;
-                        }
+                        $value = is_array($values) ? json_encode($values, JSON_PRETTY_PRINT) : $values;
+
                         $replacements[$token] = $value;
                     }
 

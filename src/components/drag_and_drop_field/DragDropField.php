@@ -12,8 +12,10 @@ use Simp\Fields\FieldTypeSupportException;
 class DragDropField extends FieldBase
 {
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
 
     /**
      * @throws Exception
@@ -24,12 +26,10 @@ class DragDropField extends FieldBase
     {
         parent::__construct($field, $request_method, $post, $params, $files);
 
-        $this->validation_message = '';
-
         $supported_field_type = ['drag_and_drop', 'hidden'];
 
         if (!in_array($field['type'], $supported_field_type)) {
-            throw new FieldTypeSupportException("Field type '{$field['type']}' is not supported with this class ".static::class);
+            throw new FieldTypeSupportException(sprintf("Field type '%s' is not supported with this class ", $field['type']).static::class);
         }
 
         $required = ['label', 'name', 'type'];
@@ -37,7 +37,7 @@ class DragDropField extends FieldBase
         foreach ($required as $field_key) {
 
             if (!isset($field[$field_key])) {
-                throw new FieldRequiredException("Field key {$field_key} is required");
+                throw new FieldRequiredException(sprintf('Field key %s is required', $field_key));
             }
         }
 
@@ -45,13 +45,14 @@ class DragDropField extends FieldBase
 
         if ($request_method === 'POST') {
             $field_name = $field['name'];
-            if (str_ends_with($field_name, '[]')) {
-                $field_name = substr($field_name, 0, -2);
+            if (str_ends_with((string) $field_name, '[]')) {
+                $field_name = substr((string) $field_name, 0, -2);
             }
+
             $value = $post[$field_name] ?? null;
             if (!is_null($value)) {
                 $value = is_array($value) ? reset($value) : $value;
-                $this->submission['value'] = is_array($value)? $value : json_decode($value, true);
+                $this->submission['value'] = is_array($value)? $value : json_decode((string) $value, true);
             }
         }
 
@@ -87,7 +88,7 @@ class DragDropField extends FieldBase
 
     public function getId(): string
     {
-        return !empty($this->field['id']) ? $this->field['id'] : FieldManager::createFieldName($this->getLabel());
+        return empty($this->field['id']) ? FieldManager::createFieldName($this->getLabel()) : $this->field['id'];
     }
 
     public function getClassList(): array
@@ -97,7 +98,7 @@ class DragDropField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -112,7 +113,7 @@ class DragDropField extends FieldBase
 
     public function getValue(): string|int|float|null|array|bool
     {
-        $data = !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
+        $data = empty($this->submission['value']) ? $this->field['default_value'] ?? '' : $this->submission['value'];
         if (is_string($data) || is_scalar($data) || is_null($data)  || is_bool($data)) {
             return $data;
         }
@@ -124,8 +125,10 @@ class DragDropField extends FieldBase
                     $fids[] = $file['fid'];
                 }
             }
+
             return $fids;
         }
+
         return $data;
     }
 
@@ -136,7 +139,7 @@ class DragDropField extends FieldBase
 
     public function getBuildField(bool $wrapper = true): string
     {
-        $class = implode(' ', $this->getClassList());
+        implode(' ', $this->getClassList());
         $name = $this->getName();
         $label = $this->getLabel();
         $values = json_encode($this->getValue());
@@ -147,7 +150,7 @@ class DragDropField extends FieldBase
 
         $options = "";
         foreach ($this->getOptions() as $key=>$option) {
-            $options .= "{$key}='{$option}'";
+            $options .= sprintf("%s='%s'", $key, $option);
         }
 
         $extensions = implode(', ', $this->field['settings'] ?? ['image/*']);
@@ -158,9 +161,9 @@ class DragDropField extends FieldBase
         $uuid = uniqid();
 
         $script = AssetsManager::assetManager()->getAssetsFile('grag_drop.js', true);
-        $script = str_replace('__UUID__', "#$uuid", $script);
+        $script = str_replace('__UUID__', '#' . $uuid, $script);
 
-        $hidden_field = "<input type='hidden' name='{$name}' value='{$values}'/>";
+        $hidden_field = sprintf("<input type='hidden' name='%s' value='%s'/>", $name, $values);
 
         $drop_html = <<<DROP
  <div class="drag-drop-container">
@@ -179,7 +182,7 @@ class DragDropField extends FieldBase
                     <label for="fileInput" class="file-button">Browse Files</label>
                     <input type="file" id="fileInput" multiple style="display:none;">
                 </div>
-                <p class="file-info">Supports all file of types ($extensions). Maximum file size: ($size).</p>
+                <p class="file-info">Supports all file of types ({$extensions}). Maximum file size: ({$size}).</p>
             </div>
 
             <div class="file-list-container">
@@ -212,10 +215,10 @@ DROP;
 {$drop_html}
 <span class="field-description">{$this->getDescription()}</span>
 <span class="field-message message-{$this->getName()}">{$this->validation_message}</span>
-<noscript>$settings</noscript>
+<noscript>{$settings}</noscript>
 </div>
 <script>
-$script
+{$script}
 </script>
 WRAPPER;
 

@@ -21,24 +21,24 @@ $field_settings = ContentDefinitionManager::contentDefinitionManager()->getField
 
 $settings = json_decode($_POST['field_settings'] ?? "", true);
 
-$field_settings = empty($field_settings) ? $settings : $field_settings;
+$field_settings = $field_settings === [] ? $settings : $field_settings;
 
 if ($field_settings) {
     $upload = new FormUpload();
 
     $upload->addAllowedMaxSize($field_settings['settings']['allowed_file_size'] ?? 6000000);
-    array_map(function ($extension) use ($upload) {
+    array_map(function ($extension) use ($upload): void {
         $upload->addAllowedExtension($extension);
     }, $field_settings['settings']['allowed_file_types'] ?? []);
 
     // limit number of files
-    $limit = !empty($field_settings['limit']) ? (int)$field_settings['limit'] : 1;
+    $limit = empty($field_settings['limit']) ? 1 : (int)$field_settings['limit'];
 
     // Validation: enforce file limit
     if ($limit === 1 && is_array($_FILES[$field]['name'])) {
         $json = new JsonResponse([
             'success' => false,
-            'error'   => "You are allowed to upload not more than {$limit} file.",
+            'error'   => sprintf('You are allowed to upload not more than %d file.', $limit),
         ]);
         $json->setStatusCode(400)->send();
         exit;
@@ -47,7 +47,7 @@ if ($field_settings) {
     if (is_array($_FILES[$field]['name']) && count($_FILES[$field]['name']) > $limit) {
         $json = new JsonResponse([
             'success' => false,
-            'error'   => "Too many files attached to {$field_settings['label']} field. Only {$limit} files allowed.",
+            'error'   => sprintf('Too many files attached to %s field. Only %d files allowed.', $field_settings['label'], $limit),
         ]);
         $json->setStatusCode(400)->send();
         exit;
@@ -57,7 +57,9 @@ if ($field_settings) {
     $files_object = [];
     if (is_array($_FILES[$field]['name'])) {
         // Multiple files
-        for ($i = 0; $i < count($_FILES[$field]['name']); $i++) {
+        $counter = count($_FILES[$field]['name']);
+        // Multiple files
+        for ($i = 0; $i < $counter; $i++) {
             $files_object[] = [
                 'name'      => $_FILES[$field]['name'][$i],
                 'type'      => $_FILES[$field]['type'][$i],

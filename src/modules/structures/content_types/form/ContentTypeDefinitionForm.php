@@ -32,6 +32,7 @@ use Simp\Core\modules\services\Service;
 class ContentTypeDefinitionForm extends FormBase
 {
     protected ?array $content_type = [];
+
     protected bool $validated = true;
 
     protected Request $request;
@@ -58,7 +59,7 @@ class ContentTypeDefinitionForm extends FormBase
         }
 
         $this->content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($content_name);
-        if (empty($this->content_type)) {
+        if ($this->content_type === null || $this->content_type === []) {
             $redirect = new RedirectResponse('/');
             Messager::toast()->addWarning("No content type name provided");
             $redirect->setStatusCode(302);
@@ -141,7 +142,7 @@ class ContentTypeDefinitionForm extends FormBase
                 $this->validate_recursive($field);
             }
             elseif ($field instanceof FieldBase && $field->getRequired() === 'required' && empty($field->getValue())) {
-                $field->setError("{$field->getLabel()} is required");
+                $field->setError($field->getLabel() . ' is required');
                 $this->validated = false;
             }
         }
@@ -154,13 +155,15 @@ class ContentTypeDefinitionForm extends FormBase
                 return $this->validate_recursive($inner_field);
             }
             elseif ($inner_field instanceof FieldBase && $inner_field->getRequired() === 'required' && empty($field->getValue())) {
-                $inner_field->setError("{$field->getName()} is required");
+                $inner_field->setError($field->getName() . ' is required');
                 $this->validated = false;
             }
         }
+
+        return null;
     }
 
-    private function submit_recursive(&$field, array &$temp, Request $request, $data_all, $parent_key)
+    private function submit_recursive(array &$field, array &$temp, Request $request, array $data_all, $parent_key)
     {
         foreach ($field['inner_field'] as $k=>$inner_field) {
             if (in_array($inner_field['type'], ['fieldset', 'conditional', 'details'])) {
@@ -201,6 +204,7 @@ class ContentTypeDefinitionForm extends FormBase
                     foreach ($allowedExtensions as $extension) {
                         $form->addAllowedExtension($extension);
                     }
+
                     $allowed_size = $inner_field['settings']['allowed_file_size'] ?? 1000000;
                     $form->addAllowedMaxSize($allowed_size);
                     $form->addFileObject($file);
@@ -210,10 +214,11 @@ class ContentTypeDefinitionForm extends FormBase
                     if (!is_dir($filename)) {
                         @mkdir($filename);
                     }
+
                     $filename .= "/" . $file['name'];
                     $file = $form->moveFileUpload($filename);
                     $object = $file->getFileObject();
-                    if ($object) {
+                    if ($object !== []) {
                         $file = File::create(
                             [
                                 'name' => $object['name'],
@@ -224,11 +229,12 @@ class ContentTypeDefinitionForm extends FormBase
                                 'uid' => $data_all['uid']
                             ]
                         );
-                        if ($file) {
+                        if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $file_fids[] = $file->getFid();
                         }
                     }
                 }
+
                 $temp[$k] = $file_fids;
             }
             else {
@@ -241,6 +247,8 @@ class ContentTypeDefinitionForm extends FormBase
 
 
         }
+
+        return null;
     }
 
     /**
@@ -255,9 +263,7 @@ class ContentTypeDefinitionForm extends FormBase
     {
         if ($this->validated) {
 
-            $data_all = array_map(function ($value) {
-                return $value->getValue();
-            }, $form);
+            $data_all = array_map(fn($value) => $value->getValue(), $form);
 
             $user = User::load($data_all['owner'][0] ?? 1);
             if ($user instanceof User) {
@@ -273,7 +279,7 @@ class ContentTypeDefinitionForm extends FormBase
                 $request = Service::get('request');
 
                 $temp = [];
-                foreach ($node_data as $key => $value) {
+                foreach (array_keys($node_data) as $key) {
                     $field = $this->content_type["fields"][$key] ?? null;
 
                     if (isset($field) && $field['type'] === 'file') {
@@ -309,6 +315,7 @@ class ContentTypeDefinitionForm extends FormBase
                             foreach ($allowedExtensions as $extension) {
                                 $form->addAllowedExtension($extension);
                             }
+
                             $allowed_size = $field['settings']['allowed_file_size'] ?? 1000000;
                             $form->addAllowedMaxSize($allowed_size);
 
@@ -319,10 +326,11 @@ class ContentTypeDefinitionForm extends FormBase
                             if (!is_dir($filename)) {
                                 @mkdir($filename);
                             }
+
                             $filename .= "/". $file['name'];
                             $file = $form->moveFileUpload($filename);
                             $object = $file->getFileObject();
-                            if ($object) {
+                            if ($object !== []) {
                                 $file = File::create(
                                     [
                                         'name' => $object['name'],
@@ -333,11 +341,12 @@ class ContentTypeDefinitionForm extends FormBase
                                         'uid' => $node_data['uid']
                                     ]
                                 );
-                                if ($file) {
+                                if ($file instanceof \Simp\Core\modules\files\entity\File) {
                                     $file_fids[] = $file->getFid();
                                 }
                             }
                         }
+
                         $node_data[$key] = $file_fids;
                     }
 
@@ -347,12 +356,13 @@ class ContentTypeDefinitionForm extends FormBase
                       unset($node_data[$key]);
                     }
                 }
+
                 $node_data = array_merge($node_data, $temp);
 
                 // now insert in other tables.
                 $node = Node::create($node_data);
 
-                Messager::toast()->addMessage("Content of type {$this->content_type['name']} created");
+                Messager::toast()->addMessage(sprintf('Content of type %s created', $this->content_type['name']));
                 $redirect = new RedirectResponse('/admin/content');
                 $redirect->setStatusCode(302);
                 $redirect->send();

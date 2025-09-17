@@ -13,6 +13,7 @@ use Simp\Mail\Mail\Envelope;
 class MailQueueManager
 {
     protected array $queue = [];
+
     protected Session $caching;
 
     /**
@@ -31,7 +32,6 @@ class MailQueueManager
      * Adds an envelope to the desired collection or process.
      *
      * @param Envelope $envelope The envelope to be added.
-     * @return void
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
@@ -47,7 +47,6 @@ class MailQueueManager
      * Adds an array of envelopes to the mail queue.
      *
      * @param array<Envelope> $envelopes An array of envelopes to be added to the queue.
-     * @return void
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
@@ -69,7 +68,6 @@ class MailQueueManager
      * MailManager and sending it. After sending all envelopes, the queue is
      * cleared and the global mail queue is updated to reflect the changes.
      *
-     * @return void
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException

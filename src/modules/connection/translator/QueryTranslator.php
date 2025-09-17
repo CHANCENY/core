@@ -79,7 +79,7 @@ class QueryTranslator
     protected function translateCreateTable(): array
     {
         $pattern = '/CREATE TABLE IF NOT EXISTS `?(\w+)`?\s*\((.*?)\)/is';
-        if (!preg_match($pattern, $this->query, $matches)) {
+        if (in_array(preg_match($pattern, $this->query, $matches), [0, false], true)) {
             throw new Exception("Invalid CREATE TABLE syntax.");
         }
 
@@ -120,7 +120,7 @@ class QueryTranslator
     protected function translateSelect(): array
     {
         $pattern = '/SELECT\s+(.*?)\s+FROM\s+`?(\w+)`?(?:\s+WHERE\s+(.*))?/is';
-        if (!preg_match($pattern, $this->query, $matches)) {
+        if (in_array(preg_match($pattern, $this->query, $matches), [0, false], true)) {
             throw new Exception("Invalid SELECT syntax.");
         }
 
@@ -128,7 +128,7 @@ class QueryTranslator
         $collection = $matches[2];
         $filter = [];
 
-        if (!empty($matches[3])) {
+        if (isset($matches[3]) && ($matches[3] !== '' && $matches[3] !== '0')) {
             $filter = $this->parseWhereClause($matches[3]);
         }
 
@@ -154,7 +154,7 @@ class QueryTranslator
     protected function translateInsert(): array
     {
         $pattern = '/INSERT INTO `?(\w+)`? \((.*?)\) VALUES \((.*?)\)/is';
-        if (!preg_match($pattern, $this->query, $matches)) {
+        if (in_array(preg_match($pattern, $this->query, $matches), [0, false], true)) {
             throw new Exception("Invalid INSERT INTO syntax.");
         }
 
@@ -187,7 +187,7 @@ class QueryTranslator
     protected function translateUpdate(): array
     {
         $pattern = '/UPDATE `?(\w+)`? SET (.*?) WHERE (.*)/is';
-        if (!preg_match($pattern, $this->query, $matches)) {
+        if (in_array(preg_match($pattern, $this->query, $matches), [0, false], true)) {
             throw new Exception("Invalid UPDATE syntax.");
         }
 
@@ -223,7 +223,7 @@ class QueryTranslator
     protected function translateDelete(): array
     {
         $pattern = '/DELETE FROM `?(\w+)`?(?:\s+WHERE\s+(.*))?/is';
-        if (!preg_match($pattern, $this->query, $matches)) {
+        if (in_array(preg_match($pattern, $this->query, $matches), [0, false], true)) {
             throw new Exception("Invalid DELETE syntax.");
         }
 
@@ -252,6 +252,7 @@ class QueryTranslator
                 $filters[$condMatch[1]] = $this->cleanValue($condMatch[3]);
             }
         }
+
         return $filters;
     }
 
@@ -266,6 +267,7 @@ class QueryTranslator
         foreach ($values as $k => $v) {
             $values[$k] = $this->cleanValue($v);
         }
+
         return $values;
     }
 
@@ -279,11 +281,21 @@ class QueryTranslator
     {
         $value = trim($value, "'\"");
         if (is_numeric($value)) {
-            return strpos($value, '.') !== false ? (float)$value : (int)$value;
+            return str_contains($value, '.') ? (float)$value : (int)$value;
         }
-        if (strtolower($value) === 'null') return null;
-        if (strtolower($value) === 'true') return true;
-        if (strtolower($value) === 'false') return false;
+
+        if (strtolower($value) === 'null') {
+            return null;
+        }
+
+        if (strtolower($value) === 'true') {
+            return true;
+        }
+
+        if (strtolower($value) === 'false') {
+            return false;
+        }
+
         return $value;
     }
 
@@ -295,8 +307,8 @@ class QueryTranslator
         $query = preg_replace('/\s+/', ' ', str_replace('`', '', $query));
 
         // Match table name
-        preg_match('/CREATE TABLE IF NOT EXISTS (\w+)\s*\((.+)\)/i', $query, $matches);
-        if (!$matches || count($matches) < 3) {
+        preg_match('/CREATE TABLE IF NOT EXISTS (\w+)\s*\((.+)\)/i', (string) $query, $matches);
+        if ($matches === [] || count($matches) < 3) {
             throw new \InvalidArgumentException("Invalid CREATE TABLE statement.");
         }
 
@@ -308,7 +320,7 @@ class QueryTranslator
 
         $resultFields = [];
         foreach ($fields as $field) {
-            $field = trim($field);
+            $field = trim((string) $field);
 
             // Skip constraints
             if (stripos($field, 'PRIMARY KEY') === 0 ||
@@ -322,7 +334,9 @@ class QueryTranslator
 
             // Match field definition: name type [options...]
             preg_match('/^(\w+)\s+([A-Z]+(?:\(\d+\))?)(.*)$/i', $field, $fmatch);
-            if (!$fmatch) continue;
+            if ($fmatch === []) {
+                continue;
+            }
 
             $name = $fmatch[1];
             $type = strtoupper($fmatch[2]);
@@ -350,8 +364,14 @@ class QueryTranslator
         $chars = str_split($fieldsStr);
 
         foreach ($chars as $char) {
-            if ($char === '(') $depth++;
-            if ($char === ')') $depth--;
+            if ($char === '(') {
+                $depth++;
+            }
+
+            if ($char === ')') {
+                $depth--;
+            }
+
             if ($char === ',' && $depth === 0) {
                 $fields[] = $buffer;
                 $buffer = '';
@@ -371,10 +391,17 @@ class QueryTranslator
     {
         if (preg_match('/DEFAULT\s+([^\s]+)/i', $options, $m)) {
             $default = trim($m[1], "'\"");
-            if (strcasecmp($default, 'NULL') === 0) return null;
-            if (is_numeric($default)) return (float)$default;
+            if (strcasecmp($default, 'NULL') === 0) {
+                return null;
+            }
+
+            if (is_numeric($default)) {
+                return (float)$default;
+            }
+
             return $default;
         }
+
         return null;
     }
 

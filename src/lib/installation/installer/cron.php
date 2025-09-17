@@ -32,15 +32,13 @@ try {
         }
     }
 
-    if (count($queued) > 0) {
-        foreach ($queued as $k=>$cron) {
-            $serialized = base64_encode(serialize($cron));
-            $command = 'php '.$executor.' "' . $serialized . '" > /dev/null 2>&1 &';
-            echo PHP_EOL. "$k has started execution".PHP_EOL;
-            exec($command);
-        }
+    foreach ($queued as $k=>$cron) {
+        $serialized = base64_encode(serialize($cron));
+        $command = 'php '.$executor.' "' . $serialized . '" > /dev/null 2>&1 &';
+        echo PHP_EOL. ($k . ' has started execution').PHP_EOL;
+        exec($command);
     }
 
-}catch (Throwable $e){
-    echo PHP_EOL . "sorry console not working properly" . PHP_EOL .$e->getMessage();
+}catch (Throwable $throwable){
+    echo PHP_EOL . "sorry console not working properly" . PHP_EOL .$throwable->getMessage();
 }

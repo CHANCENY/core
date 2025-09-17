@@ -10,8 +10,10 @@ use Simp\Fields\FieldTypeSupportException;
 class UserReferenceField extends FieldBase {
 
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
 
     public function __construct(array $field, string $request_method, array $post = [], array $params = [], array $files = [])
     {
@@ -26,8 +28,6 @@ class UserReferenceField extends FieldBase {
             'id',
             'label'
         ];
-
-        $this->validation_message = '';
 
         foreach ($required as $field_key) {
             if (!array_key_exists($field_key, $field)) {
@@ -47,12 +47,13 @@ class UserReferenceField extends FieldBase {
             if (!empty($field['required']) && empty($value) && empty($field['default_value'])) {
                 $this->validation_message = "This input field is mandatory.";
             }
+
             if ($value !== null) {
                 $this->submission['value'] = $value;
             }
         }
 
-        if ($request_method === 'GET' && !empty($params)) {
+        if ($request_method === 'GET' && $params !== []) {
 
             $value = $params[$field['name']] ?? null;
             if ($value !== null) {
@@ -88,7 +89,7 @@ class UserReferenceField extends FieldBase {
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -103,7 +104,7 @@ class UserReferenceField extends FieldBase {
 
     public function getValue(): string|int|float|null|array|bool
     {
-        return !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
+        return empty($this->submission['value']) ? $this->field['default_value'] ?? '' : $this->submission['value'];
     }
 
     public function get(string $field_name): float|int|bool|array|string|null
@@ -118,6 +119,7 @@ class UserReferenceField extends FieldBase {
         foreach ($this->getOptions() as $key => $option) {
             $options .= $key . '="' . $option . '" ';
         }
+
         $script = AssetsManager::assetManager()->getAssetsFile('user.js');
 
         if ($wrapper) {
@@ -136,11 +138,11 @@ class UserReferenceField extends FieldBase {
         (function(){
 
             {$script}
-             
+
             document.addEventListener('DOMContentLoaded',()=>{
                 attachAutoFilterListener('{$this->getId()}', document.getElementById('entity_name').value);
             })
-            
+
         })();
     </script>
 </div>

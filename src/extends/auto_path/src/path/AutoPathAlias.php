@@ -19,23 +19,22 @@ use Simp\Core\modules\tokens\TokenManager;
 class AutoPathAlias
 {
     protected string $cache_key = 'auto_path_patterns_cache_key';
+
     protected string $cache_key_path = 'auto_path_patterns_cache_key_path';
 
     protected array $patterns = [];
+
     protected array $paths = [];
 
     public function __construct(protected ?Database $database = null)
     {
-        if (!is_null($this->database)) {
-            if (!Caching::init()->has($this->cache_key)) {
-                $stmt = $this->database->con()->prepare("SELECT * FROM auto_path_patterns");
-                $stmt->execute();
-                Caching::init()->set($this->cache_key, $stmt->fetchAll());
-
-                $stmt = $this->database->con()->prepare("SELECT * FROM auto_path");
-                $stmt->execute();
-                Caching::init()->set($this->cache_key_path, $stmt->fetchAll());
-            }
+        if (!is_null($this->database) && !Caching::init()->has($this->cache_key)) {
+            $stmt = $this->database->con()->prepare("SELECT * FROM auto_path_patterns");
+            $stmt->execute();
+            Caching::init()->set($this->cache_key, $stmt->fetchAll());
+            $stmt = $this->database->con()->prepare("SELECT * FROM auto_path");
+            $stmt->execute();
+            Caching::init()->set($this->cache_key_path, $stmt->fetchAll());
         }
 
         $this->patterns = Caching::init()->get($this->cache_key) ?? [];
@@ -49,6 +48,7 @@ class AutoPathAlias
                 return true;
             }
         }
+
         return false;
     }
 
@@ -63,6 +63,7 @@ class AutoPathAlias
         $stmt->bindValue(':pattern_path', $pattern);
         $stmt->bindValue(':entity_type', $entity_type);
         $stmt->bindValue(':route_controller', $default_route);
+
         $result = $stmt->execute();
 
         if ($result) {
@@ -85,6 +86,7 @@ class AutoPathAlias
                 return $pattern;
             }
         }
+
         return null;
     }
 
@@ -95,20 +97,24 @@ class AutoPathAlias
                 return $p;
             }
         }
+
         return null;
     }
 
     public function deleteAlias(int $id): bool
     {
-        if (is_null($this->database)) return false;
+        if (is_null($this->database)) {
+            return false;
+        }
 
         $query = "DELETE FROM auto_path_patterns WHERE id = :id";
         $stmt = $this->database->con()->prepare($query);
         $stmt->bindValue(':id', $id);
+
         $result = $stmt->execute();
 
         if ($result) {
-            $this->patterns = array_filter($this->patterns, fn($p) => $p['id'] !== $id);
+            $this->patterns = array_filter($this->patterns, fn(array $p): bool => $p['id'] !== $id);
             Caching::init()->set($this->cache_key, $this->patterns);
         }
 
@@ -127,6 +133,7 @@ class AutoPathAlias
                 return true;
             }
         }
+
         return false;
     }
 
@@ -173,8 +180,8 @@ class AutoPathAlias
     {
         $token = strtolower(trim($token));
         $token = preg_replace('/[^a-z0-9]+/i', '-', $token);
-        $token = preg_replace('/-+/', '-', $token);
-        return trim($token, '-');
+        $token = preg_replace('/-+/', '-', (string) $token);
+        return trim((string) $token, '-');
     }
 
     /**
@@ -182,28 +189,36 @@ class AutoPathAlias
      */
     public function create(Node $node): bool
     {
-        if (is_null($this->database)) return false;
+        if (is_null($this->database)) {
+            return false;
+        }
 
         $token_manager = TokenManager::token();
         $data = $this->getAliasByEntityType($node->getEntityArray()['machine_name']);
-        if (!$data) return false;
+        if ($data === [] || $data === false || $data === null) {
+            return false;
+        }
 
         $pattern = $data['pattern_path'];
         $appended = 0;
 
         while (true) {
-            $list = explode('/', $pattern);
+            $list = explode('/', (string) $pattern);
 
             foreach ($list as $key => $token) {
                 if (str_starts_with($token, '[') && str_ends_with($token, ']')) {
                     while (true) {
                         $token_val = $token_manager->resolver($token, ['node' => $node]);
                         $token_url_part = $this->createAliasUrl($token_val);
-                        if ($appended !== 0) $token_url_part .= "-" . $appended;
+                        if ($appended !== 0) {
+                            $token_url_part .= "-" . $appended;
+                        }
+
                         if (!$this->validatePath($token_url_part, $data['id'])) {
                             $list[$key] = $token_url_part;
                             break;
                         }
+
                         $appended++;
                     }
                 }
@@ -214,6 +229,7 @@ class AutoPathAlias
                 $pattern = $temp;
                 break;
             }
+
             $appended++;
         }
 
@@ -222,6 +238,7 @@ class AutoPathAlias
         $stmt->bindValue(':path', $pattern);
         $stmt->bindValue(':nid', $node->getNid());
         $stmt->bindValue(':pattern_id', $data['id']);
+
         $result = $stmt->execute();
 
         if ($result) {
@@ -245,7 +262,7 @@ class AutoPathAlias
 
     public function isEntityTypeAutoPathEnabled(string $entity_type): bool
     {
-        return !empty($this->getAliasByEntityType($entity_type));
+        return !in_array($this->getAliasByEntityType($entity_type), [[], false, null], true);
     }
 
     public static function factory(?Database $database = null): AutoPathAlias
@@ -253,14 +270,18 @@ class AutoPathAlias
         if (is_null($database)) {
             $database = Database::database();
         }
+
         return new self($database);
     }
 
     public function getPattern(int $id): array|null
     {
         foreach ($this->patterns as $p) {
-            if ($p['id'] === $id) return $p;
+            if ($p['id'] === $id) {
+                return $p;
+            }
         }
+
         return null;
     }
 
@@ -295,6 +316,7 @@ class AutoPathAlias
                     ]
             ]);
         }
+
         return $routes;
     }
 

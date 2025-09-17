@@ -14,7 +14,9 @@ use Simp\Core\components\request\Request;
 class Service
 {
     protected Container $container;
+
     protected array $arguments = [];
+
     public function __construct()
     {
         $this->container = defined("DI_CONTAINER_SERVICES_TAGS") ?
@@ -54,9 +56,6 @@ class Service
     }
 
     /**
-     * @param string $service_name
-     * @param array $arguments
-     * @return mixed
      * @throws DependencyException
      * @throws NotFoundException
      */
@@ -75,7 +74,7 @@ class Service
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public static function get(string $service_name, array $arguments = [])
+    public static function get(string $service_name, array $arguments = []): mixed
     {
         $object = new static();
         return $object->service($service_name, $arguments);

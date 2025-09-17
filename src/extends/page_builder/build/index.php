@@ -27,11 +27,9 @@ if (!$user->isIsAdmin()) {
 $page = $request->get('t', null);
 $config = PageConfigManager::factory($page ?? "");
 $pages = $config->getPages();
-$current_published = array_filter($pages, function ($page) {
-   return $page->getStatus() == 1;
-});
+$current_published = array_filter($pages, fn(\Simp\Core\extends\page_builder\src\Plugin\Page $page): bool => $page->getStatus() == 1);
 
-$current_published = !empty($current_published) ? reset($current_published) : new Page(0);
+$current_published = $current_published === [] ? new Page(0) : reset($current_published);
 
 /**@var Page $current_published */
 ?>

@@ -55,21 +55,16 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Adds a join to the query.
-     * @param string $table
-     * @param string $alias
-     * @param string $condition
      * @return $this
      */
     public function addJoin(string $table, string $alias, string $condition): self
     {
-        $this->fileStorageQuery['joins'][] = "JOIN {$table} {$alias} ON {$condition}";
+        $this->fileStorageQuery['joins'][] = sprintf('JOIN %s %s ON %s', $table, $alias, $condition);
         return $this;
     }
 
     /**
      * Adds a where clause to the query.
-     * @param string $condition
-     * @param array $params
      * @return $this
      */
     public function addWhere(string $condition, array $params = []): self
@@ -78,48 +73,42 @@ class FileStorageEntity implements IteratorAggregate
         foreach ($params as $key => $value) {
             $this->parameters[$key] = $value;
         }
+
         return $this;
     }
 
     /**
      * Adds an order by clause to the query.
-     * @param string $column
-     * @param string $direction
      * @return $this
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
-        $this->fileStorageQuery['order'] = "ORDER BY {$column} {$direction}";
+        $this->fileStorageQuery['order'] = sprintf('ORDER BY %s %s', $column, $direction);
         return $this;
     }
 
     /**
      * Adds a limit clause to the query.
-     * @param int $limit
      * @return $this
      */
     public function limit(int $limit): self
     {
-        $this->fileStorageQuery['limit'] = "LIMIT {$limit}";
+        $this->fileStorageQuery['limit'] = 'LIMIT ' . $limit;
         return $this;
     }
 
     /**
      * Adds an offset clause to the query.
-     * @param int $offset
      * @return $this
      */
     public function offset(int $offset): self
     {
-        $this->fileStorageQuery['offset'] = "OFFSET {$offset}";
+        $this->fileStorageQuery['offset'] = 'OFFSET ' . $offset;
         return $this;
     }
 
     /**
      * Executes the built query and hydrates File entities.
-     *
-     * @param string $connector
-     * @return self
      */
     public function execute(string $connector = 'AND'): self
     {
@@ -129,19 +118,24 @@ class FileStorageEntity implements IteratorAggregate
         if (!empty($this->fileStorageQuery['joins'])) {
             $sql[] = implode(' ', $this->fileStorageQuery['joins']);
         }
+
         if (!empty($this->fileStorageQuery['where'])) {
-            $sql[] = 'WHERE ' . implode(" $connector ", $this->fileStorageQuery['where']);
+            $sql[] = 'WHERE ' . implode(sprintf(' %s ', $connector), $this->fileStorageQuery['where']);
         }
+
         if (!empty($this->fileStorageQuery['group'] ?? '')) {
             $sql[] = $this->fileStorageQuery['group'];
         }
+
         if (!empty($this->fileStorageQuery['order'])) {
             $sql[] = $this->fileStorageQuery['order'];
         }
+
         if (!empty($this->fileStorageQuery['limit'])) {
             // ensure this is like "LIMIT 3", not a placeholder
             $sql[] = $this->fileStorageQuery['limit'];
         }
+
         if (!empty($this->fileStorageQuery['offset'])) {
             $sql[] = $this->fileStorageQuery['offset'];
         }
@@ -154,7 +148,7 @@ class FileStorageEntity implements IteratorAggregate
         // Bind ONLY placeholders that actually exist in the SQL.
         foreach ($this->parameters as $key => $value) {
             $placeholder = ':' . ltrim((string)$key, ':$');
-            if (strpos($this->sql, $placeholder) === false) {
+            if (in_array(str_contains($this->sql, $placeholder), [0, false], true)) {
                 continue; // skip params not present in SQL
             }
 
@@ -177,12 +171,13 @@ class FileStorageEntity implements IteratorAggregate
         $this->results = $rows;
 
         $expected_columns = ['fid','name','uid', 'uri', 'created','size', 'mime_type','extension'];
-        $this->entities = array_filter(array_map(function ($row) use ($expected_columns) {
+        $this->entities = array_filter(array_map(function ($row) use ($expected_columns): ?\Simp\Core\modules\files\entity\File {
             $keys = array_keys($row);
             $diff = array_diff($keys, $expected_columns);
-            if (!empty($diff)) {
+            if ($diff !== []) {
                 return null;
             }
+
             return new File(...$row);
         },$rows));
 
@@ -202,8 +197,6 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Returns the first entity or null.
-     *
-     * @return File|null
      */
     public function first(): ?File
     {
@@ -212,18 +205,14 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Returns the last entity or null.
-     *
-     * @return File|null
      */
     public function last(): ?File
     {
-        return !empty($this->entities) ? end($this->entities) : null;
+        return $this->entities === [] ? null : end($this->entities);
     }
 
     /**
      * Retrieve entities as an iterator (foreach support).
-     *
-     * @return Traversable
      */
     public function getIterator(): Traversable
     {
@@ -240,8 +229,6 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Retrieves the parameters associated with the current instance.
-     *
-     * @return array
      */
     public function getParameters(): array
     {
@@ -253,7 +240,6 @@ class FileStorageEntity implements IteratorAggregate
      * If $fromDatabase = true, run a COUNT(*) query directly in DB.
      *
      * @param bool $fromDatabase Whether to count via SQL (true) or loaded entities (false).
-     * @return int
      */
     public function count(bool $fromDatabase = false): int
     {
@@ -274,6 +260,7 @@ class FileStorageEntity implements IteratorAggregate
             foreach ($this->parameters as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
+
             $stmt->execute();
             return (int) $stmt->fetchColumn();
         }
@@ -348,8 +335,6 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Filter Files that are published.
-     *
-     * @return self
      */
     public function published(): self
     {
@@ -360,7 +345,6 @@ class FileStorageEntity implements IteratorAggregate
      * Filter Files by author ID.
      *
      * @param int $uid The user ID of the author.
-     * @return self
      */
     public function byAuthor(int $uid): self
     {
@@ -369,9 +353,6 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Filter Files by a specific content type (bundle).
-     *
-     * @param string $bundle
-     * @return self
      */
     public function byBundle(string $bundle): self
     {
@@ -380,9 +361,6 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Filter Files created after a certain timestamp.
-     *
-     * @param int $timestamp
-     * @return self
      */
     public function createdAfter(int $timestamp): self
     {
@@ -391,9 +369,6 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Filter Files created before a certain timestamp.
-     *
-     * @param int $timestamp
-     * @return self
      */
     public function createdBefore(int $timestamp): self
     {
@@ -404,11 +379,10 @@ class FileStorageEntity implements IteratorAggregate
      * Filter Files created within the last given number of days.
      *
      * @param int $days Number of days to look back. Default is 7.
-     * @return self
      */
     public function recent(int $days = 7): self
     {
-        $timestamp = strtotime("-{$days} days");
+        $timestamp = strtotime(sprintf('-%d days', $days));
         return $this->createdAfter($timestamp);
     }
 
@@ -416,7 +390,6 @@ class FileStorageEntity implements IteratorAggregate
      * Filter Files updated after a certain timestamp.
      *
      * @param int $timestamp UNIX timestamp to filter Files updated after.
-     * @return self
      */
     public function updatedAfter(int $timestamp): self
     {
@@ -427,7 +400,6 @@ class FileStorageEntity implements IteratorAggregate
      * Filter Files updated before a certain timestamp.
      *
      * @param int $timestamp UNIX timestamp to filter Files updated before.
-     * @return self
      */
     public function updatedBefore(int $timestamp): self
     {
@@ -439,7 +411,6 @@ class FileStorageEntity implements IteratorAggregate
      *
      * @param int $termId The taxonomy term ID to filter Files by.
      * @param string $field The field in File table that stores term reference. Defaults to 'tid'.
-     * @return self
      */
     public function byTerm(int $termId, string $field = 'tid'): self
     {
@@ -452,11 +423,10 @@ class FileStorageEntity implements IteratorAggregate
      *
      * @param string $field The field/property to count items in (must be array or Countable).
      * @param string $direction 'ASC' or 'DESC'. Default 'DESC'.
-     * @return self
      */
     public function orderByFieldCountPhp(string $field, string $direction = 'DESC'): self
     {
-        usort($this->entities, function ($a, $b) use ($field, $direction) {
+        usort($this->entities, function ($a, $b) use ($field, $direction): int {
 
             /**@var File $a **/
             /**@var File $b **/
@@ -464,24 +434,16 @@ class FileStorageEntity implements IteratorAggregate
             $a_data = [];
             $b_data = [];
 
-            if (empty($a->get($field)[0])) {
-                $a_data = [];
-            }
-            else {
-                $a_data = $a->get($field);
-            }
+            $a_data = empty($a->get($field)[0]) ? [] : $a->get($field);
 
-            if (empty($b->get($field)[0])) {
-                $b_data = [];
-            }
-            else {
-                $b_data = $b->get($field);
-            }
+            $b_data = empty($b->get($field)[0]) ? [] : $b->get($field);
 
             $countA =  count($a_data);
             $countB =  count($b_data);
+            if ($countA === $countB) {
+                return 0;
+            }
 
-            if ($countA === $countB) return 0;
             return ($direction === 'ASC') ? ($countA <=> $countB) : ($countB <=> $countA);
         });
 
@@ -494,16 +456,16 @@ class FileStorageEntity implements IteratorAggregate
         $alias = $table . '_cnt';
 
         // Build subquery to count the field per File, with proper alias
-        $subquery = "(SELECT nid, COUNT($field) AS field_count FROM $table GROUP BY nid) AS $alias";
+        $subquery = sprintf('(SELECT nid, COUNT(%s) AS field_count FROM %s GROUP BY nid) AS %s', $field, $table, $alias);
 
         // Add LEFT JOIN with the subquery
-        $this->fileStorageQuery['joins'][] = "LEFT JOIN $subquery ON $alias.nid = file_managed.nid";
+        $this->fileStorageQuery['joins'][] = sprintf('LEFT JOIN %s ON %s.nid = file_managed.nid', $subquery, $alias);
 
         // Update SELECT to include all file_managed fields plus the count from subquery
-        $this->fileStorageQuery['start'] = "SELECT file_managed.*, $alias.field_count FROM file_managed";
+        $this->fileStorageQuery['start'] = sprintf('SELECT file_managed.*, %s.field_count FROM file_managed', $alias);
 
         // Order by the counted field
-        $this->fileStorageQuery['order'] = "ORDER BY $alias.field_count $direction";
+        $this->fileStorageQuery['order'] = sprintf('ORDER BY %s.field_count %s', $alias, $direction);
 
         return $this;
     }
@@ -517,7 +479,7 @@ class FileStorageEntity implements IteratorAggregate
     {
         // Step 1: Get total rows
         $this->fileStorageQuery['start'] = "SELECT COUNT(*) AS total FROM file_managed";
-        $limit = !empty($this->fileStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->fileStorageQuery['limit']) : 20;
+        $limit = empty($this->fileStorageQuery['limit']) ? 20 : (int) str_replace('LIMIT ', '', $this->fileStorageQuery['limit']);
         $this->fileStorageQuery['limit'] = "";
         $this->execute();
 
@@ -525,9 +487,6 @@ class FileStorageEntity implements IteratorAggregate
 
         // Step 2: Calculate total pages
         $totalPages = (int) ceil($total / $limit);
-
-        // Step 3: Calculate offset
-        $offset = ($page - 1) * $limit;
 
         $this->execute();
 
@@ -542,14 +501,12 @@ class FileStorageEntity implements IteratorAggregate
 
     /**
      * Randomizes the order of Files in the query.
-     *
-     * @return self
      */
-    public function pickRandom()
+    public function pickRandom(): static
     {
-        $this->fileStorageQuery['order'] = !empty($this->fileStorageQuery['order']) ?
-            $this->fileStorageQuery['order'] . ', RAND()' :
-            'ORDER BY RAND()';
+        $this->fileStorageQuery['order'] = empty($this->fileStorageQuery['order']) ?
+            'ORDER BY RAND()' :
+            $this->fileStorageQuery['order'] . ', RAND()';
         return $this;
     }
 

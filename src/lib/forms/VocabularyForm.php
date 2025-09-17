@@ -30,6 +30,7 @@ class VocabularyForm extends FormBase
         if($name) {
             $taxonomy = VocabularyManager::factory()->getVocabulary($name)['label'] ?? Service::get('request')->get('name');
         }
+
         $form['title'] = [
             'type' => 'text',
             'label' => 'Title',

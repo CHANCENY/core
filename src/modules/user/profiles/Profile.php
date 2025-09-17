@@ -8,7 +8,7 @@ use Simp\Core\modules\timezone\TimeZone;
 use Simp\Translate\lang\LanguageManager;
 use Simp\Core\modules\files\helpers\FileFunction;
 
-class Profile
+class Profile implements \Stringable
 {
     public function __construct(protected ?int $pid, protected ?string $first_name,
     protected ?string $last_name,
@@ -46,7 +46,7 @@ class Profile
         return FileFunction::resolve_fid($this->profile_image);
     }
 
-    public function getTranslation() {
+    public function getTranslation(): ?string {
         return $this->translation_code;
     }
 
@@ -70,7 +70,7 @@ class Profile
     }
 
     public function isTranslationEnabled(): bool {
-        return !empty($this->translation);
+        return $this->translation !== null && $this->translation !== 0;
     }
 
     public function setFirstName(?string $first_name): void
@@ -94,7 +94,7 @@ class Profile
 
     public function setTranslationCode(string $code): void {
         $languageManager = LanguageManager::manager()->getByCode($code);
-        if($languageManager) {
+        if($languageManager !== null && $languageManager !== []) {
             $this->translation_code = $code;
         }
     }
@@ -134,7 +134,7 @@ class Profile
 
     public function __toString(): string
     {
-        return json_encode([
+        return (string) json_encode([
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'profile_image' => $this->profile_image,

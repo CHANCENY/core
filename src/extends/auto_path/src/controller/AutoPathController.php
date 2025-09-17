@@ -43,6 +43,7 @@ class AutoPathController
         if (!empty($id)) {
             AutoPathAlias::factory()->deleteAlias($id);
         }
+
         return new RedirectResponse('/admin/auto-path/list');
     }
 }

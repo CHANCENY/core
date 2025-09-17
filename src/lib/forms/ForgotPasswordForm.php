@@ -11,6 +11,7 @@ class ForgotPasswordForm extends FormBase
 {
 
     protected bool $validated = true;
+
     public function getFormId(): string
     {
        return 'forgot_password';
@@ -18,8 +19,7 @@ class ForgotPasswordForm extends FormBase
 
     public function buildForm(array $form): array
     {
-        $form = parent::buildForm($form);
-        return $form;
+        return parent::buildForm($form);
     }
 
     public function validateForm(array $form): void
@@ -37,7 +37,7 @@ class ForgotPasswordForm extends FormBase
     {
         if ($this->validated) {
             $name = $form['name']->getValue();
-            $clean_name = htmlspecialchars(strip_tags($name));
+            $clean_name = htmlspecialchars(strip_tags((string) $name));
             $user = null;
             if (filter_var($name, FILTER_VALIDATE_EMAIL)) {
                 $user = User::loadByMail($name);
@@ -46,7 +46,7 @@ class ForgotPasswordForm extends FormBase
                 $user = User::loadByName($name);
             }
 
-            if ($user) {
+            if ($user instanceof \Simp\Core\modules\user\entity\User) {
                 //TODO: send email with reset link
                 $password = new PasswordManager($user->getUid());
                 $password->sendForgotPasswordLink();

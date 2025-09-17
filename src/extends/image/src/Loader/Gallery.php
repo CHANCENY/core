@@ -15,6 +15,7 @@ class Gallery
         $query = "SELECT * FROM image_gallery ORDER BY id DESC";
         $query = Database::database()->con()->prepare($query);
         $query->execute();
+
         $images = $query->fetchAll();
 
         foreach ($images as $image) {

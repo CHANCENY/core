@@ -8,13 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SiteMapGenerator
 {
-    private array $paths;
-    private int $limit;
-    private int $page;
+    private readonly int $limit;
 
-    public function __construct(array $paths, int $limit = 10, int $page = 1)
+    private readonly int $page;
+
+    public function __construct(private readonly array $paths, int $limit = 10, int $page = 1)
     {
-        $this->paths = $paths;
         $this->limit = max(1, $limit);
         $this->page  = max(1, $page);
     }
@@ -33,7 +32,7 @@ class SiteMapGenerator
             for ($i = 1; $i <= $totalPages; $i++) {
                 $url = Route::url('sitemap.xml', [], ['page' => $i]);
                 $xml .= "  <sitemap>\n";
-                $xml .= "    <loc>" .$base_url . htmlspecialchars($url, ENT_XML1) . "</loc>\n";
+                $xml .= "    <loc>" .$base_url . htmlspecialchars((string) $url, ENT_XML1) . "</loc>\n";
                 $xml .= "    <lastmod>" . date('c') . "</lastmod>\n";
                 $xml .= "  </sitemap>\n";
             }
@@ -52,10 +51,10 @@ class SiteMapGenerator
 
         foreach ($pagedPaths as $path) {
             $xml .= "  <url>\n";
-            $xml .= "    <loc>" . htmlspecialchars($path['url'], ENT_XML1) . "</loc>\n";
+            $xml .= "    <loc>" . htmlspecialchars((string) $path['url'], ENT_XML1) . "</loc>\n";
 
             if (!empty($path['modified'])) {
-                $xml .= "    <lastmod>" .$base_url . htmlspecialchars($path['modified'], ENT_XML1) . "</lastmod>\n";
+                $xml .= "    <lastmod>" .$base_url . htmlspecialchars((string) $path['modified'], ENT_XML1) . "</lastmod>\n";
             }
 
             if (!empty($path['priority'])) {

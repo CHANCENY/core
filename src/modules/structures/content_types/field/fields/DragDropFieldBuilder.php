@@ -72,6 +72,7 @@ class DragDropFieldBuilder implements FieldBuilderInterface
             $field_data['handler'] = $this->getFieldHandler();
             $field_data['class'][] = "dropzone-hidden";
         }
+
         return $field_data;
     }
 

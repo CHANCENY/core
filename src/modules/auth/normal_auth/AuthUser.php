@@ -22,13 +22,21 @@ class AuthUser
     protected string $password = '';
 
     protected User $user;
+
     private bool $validated = false;
+
     private int $rememberMe = 3600;
+
     private bool $is_authenticated  = false;
+
     private bool $is_admin = false;
+
     private bool $is_login = false;
+
     private bool $is_manager = false;
+
     private bool $is_content_creator = false;
+
     public function setName(string $name): void
     {
         $this->name = $name;
@@ -37,38 +45,38 @@ class AuthUser
     public function getName(): string{
         return $this->name;
     }
+
     public function setPassword(string $password): void
     {
         $this->password = $password;
     }
+
     public function getPassword(): string
     {
         return $this->password;
     }
+
     public function authenticate(string $username, string $password): bool
     {
-        if (!empty($username) && !empty($password)) {
+        if ($username !== '' && $username !== '0' && ($password !== '' && $password !== '0')) {
 
             $user = User::loadByMail($username);
-            if ($user instanceof User) {
-                if (password_verify($password, $user->getPassword())) {
-                    $this->user = $user;
-                    $this->validated = true;
-                    $this->is_login = true;
-                    return true;
-                }
+            if ($user instanceof User && password_verify($password, (string) $user->getPassword())) {
+                $this->user = $user;
+                $this->validated = true;
+                $this->is_login = true;
+                return true;
             }
 
             $user = User::loadByName($username);
-            if ($user instanceof User) {
-                if (password_verify($password, $user->getPassword())) {
-                    $this->user = $user;
-                    $this->validated = true;
-                    $this->is_login = true;
-                    return true;
-                }
+            if ($user instanceof User && password_verify($password, (string) $user->getPassword())) {
+                $this->user = $user;
+                $this->validated = true;
+                $this->is_login = true;
+                return true;
             }
         }
+
         return false;
     }
 
@@ -82,7 +90,7 @@ class AuthUser
     public function finalizeAuthenticate(int $to_remember = 525600): void
     {
         if ($this->validated) {
-            $remember_key = hash('sha512', $this->user->getPassword());
+            $remember_key = hash('sha512', (string) $this->user->getPassword());
             $roles = $this->user->getRoles();
             $this->rememberMe = $to_remember;
 
@@ -92,22 +100,27 @@ class AuthUser
                     if ($role->getRoleName() === "administrator") {
                         $this->is_admin = true;
                     }
+
                     if ($role->getRoleName() === "authenticated") {
                         $this->is_authenticated = true;
                     }
+
                     if ($role->getRoleName() === "manager") {
                         $this->is_manager = true;
                     }
+
                     if ($role->getRoleName() === "content_creator") {
                         $this->is_content_creator = true;
                     }
                 }
             }
+
             $login_time = new DateTime();
             $this->user->setLogin($login_time->format('Y-m-d H:i:s'));
             if ($this->user->update()) {
                 $this->is_login = true;
             }
+
             Session::init()->set("private.current.user", $this, $to_remember);
         }
     }
@@ -115,7 +128,7 @@ class AuthUser
     public function authenticateViaGoogle(Userinfo $user): bool
     {
         $email = $user->getEmail();
-        if ($user_system = User::loadByMail($email)) {
+        if (($user_system = User::loadByMail($email)) instanceof \Simp\Core\modules\user\entity\User) {
             $this->user = $user_system;
             $this->validated = true;
             $this->is_login = true;
@@ -144,13 +157,14 @@ class AuthUser
                 return true;
             }
         }
+
         return false;
     }
 
     public function authenticateViaGithub(GithubResourceOwner|ResourceOwnerInterface  $user): bool
     {
         $email = $user->getEmail();
-        if ($user_system = User::loadByMail($email)) {
+        if (($user_system = User::loadByMail($email)) instanceof \Simp\Core\modules\user\entity\User) {
             $this->user = $user_system;
             $this->validated = true;
             $this->is_login = true;
@@ -173,12 +187,14 @@ class AuthUser
             if (count($list) >= 2) {
                 $profile->setLastName($list[1]);
             }
+
             $profile->update();
             $this->user = $new_user;
             $this->is_login = true;
             $this->validated = true;
             return true;
         }
+
         return false;
     }
 

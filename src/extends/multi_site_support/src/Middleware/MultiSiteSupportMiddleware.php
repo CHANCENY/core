@@ -55,10 +55,10 @@ class MultiSiteSupportMiddleware implements Middleware
             $all_roles = array_merge($primary_roles, $secondary_roles);
             $all_roles = array_unique($all_roles);
 
-            $user_roles = array_map(function ($role){ return $role->getName(); },$current_user->getUser()->roleManager()->getRoles());
+            $user_roles = array_map(fn($role) => $role->getName(),$current_user->getUser()->roleManager()->getRoles());
 
             // Check if a user has any of the roles
-            if (count(array_intersect($all_roles, $user_roles)) > 0) {
+            if (array_intersect($all_roles, $user_roles) !== []) {
                 $access_interface->access_granted = true;
             }
             else {
@@ -67,6 +67,7 @@ class MultiSiteSupportMiddleware implements Middleware
                 $access_interface->redirect = $redirect;
 
             }
+
             return $next($request, $access_interface);
 
         }

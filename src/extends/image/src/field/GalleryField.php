@@ -18,8 +18,10 @@ use Twig\Error\SyntaxError;
 class GalleryField extends FieldBase
 {
     private array $field;
+
     private array $submission;
-    protected string $validation_message;
+
+    protected string $validation_message = '';
 
     /**
      * @throws Exception
@@ -40,8 +42,6 @@ class GalleryField extends FieldBase
             'name',
         ];
 
-        $this->validation_message = '';
-
         foreach ($required as $field_key) {
             if (!array_key_exists($field_key, $field)) {
                 throw new FieldRequiredException('Field "' . $field_key . '" is required.');
@@ -60,13 +60,14 @@ class GalleryField extends FieldBase
             if (!empty($field['required']) && empty($value) && empty($field['default_value'])) {
                 $this->validation_message = "This input field is mandatory.";
             }
+
             if ($value !== null) {
                 $this->submission['value'] = $value;
             }
 
         }
 
-        if ($request_method === 'GET' && !empty($params)) {
+        if ($request_method === 'GET' && $params !== []) {
 
             $value = $params[$field['name']] ?? null;
             if ($value !== null) {
@@ -93,7 +94,7 @@ class GalleryField extends FieldBase
 
     public function getId(): string
     {
-        return !empty($this->field['id']) ? $this->field['id'] : FieldManager::createFieldName($this->getLabel());
+        return empty($this->field['id']) ? FieldManager::createFieldName($this->getLabel()) : $this->field['id'];
     }
 
     public function getClassList(): array
@@ -103,7 +104,7 @@ class GalleryField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array
@@ -118,12 +119,13 @@ class GalleryField extends FieldBase
 
     public function getValue(): string|int|float|null|array|bool
     {
-        $data = !empty($this->submission['value']) ? $this->submission['value'] : $this->field['default_value'] ?? '';
+        $data = empty($this->submission['value']) ? $this->field['default_value'] ?? '' : $this->submission['value'];
         if (str_ends_with($data, ')')) {
             $value = explode('(', $data);
             $value = end($value);
             return substr($value, 0, -1);
         }
+
         return $data;
     }
 
@@ -139,13 +141,13 @@ class GalleryField extends FieldBase
      */
     public function getBuildField(bool $wrapper = true): string
     {
-        $class = implode(' ', $this->getClassList());
+        implode(' ', $this->getClassList());
         $options = null;
         foreach ($this->getOptions() as $key=>$option) {
             $options .= $key . '="' . $option . '" ';
         }
 
-        $id = $this->getId();
+        $this->getId();
         $gallery = Gallery::factory();
         $images = $gallery->getImagesByPage(Service::get('request')->get('page', 1), 5);
 

@@ -17,16 +17,14 @@ final class DatabaseActivity implements EventSubscriber
             $current_uri = $request->getRequestUri();
             $records = DatabaseRecorder::getActivity($current_uri);
 
-            if($records) {
-                foreach($records as $record) {
+            foreach($records as $record) {
 
-                    $query = "INSERT INTO database_activity (query_line, executed_time, path) VALUES (:query_line, :time_executed, :path)";
-                    $database = Database::database()->con()->prepare($query);
-                    $database->bindParam(':query_line', $record['query']);
-                    $database->bindParam(':time_executed', $record['execute_time']);
-                    $database->bindParam(':path', $current_uri);
-                    $database->execute();
-                }
+                $query = "INSERT INTO database_activity (query_line, executed_time, path) VALUES (:query_line, :time_executed, :path)";
+                $database = Database::database()->con()->prepare($query);
+                $database->bindParam(':query_line', $record['query']);
+                $database->bindParam(':time_executed', $record['execute_time']);
+                $database->bindParam(':path', $current_uri);
+                $database->execute();
             }
         }catch(Throwable) {}
     }

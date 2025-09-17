@@ -20,11 +20,14 @@ class MultiSiteSupport
     protected array $sites = [];
 
     protected array $themes = [];
+
     private mixed $currentTheme;
+
     /**
      * @var mixed|null
      */
     private mixed $currentThemeHomeTemplate;
+
     private mixed $current_theme_files;
 
     public bool $is_default_theme = false;
@@ -37,6 +40,7 @@ class MultiSiteSupport
         if (!file_exists($sites_file)) {
             touch($sites_file);
         }
+
         $this->sites = Yaml::parseFile($sites_file) ?? [];
 
         $system = new SystemDirectory();
@@ -56,36 +60,32 @@ class MultiSiteSupport
 
         $files = array_diff(scandir($themes_base) ?? [], ['.', '..']);
 
-        if (!empty($files)) {
+        foreach ($files as $file) {
 
-            foreach ($files as $file) {
+            $full_path = $themes_base . DIRECTORY_SEPARATOR . $file . DIRECTORY_SEPARATOR .
+                $file.'.info.yml';
 
-                $full_path = $themes_base . DIRECTORY_SEPARATOR . $file . DIRECTORY_SEPARATOR .
-                    $file.'.info.yml';
+            if (file_exists($full_path)) {
 
-                if (file_exists($full_path)) {
+                $content = Yaml::parseFile($full_path);
+                if (!empty($content['name']) && !empty($content['version'])) {
 
-                    $content = Yaml::parseFile($full_path);
-                    if (!empty($content['name']) && !empty($content['version'])) {
+                    $this->themes[$file] = $content;
 
-                        $this->themes[$file] = $content;
+                    if (!empty($content['default'])) {
 
-                        if (!empty($content['default'])) {
+                        $this->currentTheme = $file;
+                        $this->currentThemeHomeTemplate = $content['home_template'] ?? null;
 
-                            $this->currentTheme = $file;
-                            $this->currentThemeHomeTemplate = $content['home_template'] ?? null;
-
-                        }
                     }
                 }
             }
-
         }
 
         $this->is_default_theme = $this->currentTheme === 'default';
     }
 
-    protected function recursive_dir_iterator($dir): void
+    protected function recursive_dir_iterator(string $dir): void
     {
         $files = array_diff(scandir($dir) ?? [], ['.', '..']);
         foreach ($files as $file) {
@@ -103,7 +103,6 @@ class MultiSiteSupport
 
     /**
      * Returns the list of sites.
-     * @return array
      */
     public function getSites(): array
     {
@@ -112,8 +111,6 @@ class MultiSiteSupport
 
     /**
      * Returns the site data for a specific site ID.
-     * @param string $site_id
-     * @return array|null
      */
     public function getSite(string $site_id): ?array
     {
@@ -122,17 +119,14 @@ class MultiSiteSupport
 
     /**
      * Adds a new site to the list of sites and updates the configuration file.
-     * @param array $site_data
-     * @return bool|int
      * @throws DependencyException
      * @throws NotFoundException
      */
     public function addSite(array $site_data): bool|int
     {
-        $clean_site_id = null;
         // remove all special characters and replace with underscore
-        $clean_site_id = preg_replace('/[^a-zA-Z0-9_]/', '_', $site_data['domain']);
-        $clean_site_id = strtolower($clean_site_id);
+        $clean_site_id = preg_replace('/[^a-zA-Z0-9_]/', '_', (string) $site_data['domain']);
+        $clean_site_id = strtolower((string) $clean_site_id);
 
         $this->sites[$clean_site_id] = $site_data;
         return file_put_contents(Service::get('system.directory')->setting_dir . DIRECTORY_SEPARATOR . 'multi.sites.support.yml', Yaml::dump($this->sites, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
@@ -159,6 +153,7 @@ class MultiSiteSupport
                 return $site;
             }
         }
+
         return null;
     }
 
@@ -170,6 +165,7 @@ class MultiSiteSupport
                 return $this->themes[$site['theme']];
             }
         }
+
         return null;
     }
 
@@ -180,6 +176,7 @@ class MultiSiteSupport
                 return $site['theme'];
             }
         }
+
         return null;
     }
 

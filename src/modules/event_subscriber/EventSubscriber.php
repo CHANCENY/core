@@ -30,12 +30,8 @@ interface EventSubscriber
      * @param Request $request The incoming HTTP request.
      * @param Route $route The route associated with the request.
      * @param Response|null $response The HTTP response to be sent.
-     * @return void
      */
     public function listeners(Request $request, Route $route, ?Response $response): void;
 
-    /**
-     * @return EventSubscriber
-     */
     public static function factory(): EventSubscriber;
 }

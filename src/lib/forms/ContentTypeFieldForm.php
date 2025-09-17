@@ -26,6 +26,7 @@ class ContentTypeFieldForm extends FormBase
 {
 
     protected bool $validated = true;
+
     public function getFormId(): string
     {
         return 'content_type_manage_add_field';
@@ -258,21 +259,19 @@ class ContentTypeFieldForm extends FormBase
     {
         $request = Service::get('request');
        if ($this->validated) {
-           $data = array_map(function($item) {
-               return $item->getValue();
-           },$form);
+           $data = array_map(fn($item) => $item->getValue(),$form);
 
            $field = [
                'type' => $data['type'],
                'label' => $data['title'],
                'required' => $data['option']['field_required'] === 'yes',
-               'class' => explode(' ',$data['option']['field_classes']),
+               'class' => explode(' ',(string) $data['option']['field_classes']),
                'default_value' => $data['option']['field_default'],
                'id' => $data['option']['field_id'],
            ];
            $options = $data['option']['others'];
            if (!empty($options)) {
-               $list = explode('\n',$options);
+               $list = explode('\n',(string) $options);
                $options = [];
                foreach ($list as $item) {
                    $lis = explode('=',$item);
@@ -283,8 +282,10 @@ class ContentTypeFieldForm extends FormBase
                        $options[end($lis)] = end($lis);
                    }
                }
+
                $field['options'] = $options;
            }
+
            $field['handler'] = match ($data['type']) {
                'file' => FileField::class,
                'textarea' => TextareaField::class,
@@ -313,8 +314,10 @@ class ContentTypeFieldForm extends FormBase
               if ($data['type'] === 'conditional') {
                 $field['conditions'] = [];
               }
+
               $persist = false;
            }
+
            $name_content = $request->get('machine_name');
            $name = str_replace(' ','_',$field['label']);
            $name = 'field_'. strtolower($name);
@@ -325,29 +328,29 @@ class ContentTypeFieldForm extends FormBase
                 $persist_override = [];
             }
 
-           $conditions = explode('\n', $data['conditions']['conditional_line']);
+           $conditions = explode('\n', (string) $data['conditions']['conditional_line']);
            $field['conditions'] = [];
-           if (!empty($conditions)) {
-               foreach ($conditions as $condition) {
-                   $lines = explode(":",$condition);
-                   if (count($lines) == 2) {
-                       $field['conditions'][$lines[1]] = [
-                           'event' => $lines[0],
-                           'receiver_field' => $lines[2],
-                       ];
-                   }
-
+           foreach ($conditions as $condition) {
+               $lines = explode(":",$condition);
+               if (count($lines) == 2) {
+                   $field['conditions'][$lines[1]] = [
+                       'event' => $lines[0],
+                       'receiver_field' => $lines[2],
+                   ];
                }
+
            }
+
            $file_options = [
-               'allowed_file_types' => explode(' ',$data['file_field_settings']['allowed_file_types']),
+               'allowed_file_types' => explode(' ',(string) $data['file_field_settings']['allowed_file_types']),
                'allowed_file_size' => $data['file_field_settings']['allowed_file_size'],
            ];
            $field['settings'] = $file_options;
 
-           if (ContentDefinitionManager::contentDefinitionManager()->addField($name_content, $name_content.'_'.$name, $field, $persist, $persist_override)) {
-               Messager::toast()->addMessage("Field '$name' has been created");
+           if (ContentDefinitionManager::contentDefinitionManager()->addField($name_content, $name_content.'_'.$name, $field)) {
+               Messager::toast()->addMessage(sprintf("Field '%s' has been created", $name));
            }
+
            $redirect = new RedirectResponse('/admin/structure/content-type/'.$name_content. '/manage');
            $redirect->send();
        }

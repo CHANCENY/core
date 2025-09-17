@@ -14,12 +14,13 @@ use Simp\Core\modules\user\entity\User;
 use Simp\Core\modules\user\trait\StaticHelperTrait;
 use Throwable;
 
-class Node
+class Node implements \Stringable
 {
     use StaticHelperTrait;
     use NodeFunction;
 
     protected ?array $entity_types = [];
+
     protected array $values = [];
 
 
@@ -36,7 +37,7 @@ class Node
     {
         $this->entity_types = ContentDefinitionManager::contentDefinitionManager()->getContentType($this->bundle) ?? [];
         $storage = ContentDefinitionStorage::contentDefinitionStorage($this->bundle)->getStorageJoinStatement();
-        
+
         try{
             $query = Database::database()->con()->prepare($storage);
             $query->bindValue(':nid', $this->nid);
@@ -59,15 +60,16 @@ class Node
 
     public static function filter(string $title, string $content_type): array
     {
-        if (!empty($title) || !empty($content_type)) {
+        if ($title !== '' && $title !== '0' || $content_type !== '' && $content_type !== '0') {
             $query = "SELECT nid FROM node_data WHERE bundle = :bundle AND title LIKE :title";
             $query = Database::database()->con()->prepare($query);
-            $query->bindValue(':title', "%$title%");
+            $query->bindValue(':title', sprintf('%%%s%%', $title));
             $query->bindValue(':bundle', $content_type);
             $query->execute();
             $result = $query->fetchAll(PDO::FETCH_ASSOC);
-            return array_map(fn($value) => Node::load($value['nid']), $result);
+            return array_map(fn(array $value): ?\Simp\Core\modules\structures\content_types\entity\Node => Node::load($value['nid']), $result);
         }
+
         return [];
     }
 
@@ -101,6 +103,7 @@ class Node
         if (empty($field)) {
             return null;
         }
+
         $values = $this->values[$field_name]['value'] ?? null;
 
         if (empty($values)) {
@@ -110,6 +113,7 @@ class Node
         if (!empty($field['limit']) && intval($field['limit']) === 1) {
             return [end($values)];
         }
+
         return $values;
     }
 
@@ -189,7 +193,7 @@ class Node
     public static function create(array $data): ?Node
     {
         if (!empty($data['title']) && !empty($data['bundle']) && !empty($data['uid'])) {
-            $data['lang'] = !empty($data['lang']) ? $data['lang'] : 'en';
+            $data['lang'] = empty($data['lang']) ? 'en' : $data['lang'];
             $connection = Database::database()->con();
             $query = "INSERT INTO node_data (title, bundle, status, uid, lang) VALUES (:title, :bundle, :status, :uid, :lang)";
             $query = $connection->prepare($query);
@@ -208,14 +212,14 @@ class Node
                 }
 
                 //Auto path creation if enabled
-                if (ModuleHandler::factory()->isModuleEnabled('auto_path')) {
-                    if (AutoPathAlias::factory()->isEntityTypeAutoPathEnabled($node->entity_types['machine_name'])) {
-                        AutoPathAlias::factory()->create($node);
-                    }
+                if (ModuleHandler::factory()->isModuleEnabled('auto_path') && AutoPathAlias::factory()->isEntityTypeAutoPathEnabled($node->entity_types['machine_name'])) {
+                    AutoPathAlias::factory()->create($node);
                 }
+
                 return Node::load($nid);
             }
         }
+
         return null;
     }
 
@@ -245,7 +249,7 @@ class Node
         $storage_query = ContentDefinitionStorage::contentDefinitionStorage($this->bundle)
         ->getStorageInsertStatement($field_name);
 
-        if (!empty($storage_query)) {
+        if ($storage_query !== null && $storage_query !== '' && $storage_query !== '0') {
             if (!is_array($values)) {
                 $values = [$values];
             }
@@ -258,9 +262,11 @@ class Node
                 $query->bindParam(':field_value', $value);
                 $flags[]= $query->execute();
             }
+
             return !in_array(false, $flags);
 
         }
+
         return false;
     }
 
@@ -269,11 +275,12 @@ class Node
         if (!is_array($values)) {
             $values = [$values];
         }
-        $table = "node__{$field_name}";
+
+        $table = 'node__' . $field_name;
         $flags = [];
 
         if (Database::database()->isTableExist($table)) {
-            $delete_query = "DELETE FROM {$table} WHERE nid = :nid";
+            $delete_query = sprintf('DELETE FROM %s WHERE nid = :nid', $table);
             $statement = Database::database()->con()->prepare($delete_query);
             $statement->bindParam(':nid', $this->nid);
             $statement->execute();
@@ -289,6 +296,7 @@ class Node
 
             }
         }
+
         return !in_array(false, $flags);
     }
 
@@ -298,10 +306,12 @@ class Node
         $query = $connection->prepare($query);
         $query->bindValue(':nid', $nid);
         $query->execute();
+
         $result = $query->fetch();
         if (empty($result)) {
             return null;
         }
+
         return new Node(...$result);
     }
 
@@ -312,48 +322,55 @@ class Node
         $query = $connection->prepare($query);
         $query->bindValue(':bundle', $type);
         $query->execute();
+
         $result = $query->fetchAll();
         if (empty($result)) {
             return [];
         }
-        return array_map(fn($value) => new Node(...$value), $result);
+
+        return array_map(fn($value): \Simp\Core\modules\structures\content_types\entity\Node => new Node(...$value), $result);
     }
 
     public static function loadByTypes(array $types): array
     {
         $placeholders = implode(',', array_fill(0, count($types), '?'));
         $connection = Database::database()->con();
-        $query = "SELECT * FROM node_data WHERE bundle IN ($placeholders) ORDER BY created DESC";
+        $query = sprintf('SELECT * FROM node_data WHERE bundle IN (%s) ORDER BY created DESC', $placeholders);
         $statement = $connection->prepare($query);
         foreach ($types as $key => $value) {
             $statement->bindValue($key + 1, $value);
         }
+
         $statement->execute();
 
         $result = $statement->fetchAll();
         if (empty($result)) {
             return [];
         }
-        return array_map(fn($value) => new Node(...$value), $result);
+
+        return array_map(fn($value): \Simp\Core\modules\structures\content_types\entity\Node => new Node(...$value), $result);
     }
 
     public static function loadByOwner(int $uid, ?string $bundle): array
     {
         $query = "SELECT * FROM node_data WHERE uid = :uid";
-        if ($bundle) {
+        if ($bundle !== null && $bundle !== '' && $bundle !== '0') {
             $query .= " AND bundle = :bundle";
         }
+
         $query = Database::database()->con()->prepare($query);
         $query->bindValue(':uid', $uid);
-        if ($bundle) {
+        if ($bundle !== null && $bundle !== '' && $bundle !== '0') {
             $query->bindValue(':bundle', $bundle);
         }
+
         $query->execute();
         $result = $query->fetchAll();
         if (empty($result)) {
             return [];
         }
-        return array_map(fn($value) => new Node(...$value), $result);
+
+        return array_map(fn($value): \Simp\Core\modules\structures\content_types\entity\Node => new Node(...$value), $result);
     }
 
     public function __toString(): string
@@ -368,7 +385,7 @@ class Node
             ...$this->getValues()
         ];
 
-        return json_encode($top_table, JSON_PRETTY_PRINT);
+        return (string) json_encode($top_table, JSON_PRETTY_PRINT);
     }
 
     public function update(array $other_fields): bool|Node|null
@@ -384,8 +401,10 @@ class Node
             foreach ($other_fields as $key => $value) {
                $this->updateFieldData($key, $value);
             }
+
             return  self::load($this->nid);
         }
+
         return false;
     }
 
@@ -400,6 +419,7 @@ class Node
             $query = $connection->prepare($query);
             $query->bindValue(':status', 0);
         }
+
         $query->bindValue(':nid', $this->nid);
         return $query->execute();
     }

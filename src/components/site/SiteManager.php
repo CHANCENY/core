@@ -17,6 +17,7 @@ class SiteManager extends SystemDirectory
         if (file_exists($site_file)) {
             $this->basic_settings = Yaml::parseFile($site_file);
         }
+
         $GLOBALS['site_manager'] = $this;
     }
 
@@ -27,20 +28,14 @@ class SiteManager extends SystemDirectory
 
     public static function factory(): SiteManager
     {
-        if (isset($GLOBALS['site_manager'])) {
-            return $GLOBALS['site_manager'];
-        }
-        return new self();
+        return $GLOBALS['site_manager'] ?? new self();
     }
 
-    public function set(array $data)
+    public function set(array $data): bool
     {
         $this->basic_settings = array_merge($this->basic_settings, $data);
         $setting_data = $this->setting_dir .
             DIRECTORY_SEPARATOR . 'basic.site.setting.yml';
-        if (file_put_contents($setting_data, Yaml::dump($this->basic_settings))) {
-           return true;
-        }
-        return false;
+        return (bool) file_put_contents($setting_data, Yaml::dump($this->basic_settings));
     }
 }

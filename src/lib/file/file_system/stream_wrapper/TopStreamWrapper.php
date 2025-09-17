@@ -8,6 +8,7 @@ use Simp\StreamWrapper\Stream\StreamWrapper;
 class TopStreamWrapper extends StreamWrapper
 {
     protected InstallerValidator $system;
+
     public function __construct()
     {
         $this->system = $GLOBALS['system_store'];

@@ -67,7 +67,7 @@ class ContentTypeForm extends FormBase
      */
     public function submitForm(array $form): void
     {
-        $system = new SystemDirectory();
+        new SystemDirectory();
         $request = Service::get('request');
         $data = $request->request->all();
         $line = str_replace(' ', '_', $data['name']);
@@ -80,7 +80,7 @@ class ContentTypeForm extends FormBase
 
         $manager = ContentDefinitionManager::contentDefinitionManager();
         $exist_name = $manager->getContentType($line);
-        if (empty($exist_name)) {
+        if ($exist_name === null || $exist_name === []) {
             $manager->addContentType($line, $data);
             Messager::toast()->addMessage("Content type structure created successfully");
             (new RedirectResponse('/admin/structure/types'))->send();

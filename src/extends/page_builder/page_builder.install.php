@@ -26,8 +26,6 @@ function page_builder_database_install(): bool
     status INT(11) NOT NULL DEFAULT 0
 )";
 
-    $query2 = "CREATE TABLE IF NOT EXISTS page_builder_pdf_links (id INT AUTO_INCREMENT PRIMARY KEY, pid INT NOT NULL, fid INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
-
     $connection->exec($queries);
     // run query
     return $connection->prepare($queries)->execute();
@@ -36,124 +34,124 @@ function page_builder_database_install(): bool
 function page_builder_route_install(): array
 {
     return [
-        'page_builder.create' => array(
+        'page_builder.create' => [
             'title' => 'Page Create',
             'path' => '/admin/page-builder/create',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => PageBuilderController::class,
                 'method' => 'create'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa','fa-plus']
-            )
-        ),
-        'page_builder.list' => array(
+            ]
+        ],
+        'page_builder.list' => [
             'title' => 'Page Building',
             'path' => '/admin/page-builder/list',
-            'method' => array(
+            'method' => [
                 'GET'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => PageBuilderController::class,
                 'method' => 'dashboard'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa fa-list']
-            )
-        ),
-        'page_builder.action.save' => array(
+            ]
+        ],
+        'page_builder.action.save' => [
             'title' => 'Page Builder Save',
             'path' => '/admin/page-builder/templates/save',
-            'method' => array(
+            'method' => [
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => PageBuilderController::class,
                 'method' => 'save'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa fa-save']
-            )
-        ),
-        'page_builder.action.search' => array(
+            ]
+        ],
+        'page_builder.action.search' => [
             'title' => 'Page Contents Search',
             'path' => '/page-builder/search',
-            'method' => array(
+            'method' => [
                 'POST',
                 'GET'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => PageBuilderController::class,
                 'method' => 'search'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'anonymous',
                 'authenticated',
                 'content_creator',
                 'manager',
                 'administrator'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa fa-search']
-            )
-        ),
-        'page_builder.action.embeddable' => array(
+            ]
+        ],
+        'page_builder.action.embeddable' => [
             'title' => 'Page',
             'path' => '/page-builder/[pid:int]/embeddable',
-            'method' => array(
+            'method' => [
                 'POST',
                 'GET'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => PageBuilderController::class,
                 'method' => 'embeddable'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'anonymous',
                 'authenticated',
                 'content_creator',
                 'manager',
                 'administrator'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa fa-search']
-            )
-        ),
-        'page_builder.action.link' => array(
+            ]
+        ],
+        'page_builder.action.link' => [
             'title' => 'Page',
             'path' => '/[name:string]/[pid:int]/content',
-            'method' => array(
+            'method' => [
                 'POST',
                 'GET'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => PageBuilderController::class,
                 'method' => 'link'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'anonymous',
                 'authenticated',
                 'content_creator',
                 'manager',
                 'administrator'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa fa-search']
-            )
-        )
+            ]
+        ]
     ];
 }
 
@@ -174,9 +172,9 @@ function page_builder_menu_install(array &$menus): void
 
 function page_builder_field_install(): array
 {
-    return array(
+    return [
         'page_builder' => PageBuilderFieldBuilder::class,
-    );
+    ];
 }
 
 function page_builder_library_install(string $library_name): array
@@ -197,10 +195,8 @@ function page_builder_library_install(string $library_name): array
 function page_builder_twig_function_install(): array
 {
     return [
-        new TwigFunction('load_page', function (int $pid) {
-            return Page::load($pid);
-        }),
-        new TwigFunction('r_strip', function (string $string) {
+        new TwigFunction('load_page', fn(int $pid): \Simp\Core\extends\page_builder\src\Plugin\Page => Page::load($pid)),
+        new TwigFunction('r_strip', function (string $string): string {
             // Replace anything that is not a letter, number, or space with a space
             $text = preg_replace('/[^a-zA-Z0-9\s]/', '-', $string);
 
@@ -210,11 +206,7 @@ function page_builder_twig_function_install(): array
             // Trim leading/trailing spaces
             return trim($text);
         }),
-        new TwigFunction('pdf_link',function (Page $page){
-            return PdfLink::factory($page)->getDownloadLink();
-        }),
-        new TwigFunction('pdf_file',function (Page $page){
-            return PdfLink::factory($page)->getFile();
-        })
+        new TwigFunction('pdf_link',fn(Page $page): string => PdfLink::factory($page)->getDownloadLink()),
+        new TwigFunction('pdf_file',fn(Page $page): ?\Simp\Core\modules\files\entity\File => PdfLink::factory($page)->getFile())
     ];
 }

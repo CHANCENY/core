@@ -46,7 +46,7 @@ class Activity implements EventSubscriber
 
        try{
            $connection = Database::database()?->con();
-           if ($connection) {
+           if ($connection instanceof \Simp\Core\modules\database\SPDO) {
                $statement = $connection->prepare("INSERT INTO activity (start,end,elapsed,memory,system_usage,user_usage,user,path) VALUES (:start,:end,:elapsed,:memory,:system_usage,:user_usage,:user,:path)");
                $statement->execute($data);
            }

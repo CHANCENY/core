@@ -14,13 +14,14 @@ class Variables extends Environment
     {
     }
 
-    private static function getStore()
+    private static function getStore(): string
     {
         $system = new SystemDirectory();
         $store_path = $system->root_dir . DIRECTORY_SEPARATOR . 'variables';
         if(!is_dir($store_path)) {
             mkdir($store_path, 0755, true);
         }
+
         return $store_path;
     }
 

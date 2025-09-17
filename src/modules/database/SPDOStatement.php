@@ -11,17 +11,23 @@ class SPDOStatement extends PDOStatement
 {
     // Store bound parameters for cache key generation
     private array $boundParams = [];
+
     // Store parameters passed directly to execute()
     private ?array $executeParams = null;
 
     private ?DatabaseCacheManager $cacheManager = null;
+
     private float $lastExecutionTime = 0.0;
+
     private bool $isExecuted = false; // Track if execute() was called
 
     // Cache settings for this statement (can be overridden)
     private bool $enableCache = false;
+
     private ?string $cacheTag = null;
+
     private bool $cacheHit = false;
+
     private mixed $cachedResult = null;
 
     // Constructor: Initialize cache manager and check global cache status
@@ -31,8 +37,8 @@ class SPDOStatement extends PDOStatement
             $this->cacheManager = DatabaseCacheManager::manager();
             $this->enableCache = $this->cacheManager->isCacheActive();
             Database::staticLogger("SPDOStatement Info: Cache globally active: " . ($this->enableCache ? 'Yes' : 'No'));
-        } catch (Throwable $e) {
-            Database::staticLogger("SPDOStatement Error: Failed to initialize DatabaseCacheManager: " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger("SPDOStatement Error: Failed to initialize DatabaseCacheManager: " . $throwable->getMessage());
             $this->cacheManager = null;
             $this->enableCache = false;
         }
@@ -71,7 +77,7 @@ class SPDOStatement extends PDOStatement
             try {
                 $allParams = array_merge($this->boundParams, $this->executeParams ?? []);
                 $this->cacheTag = $this->cacheManager->cacheTagCreate($this->queryString, $allParams);
-                Database::staticLogger("SPDOStatement Info: Generated cache tag [{$this->cacheTag}] for query.");
+                Database::staticLogger(sprintf('SPDOStatement Info: Generated cache tag [%s] for query.', $this->cacheTag));
             } catch (Throwable $e) {
                 Database::staticLogger("SPDOStatement Cache Error (execute - tag generation): " . $e->getMessage() . " for query: " . $this->queryString);
                 $this->enableCache = false; // Disable cache for this statement on error
@@ -83,19 +89,20 @@ class SPDOStatement extends PDOStatement
         try {
             $result = parent::execute($params);
             $this->isExecuted = $result;
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             $this->isExecuted = false;
             $this->lastExecutionTime = microtime(true) - $start;
-            Database::staticLogger("SPDOStatement Execute Error: " . $e->getMessage() . " Query: " . $this->queryString);
-            throw $e; // Re-throw
+            Database::staticLogger("SPDOStatement Execute Error: " . $throwable->getMessage() . " Query: " . $this->queryString);
+            throw $throwable; // Re-throw
         }
+
         $this->lastExecutionTime = microtime(true) - $start;
 
         // 4. Record Query Execution
         try {
             DatabaseRecorder::factory($this->queryString, $this->lastExecutionTime, $this->executeParams ?? $this->boundParams);
-        } catch (Throwable $e) {
-            Database::staticLogger("SPDOStatement Error: Failed to record query: " . $e->getMessage());
+        } catch (Throwable $throwable) {
+            Database::staticLogger("SPDOStatement Error: Failed to record query: " . $throwable->getMessage());
         }
 
         // 5. Invalidate Cache (If modifying query succeeded)
@@ -127,7 +134,7 @@ class SPDOStatement extends PDOStatement
 
         // Check only if cache enabled, manager exists, and a tag was generated (i.e., likely a SELECT)
         if ($this->enableCache && $this->cacheManager && $this->cacheTag) {
-            Database::staticLogger("SPDOStatement Cache Check: Checking cache for tag [{$this->cacheTag}].");
+            Database::staticLogger(sprintf('SPDOStatement Cache Check: Checking cache for tag [%s].', $this->cacheTag));
             try {
                 // Attempt to get data from cache
                 $cachedData = $this->cacheManager->getCache($this->cacheTag);
@@ -136,18 +143,19 @@ class SPDOStatement extends PDOStatement
                 // (Phpfastcache get() returns null on miss, but cache could store null)
                 // Using isTagCached provides a more explicit check for existence.
                 if ($this->cacheManager->isTagCached($this->cacheTag)) {
-                    Database::staticLogger("SPDOStatement Cache Check: Cache HIT for tag [{$this->cacheTag}].");
+                    Database::staticLogger(sprintf('SPDOStatement Cache Check: Cache HIT for tag [%s].', $this->cacheTag));
                     $this->cachedResult = $cachedData;
                     $this->cacheHit = true;
                     return true;
                 } else {
-                    Database::staticLogger("SPDOStatement Cache Check: Cache MISS for tag [{$this->cacheTag}].");
+                    Database::staticLogger(sprintf('SPDOStatement Cache Check: Cache MISS for tag [%s].', $this->cacheTag));
                 }
             } catch (Throwable $e) {
                 Database::staticLogger("SPDOStatement Cache Error (checkCache - get): " . $e->getMessage() . " for tag: " . $this->cacheTag);
                 $this->enableCache = false; // Disable cache on error for this statement
             }
         }
+
         return false;
     }
 
@@ -158,11 +166,11 @@ class SPDOStatement extends PDOStatement
     {
         // Save only if cache enabled, manager exists, tag generated, and it wasn't a cache hit
         if ($this->enableCache && $this->cacheManager && $this->cacheTag && !$this->cacheHit) {
-            Database::staticLogger("SPDOStatement Cache Save: Saving data to cache for tag [{$this->cacheTag}].");
+            Database::staticLogger(sprintf('SPDOStatement Cache Save: Saving data to cache for tag [%s].', $this->cacheTag));
             try {
                 $saved = $this->cacheManager->resultCache($this->cacheTag, $data);
                 if (!$saved) {
-                    Database::staticLogger("SPDOStatement Cache Warning: resultCache() returned false for tag [{$this->cacheTag}].");
+                    Database::staticLogger(sprintf('SPDOStatement Cache Warning: resultCache() returned false for tag [%s].', $this->cacheTag));
                 }
             } catch (Throwable $e) {
                 Database::staticLogger("SPDOStatement Cache Error (saveToCache - set): " . $e->getMessage() . " for tag: " . $this->cacheTag);
@@ -224,19 +232,28 @@ class SPDOStatement extends PDOStatement
     // fetch, fetchColumn, fetchObject remain without caching for simplicity/correctness
     public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursorOrientation = PDO::FETCH_ORI_NEXT, int $cursorOffset = 0): mixed
     {
-        if (!$this->isExecuted) throw new RuntimeException("Cannot fetch before executing the statement.");
+        if (!$this->isExecuted) {
+            throw new RuntimeException("Cannot fetch before executing the statement.");
+        }
+
         return parent::fetch($mode, $cursorOrientation, $cursorOffset);
     }
 
     public function fetchColumn(int $column = 0): mixed
     {
-        if (!$this->isExecuted) throw new RuntimeException("Cannot fetchColumn before executing the statement.");
+        if (!$this->isExecuted) {
+            throw new RuntimeException("Cannot fetchColumn before executing the statement.");
+        }
+
         return parent::fetchColumn($column);
     }
 
     public function fetchObject(?string $class = "stdClass", array $constructorArgs = []): object|false
     {
-        if (!$this->isExecuted) throw new RuntimeException("Cannot fetchObject before executing the statement.");
+        if (!$this->isExecuted) {
+            throw new RuntimeException("Cannot fetchObject before executing the statement.");
+        }
+
         return parent::fetchObject($class, $constructorArgs);
     }
 

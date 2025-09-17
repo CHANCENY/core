@@ -20,6 +20,7 @@ class FileAddForm extends FormBase
 {
 
     protected bool $validated = true;
+
     public function getFormId(): string
     {
        return "add_file_form";
@@ -88,7 +89,7 @@ class FileAddForm extends FormBase
            $uploaded_files = [];
 
            if (!empty($urls)) {
-               $urls = explode("\n", $urls);
+               $urls = explode("\n", (string) $urls);
                $urls = array_filter($urls);
                $urls = array_map('trim', $urls);
 

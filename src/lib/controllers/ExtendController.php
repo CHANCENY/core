@@ -24,7 +24,6 @@ class ExtendController
 
     /**
      * @param mixed ...$args
-     * @return Response|RedirectResponse
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
@@ -39,30 +38,32 @@ class ExtendController
         \extract($args);
         if ($request->getMethod() === 'POST' && $request->request->has('enabled_module')) {
             $modules = $request->request->all();
-        
+
             foreach($modules['module'] as $module) {
                 ModuleHandler::factory()->moduleEnable($module);
             }
+
             Messager::toast()->addMessage("Updates save successfully.");
             return new RedirectResponse('/admin/extends');
         }
+
         if ($request->getMethod() === 'POST' && $request->request->has('unabled_module')) {
             $modules = $request->request->all();
 
             foreach($modules['module'] as $module) {
                 ModuleHandler::factory()->moduleDisable($module);
             }
+
             Messager::toast()->addMessage("Updates save successfully.");
             return new RedirectResponse('/admin/extends');
         }
 
         $modules = ModuleHandler::factory()->getModules();
         $moduler = ModuleHandler::factory();
-        $enabled_modules = [];
-        $un_enabled_modules = [];
         foreach ($modules as $key=>&$module) {
             $module['enabled'] = $moduler->isModuleEnabled($key);
         }
+
         return new Response(View::view('default.view.extend_manage',[
             'lists' => $modules,
         ]), Response::HTTP_OK);

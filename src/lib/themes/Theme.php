@@ -24,12 +24,18 @@ use Simp\Core\modules\services\Service;
 class Theme extends SystemDirectory
 {
     protected array $twig_functions;
+
     protected array $twig_filters;
+
     protected string $twig_function_definition_file;
+
     protected string $twig_filter_definition_file;
+
     protected array $options;
+
     public readonly Environment $twig;
-    protected array $extra_extensions;
+
+    protected array $extra_extensions = [];
 
     /**
      * @throws PhpfastcacheCoreException
@@ -40,7 +46,6 @@ class Theme extends SystemDirectory
     public function __construct()
     {
         parent::__construct();
-        $this->extra_extensions = [];
         $default_twig_function = Caching::init()->get('default.admin.functions');
         if (file_exists($default_twig_function)) {
             require_once $default_twig_function;
@@ -139,6 +144,7 @@ class Theme extends SystemDirectory
                 if (function_exists($twig_function)) {
                     $this->twig_functions = array_merge($this->twig_functions, $twig_function());
                 }
+
                 if (function_exists($twig_filter)) {
                     $this->twig_filters = array_merge($this->twig_filters, $twig_filter());
                 }
@@ -149,19 +155,15 @@ class Theme extends SystemDirectory
             ...$twig_options,
         ]);
 
-        if (!empty($this->twig_functions)) {
-            foreach ($this->twig_functions as $function) {
-                if ($function instanceof TwigFunction) {
-                    $this->twig->addFunction($function);
-                }
+        foreach ($this->twig_functions as $function) {
+            if ($function instanceof TwigFunction) {
+                $this->twig->addFunction($function);
             }
         }
 
-        if (!empty($this->twig_filters)) {
-            foreach ($this->twig_filters as $filter) {
-                if ($filter instanceof TwigFilter) {
-                    $this->twig->addFilter($filter);
-                }
+        foreach ($this->twig_filters as $filter) {
+            if ($filter instanceof TwigFilter) {
+                $this->twig->addFilter($filter);
             }
         }
 
@@ -178,12 +180,11 @@ class Theme extends SystemDirectory
             }
         }
 
-        if (!empty($this->extra_extensions)) {
-            foreach ($this->extra_extensions as $extension) {
-                $this->twig->addExtension($extension);
-            }
+        foreach ($this->extra_extensions as $extension) {
+            $this->twig->addExtension($extension);
         }
     }
+
     public function getTwigFunctions(): array
     {
         return $this->twig_functions;

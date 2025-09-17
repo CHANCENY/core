@@ -12,8 +12,6 @@ use Twig\Error\SyntaxError;
 
 class FieldImageGalleryBuilder implements FieldBuilderInterface
 {
-    private string $field_type;
-
     /**
      * @throws SyntaxError
      * @throws RuntimeError
@@ -21,7 +19,6 @@ class FieldImageGalleryBuilder implements FieldBuilderInterface
      */
     public function build(Request $request, string $field_type, array $options = []): string
     {
-        $this->field_type = $field_type;
         $field = self::extensionInfo($field_type);
         $options['extensions'] = [
             'image/png',
@@ -36,7 +33,6 @@ class FieldImageGalleryBuilder implements FieldBuilderInterface
 
     public function fieldArray(Request $request, string $field_type, string $entity_type): array
     {
-        $this->field_type = $field_type;
         return match ($field_type) {
             'image_gallery' => $this->parseFileInputFieldSetting($request, $entity_type)
         };
@@ -44,7 +40,6 @@ class FieldImageGalleryBuilder implements FieldBuilderInterface
 
     public function extensionInfo(string $type): array
     {
-        $this->field_type = $type;
         return match ($type) {
           'image_gallery' => ['title' => 'Image Gallery', 'description' => 'Image Gallery for attaching and upload images','type' => 'image_gallery'],
         };
@@ -75,6 +70,7 @@ class FieldImageGalleryBuilder implements FieldBuilderInterface
                 'allowed_file_size' => $data['max_size'] ?? 1000
             ];
         }
+
         return $field_data;
     }
 }

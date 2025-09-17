@@ -13,11 +13,11 @@ use Symfony\Component\Yaml\Yaml;
 class RolesRepository
 {
     protected array $primaryRoles;
+
     protected array $secondaryRoles;
 
     /**
      * Constructor.
-     * @param SystemDirectory $systemDirectory
      */
     public function __construct(SystemDirectory $systemDirectory)
     {
@@ -58,17 +58,14 @@ class RolesRepository
 
     /**
      * Normalizes a role name by removing special characters and converting to lowercase.
-     * @param string $role
-     * @return string
      */
     protected function normalizeRole(string $role): string
     {
         // lower case and remove special characters and spaces replace with _ if __ replace with _
-        return strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', $role));
+        return strtolower((string) preg_replace('/[^a-zA-Z0-9_]/', '_', $role));
     }
 
     /**
-     * @return RolesRepository
      * @throws DependencyException
      * @throws NotFoundException
      */
@@ -124,9 +121,10 @@ class RolesRepository
         }
 
         // remove _ replace with space the first letter of each word capitalize
-        foreach ($options as $key => $value) {
+        foreach ($options as $value) {
             $options[$value] = ucwords(str_replace('_', ' ', $value));
         }
+
         return $options;
     }
 

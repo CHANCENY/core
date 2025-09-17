@@ -26,9 +26,10 @@ class PasswordManager
     public function __construct(int $uid)
     {
         $user = User::load($uid);
-        if ($user === null) {
+        if (!$user instanceof \Simp\Core\modules\user\entity\User) {
             throw new Exception("User not found");
         }
+
         $this->user = $user;
     }
 
@@ -51,7 +52,7 @@ class PasswordManager
         $random_hash = bin2hex($random_bytes);
         $random_hash = hash('sha256', $random_hash);
         Caching::init()->set($random_hash, $this->user);
-        return "/user/password/reset/{$random_hash}";
+        return '/user/password/reset/' . $random_hash;
     }
 
     /**
@@ -67,7 +68,7 @@ class PasswordManager
         $random_hash = bin2hex($random_bytes);
         $random_hash = hash('sha256', $random_hash);
         Caching::init()->set($random_hash, $this->user);
-        return "/user/login/link/{$random_hash}";
+        return '/user/login/link/' . $random_hash;
     }
 
     /**
@@ -85,7 +86,7 @@ class PasswordManager
         $mail->addEnvelope(Envelope::create(
             'Forgot Password One Time link',
             nl2br("You have requested to reset your password here is your one-time forgot password link to reset your password \n \n
-                $host \n \n please ignore this email if you don't really want to reset your password."),
+                {$host} \n \n please ignore this email if you don't really want to reset your password."),
         )->addToAddresses([
             [
                 'name' => $this->user->getProfile()->getFirstName() ?? $this->user->getName(),

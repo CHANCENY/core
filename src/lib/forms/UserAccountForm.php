@@ -24,8 +24,10 @@ class UserAccountForm extends FormBase
 {
 
     protected array $entity_form = [];
+
     private bool $validated = true;
-    private int $status = 0;
+
+
     private array $roles = [];
 
 
@@ -44,14 +46,12 @@ class UserAccountForm extends FormBase
     {
         $this->entity_form = parent::buildForm($form);
         $this->entity_form['roles']['option_values'] = RolesRepository::getSelectRoleOptions();
-        
+
 
         $config = ConfigManager::config()->getConfigFile('account.setting');
-        if ($config?->get('allow_account_creation') !== 'administrator') {
-            if (!CurrentUser::currentUser()?->isIsAdmin()) {
-                unset($this->entity_form['fields']['roles']);
-                $this->roles = ['authenticated'];
-            }
+        if ($config?->get('allow_account_creation') !== 'administrator' && CurrentUser::currentUser()?->isIsAdmin() !== true) {
+            unset($this->entity_form['fields']['roles']);
+            $this->roles = ['authenticated'];
         }
 
         $timezone = new  TimeZone();
@@ -64,10 +64,8 @@ class UserAccountForm extends FormBase
     public function validateForm(array $form): void
     {
         foreach ($form as $field) {
-            if ($field instanceof FieldBase) {
-                if ($field->getRequired() === 'required' && empty($field->getValue())) {
-                    $this->validated = false;
-                }
+            if ($field instanceof FieldBase && ($field->getRequired() === 'required' && empty($field->getValue()))) {
+                $this->validated = false;
             }
         }
 
@@ -122,7 +120,7 @@ class UserAccountForm extends FormBase
           if ($user === false) {
               Messager::toast()->addError("Unable to create account due to already existing name or email");
           }
-          elseif ($user === null) {
+          elseif (!$user instanceof \Simp\Core\modules\user\entity\User) {
               Messager::toast()->addError("Unable to create account due to incomplete data");
           }
           else {

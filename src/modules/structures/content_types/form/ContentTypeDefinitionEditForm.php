@@ -26,8 +26,11 @@ use Simp\Core\modules\services\Service;
 class ContentTypeDefinitionEditForm extends FormBase
 {
     protected ?array $content_type = [];
+
     protected bool $validated = true;
+
     protected Request $request;
+
     protected Node $node;
 
     /**
@@ -42,20 +45,22 @@ class ContentTypeDefinitionEditForm extends FormBase
         $this->request = Service::get('request');
         $nid = $this->request->get('nid');
         $node = Node::load($nid);
-        if (empty($node)) {
+        if (!$node instanceof \Simp\Core\modules\structures\content_types\entity\Node) {
             $redirect = new RedirectResponse('/');
             Messager::toast()->addWarning("No node provided");
             $redirect->setStatusCode(302);
             $redirect->send();
         }
+
         $this->node = $node;
         $this->content_type = ContentDefinitionManager::contentDefinitionManager()->getContentType($node->getBundle());
-        if (empty($this->content_type)) {
+        if ($this->content_type === null || $this->content_type === []) {
             $redirect = new RedirectResponse('/');
             Messager::toast()->addWarning("No content type name provided");
             $redirect->setStatusCode(302);
             $redirect->send();
         }
+
         //TODO: check for permissions.
 
     }
@@ -73,13 +78,14 @@ class ContentTypeDefinitionEditForm extends FormBase
 
                 if ($field['type'] === 'file') {
                     $value = is_array($value) ? $value : [$value];
-                    $value = array_map(function ($file) {
+                    $value = array_map(function (array $file): ?array {
                         $file = File::load($file);
-                        if ($file) {
+                        if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $file = $file->toArray();
                             $file['uri'] = FileFunction::reserve_uri($file['uri']);
                             return $file;
                         }
+
                         return null;
                     }, $value);
                     $value = array_filter($value);
@@ -90,16 +96,13 @@ class ContentTypeDefinitionEditForm extends FormBase
                 }
 
             }
+
             if (isset($field['inner_field'])) {
                 $this->recursive_populate($field['inner_field']);
             }
         }
     }
 
-    /**
-     * @param array $form
-     * @return array
-     */
     public function buildForm(array $form): array
     {
         $form['title'] = [
@@ -119,13 +122,14 @@ class ContentTypeDefinitionEditForm extends FormBase
 
                 if ($field['type'] == 'file') {
                     $value = is_array($value) ? $value : [$value];
-                    $value = array_map(function ($file) {
+                    $value = array_map(function (array $file): ?array {
                         $file = File::load($file ?? 0);
-                        if ($file) {
+                        if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $file = $file->toArray();
                             $file['uri'] = FileFunction::reserve_uri($file['uri']);
                             return $file;
                         }
+
                         return null;
                     }, $value);
                     $value = array_filter($value);
@@ -187,7 +191,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                 $this->validate_recursive($field);
             }
             elseif ($field instanceof FieldBase && $field->getRequired() === 'required' && empty($field->getValue())) {
-                $field->setError("{$field->getName()} is required");
+                $field->setError($field->getName() . ' is required');
                 $this->validated = false;
             }
         }
@@ -200,13 +204,15 @@ class ContentTypeDefinitionEditForm extends FormBase
                 return $this->validate_recursive($inner_field);
             }
             elseif ($inner_field instanceof FieldBase && $inner_field->getRequired() === 'required' && empty($field->getValue())) {
-                $inner_field->setError("{$field->getName()} is required");
+                $inner_field->setError($field->getName() . ' is required');
                 $this->validated = false;
             }
         }
+
+        return null;
     }
 
-    private function submit_recursive(&$field, array &$temp, Request $request, $data_all, $parent_key)
+    private function submit_recursive(array &$field, array &$temp, Request $request, array $data_all, $parent_key)
     {
         foreach ($field['inner_field'] as $k=>$inner_field) {
 
@@ -247,6 +253,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                     foreach ($allowedExtensions as $extension) {
                         $form->addAllowedExtension($extension);
                     }
+
                     $allowed_size = $inner_field['settings']['allowed_file_size'] ?? 1000000;
                     $form->addAllowedMaxSize($allowed_size);
                     $form->addFileObject($file);
@@ -256,10 +263,11 @@ class ContentTypeDefinitionEditForm extends FormBase
                     if (!is_dir($filename)) {
                         @mkdir($filename);
                     }
+
                     $filename .= "/" . $file['name'];
                     $file = $form->moveFileUpload($filename);
                     $object = $file->getFileObject();
-                    if ($object) {
+                    if ($object !== []) {
                         $file = File::create(
                             [
                                 'name' => $object['name'],
@@ -270,11 +278,12 @@ class ContentTypeDefinitionEditForm extends FormBase
                                 'uid' => $data_all['uid']
                             ]
                         );
-                        if ($file) {
+                        if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $file_fids[] = $file->getFid();
                         }
                     }
                 }
+
                 $temp[$k] = $file_fids;
             }
             else {
@@ -287,6 +296,8 @@ class ContentTypeDefinitionEditForm extends FormBase
 
 
         }
+
+        return null;
     }
 
     /**
@@ -300,9 +311,7 @@ class ContentTypeDefinitionEditForm extends FormBase
     {
         if ($this->validated) {
 
-            $data_all = array_map(function ($value) {
-                return $value->getValue();
-            }, $form);
+            $data_all = array_map(fn($value) => $value->getValue(), $form);
 
             $user = User::loadByName($data_all['owner'] ?? '');
             if ($user instanceof User) {
@@ -321,7 +330,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                 $node_data = array_merge($data_all, $node_data);
                 $temp = [];
 
-                foreach ($node_data as $key => $value) {
+                foreach (array_keys($node_data) as $key) {
                     $field = $this->content_type["fields"][$key] ?? null;
 
                     if (isset($field) && $field['type'] === 'file') {
@@ -352,42 +361,41 @@ class ContentTypeDefinitionEditForm extends FormBase
                             $node_data[$key] = $file_fids;
                         }
 
-                        if (!empty($processed_files)) {
+                        foreach ($processed_files as $file) {
 
-                            foreach ($processed_files as $file) {
+                            $form = new FormUpload();
+                            $allowedExtensions = $field['settings']['allowed_file_types'] ?? ['image/png', 'image/jpeg', 'image/gif'];
+                            foreach ($allowedExtensions as $extension) {
+                                $form->addAllowedExtension($extension);
+                            }
 
-                                $form = new FormUpload();
-                                $allowedExtensions = $field['settings']['allowed_file_types'] ?? ['image/png', 'image/jpeg', 'image/gif'];
-                                foreach ($allowedExtensions as $extension) {
-                                    $form->addAllowedExtension($extension);
-                                }
-                                $allowed_size = $field['settings']['allowed_file_size'] ?? 1000000;
-                                $form->addAllowedMaxSize($allowed_size);
+                            $allowed_size = $field['settings']['allowed_file_size'] ?? 1000000;
+                            $form->addAllowedMaxSize($allowed_size);
 
-                                $form->addFileObject($file);
-                                $form->validate();
-                                //TODO: get file location save.
-                                $filename = "public://content";
-                                if (!is_dir($filename)) {
-                                    @mkdir($filename);
-                                }
-                                $filename .= "/". $file['name'];
-                                $file = $form->moveFileUpload($filename);
-                                $object = $file->getFileObject();
-                                if ($object) {
-                                    $file = File::create(
-                                        [
-                                            'name' => $object['name'],
-                                            'size' => $object['size'],
-                                            'uri' => $object['file_path'],
-                                            'extension' => $object['extension'],
-                                            'mime_type' => $object['mime_type'],
-                                            'uid' => $user->getUid(),
-                                        ]
-                                    );
-                                    if ($file) {
-                                        $file_fids[] = $file->getFid();
-                                    }
+                            $form->addFileObject($file);
+                            $form->validate();
+                            //TODO: get file location save.
+                            $filename = "public://content";
+                            if (!is_dir($filename)) {
+                                @mkdir($filename);
+                            }
+
+                            $filename .= "/". $file['name'];
+                            $file = $form->moveFileUpload($filename);
+                            $object = $file->getFileObject();
+                            if ($object !== []) {
+                                $file = File::create(
+                                    [
+                                        'name' => $object['name'],
+                                        'size' => $object['size'],
+                                        'uri' => $object['file_path'],
+                                        'extension' => $object['extension'],
+                                        'mime_type' => $object['mime_type'],
+                                        'uid' => $user->getUid(),
+                                    ]
+                                );
+                                if ($file instanceof \Simp\Core\modules\files\entity\File) {
+                                    $file_fids[] = $file->getFid();
                                 }
                             }
                         }
@@ -407,7 +415,7 @@ class ContentTypeDefinitionEditForm extends FormBase
                 $node_data = array_merge($node_data, $temp);
                 // now insert in other tables.
                 $this->node->update($node_data);
-                Messager::toast()->addMessage("Content of type {$this->content_type['name']} updated");
+                Messager::toast()->addMessage(sprintf('Content of type %s updated', $this->content_type['name']));
                 $redirect = new RedirectResponse('/admin/content');
                 $redirect->setStatusCode(302);
                 $redirect->send();

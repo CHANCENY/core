@@ -13,6 +13,7 @@ class CreatePage extends FormBase
 {
 
     protected bool $validated = true;
+
     public function getFormId(): string
     {
         return 'create_page';
@@ -113,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
     public function submitForm(array $form): void
     {
         if ($this->validated) {
-            $page = array_map(function ($field) { return $field->getValue(); },$form);
+            $page = array_map(fn($field) => $field->getValue(),$form);
             if ($page_config = PageConfigManager::factory('')->addPage($page['field_wrapper']['system_name'], $page['field_wrapper']['title'],'','')) {
-                $redirect = new RedirectResponse("/core/modules/page_builder/build?t={$page_config}");
+                $redirect = new RedirectResponse('/core/modules/page_builder/build?t=' . $page_config);
                 $redirect->setStatusCode(302);
                 $redirect->send();
             }

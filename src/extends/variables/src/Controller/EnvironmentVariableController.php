@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnvironmentVariableController
 {
-    public function index(...$args)
+    public function index(...$args): \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\Response
     {
 
         extract($args);
@@ -25,6 +25,7 @@ class EnvironmentVariableController
 
         $query = Database::database()->con()->prepare("SELECT * FROM environment_variables");
         $query->execute();
+
         $variables = $query->fetchAll();
         $variables_data = [];
         foreach ($variables as $variable) {
@@ -43,7 +44,7 @@ class EnvironmentVariableController
         );
     }
 
-    protected function handleAction(Request $request, array $options)
+    protected function handleAction(Request $request, array $options): ?array
     {
         try{
             if ($request->isMethod(Request::METHOD_POST)) {
@@ -58,43 +59,34 @@ class EnvironmentVariableController
                     $query = Database::database()->con()->prepare("INSERT INTO environment_variables (name) VALUES (:name)");
                     $query->bindParam(':name', $name);
                     $result = $query->execute();
-                    if ($result) {
-                        if (Variables::create($name, $value)) {
-                            return ['success'=> true,
-                                'message' => 'Variable created successfully',
-                                'name' => $name, 'id' => Database::database()->con()->lastInsertId(),
-                                'value' => Variables::load($name)
-                            ];
-                        }
+                    if ($result && Variables::create($name, $value)) {
+                        return ['success'=> true,
+                            'message' => 'Variable created successfully',
+                            'name' => $name, 'id' => Database::database()->con()->lastInsertId(),
+                            'value' => Variables::load($name)
+                        ];
                     }
-                }
-
-                else if ($action === 'edit' && !empty($name) && !empty($value) && !empty($id)) {
+                } elseif ($action === 'edit' && !empty($name) && !empty($value) && !empty($id)) {
                     $name = $this->sanitize_string($name);
                     $query = Database::database()->con()->prepare("UPDATE environment_variables SET name = :name WHERE id = :id");
                     $query->bindParam(':name', $name);
                     $query->bindParam(':id', $id, \PDO::PARAM_INT);
                     $result = $query->execute();
+                    if ($result && Variables::create($name, $value)) {
 
-                    if ($result) {
-
-                        if (Variables::create($name, $value)) {
-                            return ['success'=> true,
-                                'message' => 'Variable updated successfully',
-                                'name' => $name, 'id' => $id,
-                                'value' => Variables::load($name)
-                            ];
-                        }
+                        return ['success'=> true,
+                            'message' => 'Variable updated successfully',
+                            'name' => $name, 'id' => $id,
+                            'value' => Variables::load($name)
+                        ];
                     }
-                    return ['success'=> false, 'error' => 'Failed to update variable'];
-                }
 
-                else if ($action === 'delete' && !empty($id)) {
+                    return ['success'=> false, 'error' => 'Failed to update variable'];
+                } elseif ($action === 'delete' && !empty($id)) {
                     // select first
                     $query = Database::database()->con()->prepare("SELECT name FROM environment_variables WHERE id = :id");
                     $query->bindParam(':id', $id, \PDO::PARAM_INT);
                     $query->execute();
-
                     $variable = $query->fetch();
                     $name = $variable['name'] ?? null;
                     if ($name) {
@@ -109,27 +101,29 @@ class EnvironmentVariableController
                             'value' => Variables::load($name)
                         ];
                     }
+
                     return ['success'=> false, 'error' => 'Failed to delete variable'];
-                }
-                else {
+                } else {
                     return ['success'=> false, 'error' => 'Invalid request'];
                 }
             }
 
-        }catch (\Throwable $e){
+        }catch (\Throwable){
             return ['success'=> false, 'error' => 'Something went wrong'];
         }
+
+        return null;
     }
 
-    private function sanitize_string($string) {
+    private function sanitize_string($string): string {
         // Replace any non-alphanumeric character with underscore
-        $string = preg_replace('/[^A-Za-z0-9]/', '_', $string);
+        $string = preg_replace('/[^A-Za-z0-9]/', '_', (string) $string);
 
         // Replace multiple consecutive underscores with a single one
-        $string = preg_replace('/_+/', '_', $string);
+        $string = preg_replace('/_+/', '_', (string) $string);
 
         // Trim underscores from beginning and end (optional)
-        $string = trim($string, '_');
+        $string = trim((string) $string, '_');
 
         return $string;
     }

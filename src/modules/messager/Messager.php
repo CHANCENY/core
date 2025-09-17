@@ -103,6 +103,7 @@ class Messager
     {
         Session::init()->set('system.messages', $this->messages);
     }
+
     public static function toast(): Messager
     {
        return new self();

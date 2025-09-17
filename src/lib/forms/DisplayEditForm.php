@@ -127,12 +127,12 @@ class DisplayEditForm extends FormBase
         $data = array_map(fn($item) => $item->getValue(), $form);
         $display = ViewsManager::viewsManager()->getDisplay(Service::get('request')->get('display'));
 
-        $display['name'] = !empty($data['display_wrapper']['name']) ? $data['display_wrapper']['name'] : $display['name'];
-        $display['response_type'] = !empty($data['display_wrapper']['response_type']) ? $data['display_wrapper']['response_type'] : $display['response_type'];
-        $display['template'] = !empty($data['display_wrapper']['template']) ? $data['display_wrapper']['template'] : $display['template'];
+        $display['name'] = empty($data['display_wrapper']['name']) ? $display['name'] : $data['display_wrapper']['name'];
+        $display['response_type'] = empty($data['display_wrapper']['response_type']) ? $display['response_type'] : $data['display_wrapper']['response_type'];
+        $display['template'] = empty($data['display_wrapper']['template']) ? $display['template'] : $data['display_wrapper']['template'];
 
-        $display['permission'] = !empty($data['permission_wrapper']['permission']) ?
-            $data['permission_wrapper']['permission'] : $display['permission'];
+        $display['permission'] = empty($data['permission_wrapper']['permission']) ?
+            $display['permission'] : $data['permission_wrapper']['permission'];
 
         if (ViewsManager::viewsManager()->addFieldDisplay($display['display_name'],$display)) {
             Messager::toast()->addMessage("Display settings updated");
@@ -140,6 +140,7 @@ class DisplayEditForm extends FormBase
         else {
             Messager::toast()->addMessage("Display settings not updated");
         }
+
         $redirect = new RedirectResponse('/admin/structure/views/view/'.Service::get('request')->get('view_name').'/displays');
         $redirect->setStatusCode(302);
         $redirect->send();

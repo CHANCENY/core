@@ -13,8 +13,6 @@ use Twig\Error\SyntaxError;
 
 class SelectFieldBuilder implements FieldBuilderInterface
 {
-    private string $field_type;
-
     /**
      * @throws SyntaxError
      * @throws RuntimeError
@@ -22,7 +20,6 @@ class SelectFieldBuilder implements FieldBuilderInterface
      */
     public function build(Request $request, string $field_type, array $options = []): string
     {
-        $this->field_type = $field_type;
         $field = self::extensionInfo($field_type);
         $template = match ($field_type) {
             'select' => 'default.view.basic.select',
@@ -32,7 +29,6 @@ class SelectFieldBuilder implements FieldBuilderInterface
 
     public function fieldArray(Request $request, string $field_type, string $entity_type): array
     {
-        $this->field_type = $field_type;
         return match ($field_type) {
             'select' => $this->parseOptionInputFieldSetting($request, $entity_type)
         };
@@ -70,6 +66,7 @@ class SelectFieldBuilder implements FieldBuilderInterface
             $field_data['handler'] = $this->getFieldHandler();
             $field_data['option_values'] = $data['options'] ?? ['none'=>'None'];
         }
+
         return $field_data;
     }
 }

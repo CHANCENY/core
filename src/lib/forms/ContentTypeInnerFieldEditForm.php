@@ -44,6 +44,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
             foreach ($field['options'] ?? [] as $key=>$other) {
              $list[$key] = $other;
             }
+
             $form['title'] = [
                 'type' => 'text',
                 'label' => 'Field Name',
@@ -197,6 +198,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
                 'class' => ['btn', 'btn-primary'],
             ];
         }
+
         return $form;
     }
 
@@ -211,21 +213,19 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
     {
         $request = Service::get('request');
         if ($this->validated) {
-            $data = array_map(function ($item) {
-                return $item->getValue();
-            }, $form);
+            $data = array_map(fn($item) => $item->getValue(), $form);
 
             $field = [
                 'type' => $data['type'],
                 'label' => $data['title'],
                 'required' => $data['option']['field_required'] === 'yes',
-                'class' => explode(' ', $data['option']['field_classes']),
+                'class' => explode(' ', (string) $data['option']['field_classes']),
                 'default_value' => $data['option']['field_default'],
                 'id' => $data['option']['field_id'],
             ];
             $options = $data['option']['others'];
             if (!empty($options)) {
-                $list = explode('\n', $options);
+                $list = explode('\n', (string) $options);
                 $options = [];
                 foreach ($list as $item) {
                     $lis = explode('=', $item);
@@ -235,8 +235,10 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
                         $options[end($lis)] = end($lis);
                     }
                 }
+
                 $field['options'] = $options;
             }
+
             $field['handler'] = match ($data['type']) {
                 'file' => FileField::class,
                 'textarea' => TextareaField::class,
@@ -250,10 +252,11 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
 
             $persist = true;
             if (in_array($data['type'], ['details', 'fieldset', 'conditional'])) {
-            
+
                 if ($data['type'] === 'conditional') {
                     $field['conditions'] = [];
                 }
+
                 $persist = false;
             }
 
@@ -267,7 +270,7 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
             $name_content = $request->get('machine_name');
             $name = str_replace(' ', '_', $field['label']);
             $name = 'field_'.strtolower($name);
-    
+
             $persist_override = $field;
             if (in_array($data['type'], ['details', 'fieldset', 'conditional'])) {
                 $persist_override = [];
@@ -282,13 +285,15 @@ class ContentTypeInnerFieldEditForm extends ContentTypeFieldForm
                 $redirect->send();
                 exit;
             }
+
             $inner_field = $original_field['inner_field'][$request->get('field_name')] ?? [];
             $field = array_merge($inner_field,$field);
             $original_field['inner_field'][$request->get('field_name')] = $field;
 
-            if (ContentDefinitionManager::contentDefinitionManager()->addField($name_content, $request->get('parent_name'), $original_field, $persist, $persist_override)) {
-                Messager::toast()->addMessage("Field '$name' has been updated");
+            if (ContentDefinitionManager::contentDefinitionManager()->addField($name_content, $request->get('parent_name'), $original_field)) {
+                Messager::toast()->addMessage(sprintf("Field '%s' has been updated", $name));
             }
+
             $redirect = new RedirectResponse('/admin/structure/content-type/' . $name_content . '/manage');
             $redirect->send();
         }

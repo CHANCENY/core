@@ -34,9 +34,9 @@ class RouteAccessMiddleware implements Middleware
             $access_interface->access_granted = true;
             return $next($request, $access_interface);
         }
-    
+
         $roles = $current_user?->getUser()?->getRoles() ?? [];
-        $roles = array_map(function($role){ return $role->getRoleName(); }, $roles);
+        $roles = array_map(fn($role) => $role->getRoleName(), $roles);
 
         if($current_user instanceof AuthUser && array_intersect($access_roles, $roles)) {
             $access_interface->access_granted = true;
@@ -45,6 +45,7 @@ class RouteAccessMiddleware implements Middleware
             $access_interface->redirect = $redirect;
             $access_interface->access_granted = false;
         }
+
         return $next($request, $access_interface);
     }
 }

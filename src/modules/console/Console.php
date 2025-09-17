@@ -14,6 +14,7 @@ use Symfony\Component\Console\Application;
 class Console
 {
     protected array $custom_commands = [];
+
     protected array $default_commands = [];
 
     public function __construct()

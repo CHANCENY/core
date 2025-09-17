@@ -33,6 +33,8 @@ use Throwable;
 
 class InstallerValidatorOld extends SystemDirectory {
 
+    private $schema_dir;
+
     public object $installer_schema;
 
     public function __construct() {
@@ -42,6 +44,7 @@ class InstallerValidatorOld extends SystemDirectory {
         if (!file_exists($schema_file)) {
             die("Booter file does not exist");
         }
+
         $this->installer_schema = Yaml::parseFile($schema_file, Yaml::PARSE_OBJECT_FOR_MAP);
 
         // Run
@@ -56,13 +59,11 @@ class InstallerValidatorOld extends SystemDirectory {
         foreach ($globals as $value) {
             $GLOBALS[$value] = null;
         }
+
         $GLOBALS['system_store'] = $this;
         $GLOBALS['request_start_time'] = microtime(true);
     }
 
-    /**
-     * @return void
-     */
     public function setUpFileSystem(): void {
 
         $streams = $this->installer_schema->streams;
@@ -82,7 +83,7 @@ class InstallerValidatorOld extends SystemDirectory {
 
         //TODO: Create all need directories.
         foreach ($this->toArray() as $key=>$directory) {
-            if (is_string($directory) && !is_dir($directory) && str_ends_with($key, '_dir')) {
+            if (is_string($directory) && !is_dir($directory) && str_ends_with((string) $key, '_dir')) {
                 mkdir($directory, 0777, true);
             }
         };
@@ -160,6 +161,7 @@ class InstallerValidatorOld extends SystemDirectory {
                          $statement = $connection->prepare($query);
                          $statement->execute();
                     }
+
                     $module_handler = ModuleHandler::factory();
                     $modules = $module_handler->getModules();
                     foreach($modules as $key=>$module) {
@@ -203,6 +205,7 @@ class InstallerValidatorOld extends SystemDirectory {
             @mkdir($this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'views', 0777, true);
             @touch($views_routes);
         }
+
         if (!is_dir($this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'general')) {
             @mkdir($this->setting_dir . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'general', 0777, true);
             @touch($general_routes);
@@ -212,6 +215,7 @@ class InstallerValidatorOld extends SystemDirectory {
         if (file_exists($views_routes)) {
             $routes = Yaml::parseFile($views_routes) ?? [];
         }
+
         if (file_exists($general_routes)) {
             $routes = array_merge($routes, Yaml::parseFile($general_routes) ?? []);
         }
@@ -219,8 +223,7 @@ class InstallerValidatorOld extends SystemDirectory {
         // Modules routes
         $module = ModuleHandler::factory();
         $modules_routes = $module->getModulesRoutes();
-        $routes = \array_merge($routes, $modules_routes);
-        return $routes;
+        return \array_merge($routes, $modules_routes);
     }
 
     /**
@@ -239,12 +242,13 @@ class InstallerValidatorOld extends SystemDirectory {
         if (file_exists($service_file)) {
             $services = Yaml::parseFile($service_file) ?? [];
         }
+
         if (file_exists($services_custom)) {
             $services = array_merge($services, Yaml::parseFile($services_custom) ?? []);
         }
 
         foreach ($services as $key=>$service) {
-            $services[$key] = base64_encode($service);
+            $services[$key] = base64_encode((string) $service);
         }
 
         Caching::init()->set('system_services', $services);
@@ -275,7 +279,7 @@ class InstallerValidatorOld extends SystemDirectory {
             $routes = Yaml::parseFile($default_route);
         }
 
-        if ($routes_custom = $this->developerCustomRoutes()) {
+        if (($routes_custom = $this->developerCustomRoutes()) !== []) {
             $routes = array_merge($routes, $routes_custom);
         }
 
@@ -283,6 +287,7 @@ class InstallerValidatorOld extends SystemDirectory {
             $route = new Route($key, $route);
             Caching::init()->set($key, $route);
         }
+
         Caching::init()->set('system.routes.keys', array_keys($routes));
     }
 
@@ -304,6 +309,7 @@ class InstallerValidatorOld extends SystemDirectory {
                     $keys[] = $key_name;
                     $file_path = new TwigResolver($file_path);
                 }
+
                 Caching::init()->set($key_name, $file_path);
             }
         }
@@ -323,12 +329,13 @@ class InstallerValidatorOld extends SystemDirectory {
             $list_name = explode('.', $file);
             $type = end($list_name) === 'twig' ? 'view' : 'file';
             $list_n = array_slice($list_name, 0, -1);
-            $key_name = "$theme.".$type.".". implode('.', $list_n);
+            $key_name = $theme . '.'.$type.".". implode('.', $list_n);
             if (is_file($file_path)) {
                 if ($type === 'view') {
                     $keys[] = $key_name;
                     $file_path = new TwigResolver($file_path);
                 }
+
                 Caching::init()->set($key_name, $file_path);
             }
         }
@@ -340,6 +347,7 @@ class InstallerValidatorOld extends SystemDirectory {
         if (!is_dir($settings)) {
             mkdir($settings);
         }
+
         $settings .= DIRECTORY_SEPARATOR . $directory_name;
         if (!is_dir($settings)) {
             mkdir($settings);

@@ -11,8 +11,9 @@ use Simp\Fields\FieldTypeSupportException;
 class MarkUpField extends FieldBase
 {
     private array $field;
-    private array $submission;
-    protected string $validation_message;
+
+
+    protected string $validation_message = '';
 
     /**
      * @throws Exception
@@ -23,12 +24,10 @@ class MarkUpField extends FieldBase
     {
         parent::__construct($field, $request_method, $post, $params, $files);
 
-        $this->validation_message = '';
-
         $supported_field_type = ['markup'];
 
         if (!in_array($field['type'], $supported_field_type)) {
-            throw new FieldTypeSupportException("Field type '{$field['type']}' is not supported with this class ".static::class);
+            throw new FieldTypeSupportException(sprintf("Field type '%s' is not supported with this class ", $field['type']).static::class);
         }
 
         $required = ['markup', 'name', 'type'];
@@ -36,7 +35,7 @@ class MarkUpField extends FieldBase
         foreach ($required as $field_key) {
 
             if (!isset($field[$field_key])) {
-                throw new FieldRequiredException("Field key {$field_key} is required");
+                throw new FieldRequiredException(sprintf('Field key %s is required', $field_key));
             }
         }
 
@@ -61,7 +60,7 @@ class MarkUpField extends FieldBase
 
     public function getId(): string
     {
-        return !empty($this->field['id']) ? $this->field['id'] : FieldManager::createFieldName($this->getLabel());
+        return empty($this->field['id']) ? FieldManager::createFieldName($this->getLabel()) : $this->field['id'];
     }
 
     public function getClassList(): array
@@ -71,7 +70,7 @@ class MarkUpField extends FieldBase
 
     public function getRequired(): string
     {
-        return !empty($this->field['required']) ? 'required' : '';
+        return empty($this->field['required']) ? '' : 'required';
     }
 
     public function getOptions(): array

@@ -8,13 +8,15 @@ use Simp\Core\modules\database\Database;
 class RoleManager
 {
     protected array $roles = [];
+
     public function __construct(protected int $uid)
     {
         $query = Database::database()->con()->prepare("SELECT * FROM `user_roles` WHERE `uid` = :uid");
         $query->bindValue(':uid', $this->uid);
         $query->execute();
+
         $roles = $query->fetchAll(PDO::FETCH_ASSOC);
-        $this->roles = array_map(fn($role) => new Role(...$role), $roles);
+        $this->roles = array_map(fn($role): \Simp\Core\modules\user\roles\Role => new Role(...$role), $roles);
 
         if ($this->uid === 0) {
             $this->roles[] = new Role(0, 'anonymous', 0,'anonymous', 'anonymous');
@@ -56,6 +58,7 @@ class RoleManager
                 return true;
             }
         }
+
         return false;
     }
 
@@ -65,6 +68,7 @@ class RoleManager
         foreach ($roles as $role) {
             $this->appendRole($role);
         }
+
         return $this;
     }
 

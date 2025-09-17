@@ -27,8 +27,7 @@ class ForgotPasswordResetForm extends FormBase
 
     public function buildForm(array $form): array
     {
-        $form = parent::buildForm($form);
-        return $form;
+        return parent::buildForm($form);
     }
 
     public function validateForm(array $form): void
@@ -37,6 +36,7 @@ class ForgotPasswordResetForm extends FormBase
             $form['password']->setError('Password cannot be empty');
             $this->validated = false;
         }
+
         if ($form['password_confirmation']->getRequired() === 'required' && empty($form['password_confirmation']->getValue())) {
             $form['password_confirmation']->setError('Confirm Password cannot be empty');
             $this->validated = false;

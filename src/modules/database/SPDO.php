@@ -32,13 +32,12 @@ class SPDO extends PDO
             $logFile = $logDirectory . DIRECTORY_SEPARATOR . 'database.log';
 
             // Ensure log directory exists
-            if (!is_dir($logDirectory)) {
-                // Attempt to create directory recursively with appropriate permissions
-                if (!mkdir($logDirectory, 0775, true) && !is_dir($logDirectory)) {
-                    // Log failure to create directory to PHP's error log
-                    error_log("SPSPD::log failed: Could not create log directory: " . $logDirectory);
-                    return false; // Indicate failure
-                }
+            // Attempt to create directory recursively with appropriate permissions
+            if (!is_dir($logDirectory) && (!mkdir($logDirectory, 0775, true) && !is_dir($logDirectory))) {
+                // Log failure to create directory to PHP's error log
+                error_log("SPSPD::log failed: Could not create log directory: " . $logDirectory);
+                return false;
+                // Indicate failure
             }
 
             // Append message to log file with end-of-line character
@@ -52,9 +51,9 @@ class SPDO extends PDO
 
             return true; // Indicate success
 
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             // Log any exception during the logging process to PHP's error log
-            error_log("SPDO::log exception: " . $e->getMessage());
+            error_log("SPDO::log exception: " . $throwable->getMessage());
             return false; // Indicate failure
         }
     }

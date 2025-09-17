@@ -35,8 +35,9 @@ class PageBuilderController
 
         $t = $request->get('t', null);
         if ($t) {
-            return new RedirectResponse("/core/modules/page_builder/build?t={$t}");
+            return new RedirectResponse('/core/modules/page_builder/build?t=' . $t);
         }
+
         $form_base = new FormBuilder(new CreatePage());
         $form_base->getFormBase()->setFormMethod('POST');
         $form_base->getFormBase()->setFormEnctype('multipart/form-data');
@@ -65,23 +66,24 @@ class PageBuilderController
     public function save(...$args): JsonResponse
     {
         extract($args);
-        $json_form = json_decode($request->getContent(), true);
+        $json_form = json_decode((string) $request->getContent(), true);
 
         if (!empty($json_form['name']) && !empty($json_form['html']) && !empty($json_form['css']))
         {
             $page_config = PageConfigManager::factory($json_form['name'])->addPage($json_form['name'], $json_form['name'], $json_form['css'], $json_form['html']);
             return new JsonResponse(['success' => true, 'message' => 'Page saved successfully', 'name' => $page_config]);
         }
+
         return new JsonResponse(['success' => false, 'message' => 'failed to save page']);
     }
 
-    public function search(...$args)
+    public function search(...$args): \Symfony\Component\HttpFoundation\JsonResponse
     {
         extract($args);
         $search = $request->get('name');
 
         $results = Page::search($search);
-        $results = array_map(function ($result) {
+        $results = array_map(function (array $result): array {
             sleep(1);
             return [
                 'pid' => $result['id'],
@@ -122,7 +124,7 @@ class PageBuilderController
         ]));
     }
 
-    public function link(...$args)
+    public function link(...$args): \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
     {
         extract($args);
         $pid = $request->get('pid', null);
@@ -155,10 +157,10 @@ class PageBuilderController
         $text = preg_replace('/[^a-zA-Z0-9\s]/', ' ', $text);
 
         // Replace multiple spaces with a single space
-        $text = preg_replace('/\s+/', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', (string) $text);
 
         // Trim leading/trailing spaces
-        return trim($text);
+        return trim((string) $text);
     }
 
 }

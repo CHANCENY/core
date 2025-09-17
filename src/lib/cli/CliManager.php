@@ -21,6 +21,7 @@ class CliManager extends SystemDirectory
         if (array_key_exists($name, $this->commands)) {
             return $this->commands[$name];
         }
+
         return null;
     }
 
@@ -29,6 +30,7 @@ class CliManager extends SystemDirectory
         if (array_key_exists($name, $this->commands)) {
             return $this->commands[$name];
         }
+
         return null;
     }
 }

@@ -21,7 +21,7 @@ class Menu
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function __construct(array|string $menu, array $options = []) {
+    public function __construct(array|string $menu) {
 
         if (is_array($menu)) {
             $this->menu = new Route(...$menu);
@@ -38,7 +38,7 @@ class Menu
 
     public function hasChildren(): bool
     {
-        return !empty($this->children);
+        return $this->children !== [];
     }
 
     public function getMenu(): ?Route

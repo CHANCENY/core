@@ -28,9 +28,6 @@ class View
     }
 
     /**
-     * @param string $view
-     * @param array $data
-     * @return string
      * @throws LoaderError
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
@@ -52,14 +49,14 @@ class View
 
         if (!empty($data['display']) && $data['display'] instanceof Display) {
             $display_name = $data['display']->getDisplayId();
-            $suggestions[] = "views.{$display_name}.results.rows";
+            $suggestions[] = sprintf('views.%s.results.rows', $display_name);
         }
 
         foreach ($suggestions as $suggestion) {
 
             // from string $suggestion remove .html.twig
             $purified_suggestion = trim(str_replace('.html.twig','',$suggestion));
-            $normalized_suggestion = !empty($currentTheme) ? $currentTheme. '.view.'. $purified_suggestion : $purified_suggestion;
+            $normalized_suggestion = $currentTheme === null || $currentTheme === '' || $currentTheme === '0' ? $purified_suggestion : $currentTheme. '.view.'. $purified_suggestion;
             if (Caching::init()->has($normalized_suggestion)) {
                 $view = $normalized_suggestion;
                 break;
@@ -69,10 +66,10 @@ class View
         $options = [...$this->theme->getOptions(), ...$data];
 
         $string = $this->theme->twig->render($view,$options);
-        $currentTheme = empty($currentTheme) ? 'default' : $currentTheme;
-        if (CurrentUser::currentUser()?->isIsAdmin()) {
+        $currentTheme = $currentTheme === null || $currentTheme === '' || $currentTheme === '0' ? 'default' : $currentTheme;
+        if (CurrentUser::currentUser()?->isIsAdmin() === true) {
             $string .= "<!-- Current Theme: {$currentTheme} \n";
-            $string .= "used:  {$view}\n";
+            $string .= sprintf('used:  %s%s', $view, PHP_EOL);
             $string .= "suggestions: \n";
             $string .= "------------------------------------\n";
             $string .= "Please create one in your theme from the following \n\n";
@@ -87,9 +84,6 @@ class View
     }
 
     /**
-     * @param string $view
-     * @param array $data
-     * @return string
      * @throws LoaderError
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
@@ -105,7 +99,7 @@ class View
     }
 
 
-    function suggestTwigTemplates(string $baseName, int $count = 10): array
+    public function suggestTwigTemplates(string $baseName, int $count = 10): array
     {
         // Normalize name
         $name = strtolower(trim($baseName));
@@ -120,14 +114,19 @@ class View
 
         // 2. Full base name, underscore style
         $suggestions[] = implode('_', $parts) . '.html.twig';
+        // 3. Progressive dotted prefixes
+        $counter = count($parts);
 
         // 3. Progressive dotted prefixes
-        for ($i = 1; $i <= count($parts); $i++) {
+        for ($i = 1; $i <= $counter; $i++) {
             $suggestions[] = implode('.', array_slice($parts, 0, $i)) . '.html.twig';
         }
 
         // 4. Progressive underscored prefixes
-        for ($i = 1; $i <= count($parts); $i++) {
+        $counter = count($parts);
+
+        // 4. Progressive underscored prefixes
+        for ($i = 1; $i <= $counter; $i++) {
             $suggestions[] = implode('_', array_slice($parts, 0, $i)) . '.html.twig';
         }
 
@@ -140,7 +139,7 @@ class View
         return array_slice($suggestions, 0, $count);
     }
 
-    function cssClassFriendlyName(string $str): string {
+    public function cssClassFriendlyName(string $str): string {
         // Convert to lowercase
         $str = strtolower($str);
 
@@ -148,13 +147,13 @@ class View
         $str = preg_replace('/[\s_]+/', '-', $str);
 
         // Remove all characters that are not a-z, 0-9, or dash
-        $str = preg_replace('/[^a-z0-9-]/', '-', $str);
+        $str = preg_replace('/[^a-z0-9-]/', '-', (string) $str);
 
         // Remove consecutive dashes
-        $str = preg_replace('/-+/', '-', $str);
+        $str = preg_replace('/-+/', '-', (string) $str);
 
         // Trim dashes from the start and end
-        $str = trim($str, '-');
+        $str = trim((string) $str, '-');
 
         // Ensure it doesn't start with a number (CSS class cannot start with number)
         if (preg_match('/^\d/', $str)) {

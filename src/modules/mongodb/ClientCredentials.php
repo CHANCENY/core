@@ -66,6 +66,7 @@ class ClientCredentials
         if (!file_exists($this->storage_file)) {
             return [];
         }
+
         return Yaml::parseFile($this->storage_file);
     }
 

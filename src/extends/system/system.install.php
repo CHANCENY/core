@@ -18,98 +18,98 @@ use Simp\Core\modules\user\current_user\CurrentUser;
 
 function system_route_install(): array
 {
-    return array(
-        'system.module.rebuild' => array(
+    return [
+        'system.module.rebuild' => [
             'title' => 'Rebuild Core',
             'path' => '/admin/system/module/rebuild',
-            'method' => array('GET', 'POST'),
-            'controller' => array(
+            'method' => ['GET', 'POST'],
+            'controller' => [
                 'class' => System::class,
                 'method' => 'system_rebuild'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        ),
-        'system.module.system' => array(
+            ]
+        ],
+        'system.module.system' => [
             'title' => 'System',
             'path' => '/admin/system',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => System::class,
                 'method' => 'system'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        ),
-        'system.rebuild.cache' => array(
+            ]
+        ],
+        'system.rebuild.cache' => [
             'title' => 'Rebuild Cache',
             'path' => '/admin/system/rebuild/cache',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => System::class,
                 'method' => 'rebuild_cache'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        ),
-        'system.module.clear.cache' => array(
+            ]
+        ],
+        'system.module.clear.cache' => [
             'title' => 'Clear Cache',
             'path' => '/admin/system/clear/cache',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => System::class,
                 'method' => 'clear_cache'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        ),
-        'system.module.rebuild.all' => array(
+            ]
+        ],
+        'system.module.rebuild.all' => [
             'title' => 'Rebuild All',
             'path' => '/admin/system/rebuild/all',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => System::class,
                 'method' => 'rebuild_all'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        ),
-        'system.structure.content-type.rebuild' => array(
+            ]
+        ],
+        'system.structure.content-type.rebuild' => [
             'title' => 'Rebuild Types Store',
             'path' => '/admin/system/structure/content-type/rebuild',
-            'method' => array('GET'),
-            'controller' => array(
+            'method' => ['GET'],
+            'controller' => [
                 'class' => System::class,
                 'method' => 'content_types'
-            ),
-            'access' => array('administrator'),
-            'options' => array(
+            ],
+            'access' => ['administrator'],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        )
-    );
+            ]
+        ]
+    ];
 }
 
 function system_twig_function_install(): array
 {
-    return array();
+    return [];
 }
 
 function system_database_install(): void { }
 
 function system_cron_jobs_install(): array
 {
-    return array();
+    return [];
 }
 
 function system_template_install(): array
@@ -123,7 +123,7 @@ function system_template_install(): array
 
 function system_cron_subscribers_install(): array
 {
-    return array();
+    return [];
 }
 
 /**
@@ -210,12 +210,12 @@ function system_menu_install(array &$menus): void
 
 function system_field_install(): array
 {
-    return array();
+    return [];
 }
 
 function system_library_install(string $library_name): array
 {
-    return array();
+    return [];
 }
 
 function system_twig_filter_install(): array

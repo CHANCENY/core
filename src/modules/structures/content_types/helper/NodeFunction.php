@@ -23,6 +23,7 @@ trait NodeFunction
                 }
             }
         }
+
         return [];
     }
 
@@ -33,16 +34,19 @@ trait NodeFunction
             foreach ($fid as $f) {
                 $uri[] = FileFunction::reserve_uri(FileFunction::resolve_fid($f),$webroot);
             }
+
             return $uri;
         }
+
         return [FileFunction::reserve_uri(FileFunction::resolve_fid($fid),$webroot)];
     }
 
     public function nodeFileContent(array|int $fid, bool $webroot = true): array
     {
-        if (empty($fid)) {
+        if ($fid === 0 || $fid === []) {
             return [];
         }
+
         $content = [];
         if (is_numeric($fid)) {
             $fid = [$fid];
@@ -52,9 +56,10 @@ trait NodeFunction
             if (!empty($f)) {
                 $file = File::load($f);
 
-                if(!$file) {
+                if(!$file instanceof \Simp\Core\modules\files\entity\File) {
                     return [];
                 }
+
                 $content[] = [
                     'name' => $file->getName(),
                     'size' => $file->getSize(),
@@ -64,6 +69,7 @@ trait NodeFunction
                 ];
             }
         }
+
         return $content;
     }
 
@@ -81,6 +87,7 @@ trait NodeFunction
                 if ($field['type'] === 'reference') {
                     $reference_entities[] = $field['name'];
                 }
+
                 if (!empty($field['inner_field'])) {
                     $function($field['inner_field'], $reference_entities);
                 }
@@ -93,8 +100,8 @@ trait NodeFunction
             $reference_entities = array_unique($reference_entities);
 
             // Create table and field names
-            $tables = array_map(fn($ref) => "node__{$ref}", $reference_entities);
-            $where_clause = array_map(fn($ref) => "{$ref}__value", $reference_entities);
+            $tables = array_map(fn($ref): string => 'node__' . $ref, $reference_entities);
+            $where_clause = array_map(fn($ref): string => $ref . '__value', $reference_entities);
 
             $base_table = 'node_data';
             $join_statements = '';
@@ -102,7 +109,7 @@ trait NodeFunction
             $params = [];
 
             foreach ($tables as $index => $table) {
-                $alias = "t{$index}";
+                $alias = 't' . $index;
                 $join_column = (count($tables) === 1) ? 'nid' : 'nid';
 
                 $join_statements .= "LEFT JOIN {$table} AS {$alias} ON {$alias}.{$join_column} = {$base_table}.nid\n";
@@ -112,13 +119,13 @@ trait NodeFunction
 
                 $placeholders = [];
                 foreach ($field_values as $i => $val) {
-                    $param_key = "{$field}_{$i}";
-                    $placeholders[] = ":{$param_key}";
+                    $param_key = sprintf('%s_%s', $field, $i);
+                    $placeholders[] = ':' . $param_key;
                     $params[$param_key] = $val;
                 }
 
-                if (!empty($placeholders)) {
-                    $where_conditions[] = "{$alias}.{$field} IN (" . implode(', ', $placeholders) . ")";
+                if ($placeholders !== []) {
+                    $where_conditions[] = sprintf('%s.%s IN (', $alias, $field) . implode(', ', $placeholders) . ")";
                 }
             }
 
@@ -126,13 +133,13 @@ trait NodeFunction
             $select = "SELECT {$base_table}.nid FROM {$base_table} \n" . $join_statements;
 
 
-            if (!empty($where_conditions)) {
+            if ($where_conditions !== []) {
                 $select .= "WHERE (" . implode(" OR ", $where_conditions) . ") ";
             } else {
                 $select .= "WHERE 1=1 ";
             }
 
-            $select .= "AND {$base_table}.status = 1 GROUP BY node_data.nid ORDER BY {$base_table}.updated DESC";
+            $select .= sprintf('AND %s.status = 1 GROUP BY node_data.nid ORDER BY %s.updated DESC', $base_table, $base_table);
 
             // Execute query
             $query = Database::database()->con()->prepare($select);
@@ -140,8 +147,9 @@ trait NodeFunction
             $results = $query->fetchAll(PDO::FETCH_ASSOC);
 
             // Optionally return or use $results
-            return array_map(function ($nid){ return Node::load($nid['nid']); }, $results);
+            return array_map(fn(array $nid): ?\Simp\Core\modules\structures\content_types\entity\Node => Node::load($nid['nid']), $results);
         }
+
         return [];
     }
 

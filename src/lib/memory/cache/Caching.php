@@ -34,9 +34,7 @@ class Caching implements MemoryInterface
 
     /**
      * Save data to cache.
-     * @param string $key
      * @param $value
-     * @param int $duration
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheLogicException
      * @throws PhpfastcacheDriverException
@@ -56,7 +54,7 @@ class Caching implements MemoryInterface
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         $instance = $this->caching_object->getItem($key);
         return $instance->get();
@@ -114,6 +112,7 @@ class Caching implements MemoryInterface
         if (!empty($GLOBALS["caching"])) {
             return $GLOBALS["caching"];
         }
+
         return new self();
     }
 

@@ -11,11 +11,9 @@ class ConfigReadOnly
     /**
      * @param string|null $name null if data being search is just string or number
      * @param mixed|null $default
-     * @return mixed
      */
     public function get(?string $name = null, mixed $default = null): mixed
     {
-        $config = [];
         if (empty($this->data)) {
             return $default;
         }
@@ -31,6 +29,7 @@ class ConfigReadOnly
                 }
             }
         }
+
         return $default;
     }
 
@@ -40,10 +39,12 @@ class ConfigReadOnly
             if ($key === $search) {
                 return $value;
             }
+
             if (is_array($value)) {
                 return $this->recursive_search($value, $search);
             }
         }
+
         return null;
     }
 }

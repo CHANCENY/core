@@ -34,7 +34,7 @@ class TermAddForm extends FormBase
             ],
             'class' => [],
             'name' => 'title',
-            'default_value' => !empty($term) ? $term['label'] : null,
+            'default_value' => $term === null || $term === [] ? null : $term['label'],
         ];
         $form['submit'] = [
             'type' => 'submit',
@@ -67,22 +67,16 @@ class TermAddForm extends FormBase
 
         if (!empty($vid) && empty($tid)) {
             if (Term::factory()->create($vid, $form['title']->getValue())) {
-                Messager::toast()->addMessage("Term '{$form['title']->getValue()}' has been added");
+                Messager::toast()->addMessage(sprintf("Term '%s' has been added", $form['title']->getValue()));
                 $redirect = new RedirectResponse('/admin/structure/taxonomy/'.$vid.'/terms');
                 $redirect->send();
                 return;
             }
-        }
-
-        else {
-
-            if (Term::factory()->update($tid, $form['title']->getValue())) {
-                Messager::toast()->addMessage("Term '{$form['title']->getValue()}' has been updated");
-                $redirect = new RedirectResponse('/admin/structure/taxonomy/'.$vid.'/terms');
-                $redirect->send();
-                return;
-            }
-
+        } elseif (Term::factory()->update($tid, $form['title']->getValue())) {
+            Messager::toast()->addMessage(sprintf("Term '%s' has been updated", $form['title']->getValue()));
+            $redirect = new RedirectResponse('/admin/structure/taxonomy/'.$vid.'/terms');
+            $redirect->send();
+            return;
         }
 
     }

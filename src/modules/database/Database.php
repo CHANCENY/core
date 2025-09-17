@@ -56,20 +56,21 @@ class Database
             // $this->pdo->setAttribute(PDO::ATTR_PERSISTENT, true);
             $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [SPDOStatement::class, []]);
 
-            if ($this->log === true) {
+            if ($this->log) {
                 $content = "CONNECTION [OK] " . ($this->pdo->getAttribute(PDO::ATTR_SERVER_INFO) ?? 'N/A') . PHP_EOL;
                 // Use the instance method for logging if SPD is available
                 $this->pdo->log($content);
             }
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
             // Error handling improvement (Step 002) - Throw exception instead of exit()
-            $errorMessage = "Error: database connection failed: " . $exception->getMessage();
-            if ($this->log === true) {
+            $errorMessage = "Error: database connection failed: " . $throwable->getMessage();
+            if ($this->log) {
                 // Log the error before throwing
                 self::staticLogger($errorMessage); // Use static logger as $this->pdo might be null
             }
+
             // Re-throw a more specific exception or the original one
-            throw new RuntimeException($errorMessage, $exception->getCode(), $exception);
+            throw new RuntimeException($errorMessage, $throwable->getCode(), $throwable);
         }
     }
 
@@ -84,17 +85,18 @@ class Database
     // Public method to get the PDO connection instance
     public function con(): SPDO
     {
-        if ($this->pdo === null) {
+        if (!$this->pdo instanceof \Simp\Core\modules\database\SPDO) {
             // This should ideally not happen if the constructor succeeded
             throw new RuntimeException("Database connection not established.");
         }
+
         return $this->pdo;
     }
 
     // The static method that controls the access to the singleton instance.
     public static function database(): ?Database
     {
-        if (self::$instance === null) {
+        if (!self::$instance instanceof \Simp\Core\modules\database\Database) {
             $system = new SystemDirectory();
             $database_setting_file = $system->setting_dir . DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'database.yml';
 
@@ -105,21 +107,22 @@ class Database
                     self::$instance = new self(...$settings);
                 } else {
                     // Handle case where YAML parsing fails or returns non-array
-                    self::staticLogger("Error: Failed to parse database settings or invalid format in {$database_setting_file}");
+                    self::staticLogger('Error: Failed to parse database settings or invalid format in ' . $database_setting_file);
                     // Optionally throw an exception here to
                      throw new RuntimeException("Invalid database configuration.", 6070);
-                    return null; // Or handle as appropriate
                 }
             } else {
-                self::staticLogger("Error: Database configuration file not found at {$database_setting_file}");
+                self::staticLogger('Error: Database configuration file not found at ' . $database_setting_file);
                 // Optionally, throw an exception
 
                 if ($_SESSION['install'] === false){
                     throw new RuntimeException("Database configuration file not found.",5555);
                 }
+
                 return null; // Configuration missing
             }
         }
+
         return self::$instance;
     }
 
@@ -141,9 +144,9 @@ class Database
                 $log_file = $system->setting_dir . DIRECTORY_SEPARATOR . 'database' . DIRECTORY_SEPARATOR . 'database.log';
                 file_put_contents($log_file, $logMessage . PHP_EOL, FILE_APPEND | LOCK_EX);
             }
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             // Fallback if logging itself fails (e.g., permissions)
-            error_log("Failed to write to database log: " . $e->getMessage());
+            error_log("Failed to write to database log: " . $throwable->getMessage());
         }
     }
 
@@ -187,6 +190,7 @@ class Database
                 self::staticLogger("Error: Failed to parse database settings for Medoo.");
             }
         }
+
         return null;
     }
 
@@ -194,13 +198,13 @@ class Database
     public static function createDatabase(string $dbname, string $host, string $user, string $password, int $port): false|int
     {
         try {
-            $dsn = "mysql:host=$host;port=$port";
+            $dsn = sprintf('mysql:host=%s;port=%d', $host, $port);
             $pdo = new PDO($dsn, $user, $password);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $sql = "CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+            $sql = sprintf('CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', $dbname);
             return $pdo->exec($sql);
-        } catch (PDOException $e) {
-            self::staticLogger("Error creating database {$dbname}: " . $e->getMessage());
+        } catch (PDOException $pdoException) {
+            self::staticLogger(sprintf('Error creating database %s: ', $dbname) . $pdoException->getMessage());
             return false;
         }
     }
@@ -218,6 +222,7 @@ class Database
                 }
             }
         }
+
         $module_handler = ModuleHandler::factory();
         $modules = $module_handler->getModules();
         foreach($modules as $key=>$module) {
@@ -232,6 +237,7 @@ class Database
                 }
             }
         }
+
         return !in_array(false, $flag);
     }
 
@@ -289,7 +295,7 @@ class Database
             $stmt->execute([':table' => $table]);
 
             return (bool)$stmt->fetchColumn();
-        } catch (\PDOException $e) {
+        } catch (\PDOException) {
             return false;
         }
     }

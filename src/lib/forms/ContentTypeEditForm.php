@@ -21,7 +21,7 @@ class ContentTypeEditForm extends ContentTypeForm
         ContentDefinitionManager::contentDefinitionManager()->addContentType($name, $content);
         $redirect = new RedirectResponse('/admin/structure/types');
         $redirect->setStatusCode(302);
-        Messager::toast()->addMessage("Content type \"$name\" successfully updated.");
+        Messager::toast()->addMessage(sprintf('Content type "%s" successfully updated.', $name));
         $redirect->send();
     }
 }

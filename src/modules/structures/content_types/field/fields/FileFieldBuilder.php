@@ -14,6 +14,7 @@ use Twig\Error\SyntaxError;
 class FileFieldBuilder implements FieldBuilderInterface
 {
     protected string $field_type;
+
     /**
      * @throws RuntimeError
      * @throws SyntaxError
@@ -47,7 +48,7 @@ class FileFieldBuilder implements FieldBuilderInterface
         ];
     }
 
-    private function parseFileInputFieldSetting(Request $request, $entity): array
+    private function parseFileInputFieldSetting(Request $request, string $entity): array
     {
         $data = $request->request->all();
         $title = $data['title'] ?? '';
@@ -67,6 +68,7 @@ class FileFieldBuilder implements FieldBuilderInterface
                 'allowed_file_size' => $data['max_size'] ?? 1000
             ];
         }
+
         return $field_data;
     }
 
@@ -75,30 +77,5 @@ class FileFieldBuilder implements FieldBuilderInterface
         return match ($this->field_type) {
             'file' => FileField::class
         };
-    }
-
-    private function parseOptionInputFieldSetting(Request $request, string $entity_type): array
-    {
-        $data = $request->request->all();
-        $field_data = [];
-        if (!empty($data['title'])) {
-            $field_data['label'] = $data['title'];
-            $field_data['name'] = $entity_type .'_field_' . FieldManager::createFieldName($data['title']);
-            $field_data['id'] = $data['id'] ?? $entity_type .'_field_' . FieldManager::createFieldName($data['title']);
-            $field_data['class'] = explode(' ', $data['class'] ?? '');
-            $field_data['default_value'] = $data['default_value'] ?? '';
-            $field_data['type'] = $data['type'] ?? 'checkbox';
-            $field_data['required'] = !empty($data['required']) && $data['required'] === 'on';
-            $field_data['limit'] = (int)($data['limit'] ?? 1);
-            $field_data['handler'] = $this->getFieldHandler();
-
-            if ($field_data['type'] === 'radio') {
-                $field_data['radios'] = $data['options'] ?? ['none'=>'None'];
-            }
-            else {
-                $field_data['checkboxes'] = $data['options'] ?? ['none'=>'None'];
-            }
-        }
-        return $field_data;
     }
 }

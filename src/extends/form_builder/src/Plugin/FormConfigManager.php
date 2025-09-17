@@ -11,7 +11,9 @@ use Symfony\Component\Yaml\Yaml;
 class FormConfigManager
 {
     protected SystemDirectory $systemDirectory;
+
     protected string $forms_dir;
+
     public function __construct()
     {
         $this->systemDirectory = new SystemDirectory();
@@ -27,26 +29,27 @@ class FormConfigManager
         $name = preg_replace('/[^a-zA-Z0-9]/', '_', $name);
 
         // remove leading and trailing underscores
-        $name = trim($name, '_');
+        $name = trim((string) $name, '_');
 
         // remove duplicate underscores
         $name = preg_replace('/_+/', '_', $name);
-        $name = strtolower($name);
+        $name = strtolower((string) $name);
 
         $file = $this->forms_dir . DIRECTORY_SEPARATOR . $name . '.yml';
 
         foreach ($config['fields'] as $key => $field) {
             if ($field['type'] === 'submit' || $field['type'] === 'reset' || $field['type'] === 'button') {
-               $config['fields'][$key]['default_value'] = $config['fields'][$key]['default_value'] ?? $config['fields'][$key]['label'] ?? 'Submit';
+               $config['fields'][$key]['default_value'] ??= $config['fields'][$key]['label'] ?? 'Submit';
             }
         }
 
         $config['name'] = $name;
         $config['attributes']['id'] = $name;
 
-        if (empty(file_put_contents($file, Yaml::dump($config, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)))) {
+        if (in_array(file_put_contents($file, Yaml::dump($config, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)), [0, false], true)) {
             return false;
         }
+
         $this->dbActions($name, $config['fields']);
         return true;
     }
@@ -57,6 +60,7 @@ class FormConfigManager
         if (!file_exists($file)) {
             return [];
         }
+
         return Yaml::parseFile($file);
     }
 
@@ -66,6 +70,7 @@ class FormConfigManager
         if (!file_exists($file)) {
             return false;
         }
+
         $this->dbActions($name,Yaml::parseFile($file)['fields'] ?? [],3);
         return unlink($file);
     }
@@ -76,6 +81,7 @@ class FormConfigManager
         if (!file_exists($file)) {
             return false;
         }
+
         $this->dbActions($name, $config['fields'], 2);
         return file_put_contents($file, Yaml::dump($config, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)) !== false;
     }
@@ -87,6 +93,7 @@ class FormConfigManager
         foreach ($files as $file) {
             $forms[] = Yaml::parseFile($file);
         }
+
         return $forms;
     }
 
@@ -98,7 +105,7 @@ class FormConfigManager
 
             foreach ($fields as $field) {
                 $table_name = "forms__".$form_name."_". $field['name'];
-                $query = "CREATE TABLE IF NOT EXISTS `{$table_name}` ";
+                $query = sprintf('CREATE TABLE IF NOT EXISTS `%s` ', $table_name);
 
                 if ($field['type'] === 'checkbox' || $field['type'] === 'radio' || $field['type'] === 'select') {
                     $query .= "(`id` INT(11) AUTO_INCREMENT NOT NULL, `sid` int(11) NOT NULL, `value` VARCHAR(255) NULL, PRIMARY KEY (`id`))";
@@ -119,13 +126,11 @@ class FormConfigManager
                 $create_tables[] = $query;
             }
 
-            if (!empty($create_tables)) {
-                foreach ($create_tables as $query) {
-                    Database::database()->con()->exec($query);
-                }
+            foreach ($create_tables as $query) {
+                Database::database()->con()->exec($query);
             }
-        }catch (\Throwable $exception) {
-            ErrorLogger::logger()->logError($exception);
+        }catch (\Throwable $throwable) {
+            ErrorLogger::logger()->logError($throwable);
         }
 
     }
@@ -138,18 +143,15 @@ class FormConfigManager
         try{
             foreach ($fields as $field) {
                 $table_name = "forms__".$name."_". $field['name'];
-                Database::database()->con()->exec("DROP TABLE IF EXISTS `{$table_name}`");
+                Database::database()->con()->exec(sprintf('DROP TABLE IF EXISTS `%s`', $table_name));
             }
-        }catch (\Throwable $e) {
-            ErrorLogger::logger()->logError($e);
+        }catch (\Throwable $throwable) {
+            ErrorLogger::logger()->logError($throwable);
         }
     }
 
     /**
-     * @param string $form_name
-     * @param array $fields
      * @param int $action 1 create, 2 update, 3 delete
-     * @return void
      */
     protected function dbActions(string $form_name, array $fields, int $action = 1): void
     {

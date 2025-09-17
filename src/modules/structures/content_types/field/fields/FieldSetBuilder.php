@@ -30,6 +30,7 @@ class FieldSetBuilder implements FieldBuilderInterface
         $fields = FieldManager::fieldManager()->getSupportedFieldsType();
         // remove unsupported fields
         $fields = array_diff($fields,['fieldset','details','conditional']);
+
         $all = [];
         $html = [];
         foreach ($fields as $type) {
@@ -37,6 +38,7 @@ class FieldSetBuilder implements FieldBuilderInterface
             $all[$type] = $extension->extensionInfo($type);
             $html[$type] = $extension->build($request,$type);
         }
+
         $template = match ($field_type) {
             'fieldset','details' => 'default.view.basic.fieldset',
             'conditional' => 'default.view.basic.conditional',
@@ -89,8 +91,8 @@ class FieldSetBuilder implements FieldBuilderInterface
         $field_data = [];
         if (!empty($data['title'])) {
             $field_data['label'] = $data['title'];
-            $field_data['name'] = !empty($data['name']) ? $data['name'] : $entity_type .'_field_' . FieldManager::createFieldName($data['title']);
-            $field_data['id'] = !empty($data['id']) ? $data['id'] : ( !empty($data['name']) ? $data['name'] : $entity_type .'_field_' . FieldManager::createFieldName($data['title']));
+            $field_data['name'] = empty($data['name']) ? $entity_type .'_field_' . FieldManager::createFieldName($data['title']) : $data['name'];
+            $field_data['id'] = empty($data['id']) ? (empty($data['name']) ? $entity_type .'_field_' . FieldManager::createFieldName($data['title']) : $data['name']) : ( $data['id']);
             $field_data['class'] = array_filter(explode(' ', $data['class'] ?? ''));
             $field_data['default_value'] = $data['default_value'] ?? '';
             $field_data['required'] = !empty($data['required']) && $data['required'] == 'on';
@@ -102,7 +104,7 @@ class FieldSetBuilder implements FieldBuilderInterface
             $inner_fields = [];
             $largest_index = 0;
             foreach (array_keys($data) as $key) {
-                $split = explode('_', $key);
+                $split = explode('_', (string) $key);
                 $index = (int)(end($split));
                 if ($index >= $largest_index) {
                     $largest_index = $index;
@@ -120,30 +122,24 @@ class FieldSetBuilder implements FieldBuilderInterface
                         $inner_field = [
                             'label' => $data['inner_title_' . $i] ?? '',
                             'name' => $entity_type .'_field_' . FieldManager::createFieldName($data['inner_title_' . $i]),
-                            'id' => !empty($data['inner_id_' . $i]) ? $data['inner_id_' . $i] : $entity_type .'_field_' . FieldManager::createFieldName($data['inner_title_' . $i]),
+                            'id' => empty($data['inner_id_' . $i]) ? $entity_type .'_field_' . FieldManager::createFieldName($data['inner_title_' . $i]) : $data['inner_id_' . $i],
                             'class' => array_filter(explode(' ', $data['inner_class_' . $i] ?? '')),
                             'default_value' => $data['inner_default_value_' . $i] ?? '',
                             'required' => !empty($data['inner_required_' . $i]) && $data['inner_required_' . $i] == 'on',
                             'handler' => $handler,
                         ];
-
-                    }
-                    else {
-
-
-                        if (!empty($data['name_'.$i])) {
-                            $handler = FieldManager::fieldManager()->getFieldBuilderHandler($data['inner_type_' . $i]);
-                            $handler = $handler->getFieldHandler();
-                            $inner_field = [
-                                'label' => $data['inner_title_' . $i] ?? '',
-                                'name' =>  $data['name_'.$i],
-                                'id' => !empty($data['inner_id_' . $i]) ? $data['inner_id_' . $i] : $data['name_'.$i],
-                                'class' => array_filter(explode(' ', $data['inner_class_' . $i] ?? '')),
-                                'default_value' => $data['inner_default_value_' . $i] ?? '',
-                                'required' => !empty($data['inner_required_' . $i]) && $data['inner_required_' . $i] == 'on',
-                                'handler' => $handler,
-                            ];
-                        }
+                    } elseif (!empty($data['name_'.$i])) {
+                        $handler = FieldManager::fieldManager()->getFieldBuilderHandler($data['inner_type_' . $i]);
+                        $handler = $handler->getFieldHandler();
+                        $inner_field = [
+                            'label' => $data['inner_title_' . $i] ?? '',
+                            'name' =>  $data['name_'.$i],
+                            'id' => empty($data['inner_id_' . $i]) ? $data['name_'.$i] : $data['inner_id_' . $i],
+                            'class' => array_filter(explode(' ', $data['inner_class_' . $i] ?? '')),
+                            'default_value' => $data['inner_default_value_' . $i] ?? '',
+                            'required' => !empty($data['inner_required_' . $i]) && $data['inner_required_' . $i] == 'on',
+                            'handler' => $handler,
+                        ];
                     }
 
                     if ($data['inner_type_' . $i] === 'checkbox') {
@@ -167,12 +163,15 @@ class FieldSetBuilder implements FieldBuilderInterface
                     else {
                         $inner_field['type'] = $data['inner_type_' . $i];
                     }
+
                     $inner_fields[$inner_field['name']] = $inner_field;
                 }
 
             }
+
             $field_data['inner_field'] = $inner_fields;
         }
+
         return $field_data;
     }
 
@@ -195,8 +194,10 @@ class FieldSetBuilder implements FieldBuilderInterface
                 ];
             }
            }
+
            $field_data['conditions'] = $conditions;
         }
+
         return $field_data;
     }
 }

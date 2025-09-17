@@ -23,14 +23,12 @@ function filter_translator(string $text, ?string $from = null, ?string $to = nul
     // Check if the current user has timezone translation enabled.
     $current_user = CurrentUser::currentUser();
 
-    if ($current_user instanceof AuthUser) {
-        if (!$current_user->getUser()->getProfile()->isTranslationEnabled()) {
-            return $text;
-        }
+    if ($current_user instanceof AuthUser && !$current_user->getUser()->getProfile()->isTranslationEnabled()) {
+        return $text;
     }
 
-    if (empty($to)) {
-        if ($current_user?->getUser()?->getProfile()?->isTranslationEnabled()) {
+    if ($to === null || $to === '' || $to === '0') {
+        if ($current_user?->getUser()?->getProfile()?->isTranslationEnabled() === true) {
             $to = $current_user?->getUser()?->getProfile()?->getTranslation();
         }else {
             $to = 'en';
@@ -38,14 +36,9 @@ function filter_translator(string $text, ?string $from = null, ?string $to = nul
     }
 
     // Get the system language.
-    if (empty($from)) {
+    if ($from === null || $from === '' || $from === '0') {
         $config = ConfigManager::config()->getConfigFile('system.translation.settings');
-        if ($config instanceof ConfigReadOnly) {
-            $from = $config->get('system_lang', 'en');
-        }
-        else {
-            $from = 'en';
-        }
+        $from = $config instanceof ConfigReadOnly ? $config->get('system_lang', 'en') : 'en';
     }
 
     if (is_dir('public://translations')) {
@@ -58,13 +51,12 @@ function filter_translator(string $text, ?string $from = null, ?string $to = nul
 function get_filters(): array
 {
     return [
-        new TwigFilter('t',function(string $text, ?string $from = null, ?string $to = null){
-            return filter_translator($text, $from, $to);
-        }),
-        new TwigFilter('class',function ($object) {
+        new TwigFilter('t',fn(string $text, ?string $from = null, ?string $to = null): \Simp\Translate\translate\Translate|string => filter_translator($text, $from, $to)),
+        new TwigFilter('class',function ($object): ?string {
             if (is_object($object)) {
-                return get_class($object);
+                return $object::class;
             }
+
             return null;
         })
     ];

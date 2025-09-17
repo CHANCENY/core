@@ -17,11 +17,12 @@ class AssetsManager
             }
             elseif (is_dir($full_path)) {
                 $found = $this->recursive_read($full_path ,$filename, $content);
-                if (!empty($found)) {
+                if ($found !== '' && $found !== '0') {
                     return $found;
                 }
             }
         }
+
         return '';
     }
 
@@ -35,15 +36,16 @@ class AssetsManager
            }
            elseif (is_dir($full_path)) {
                $found = $this->recursive_read($full_path ,$filename, $content);
-               if (!empty($found)) {
+               if ($found !== '' && $found !== '0') {
                    return $found;
                }
            }
         }
+
         return '';
     }
 
-    public function attach_library(string $library_name)
+    public function attach_library(string $library_name): void
     {
         $module_handler = ModuleHandler::factory();
         $modules = $module_handler->getModules();
@@ -62,8 +64,8 @@ class AssetsManager
 
                             foreach ($file as $file) {
 
-                                if (str_starts_with($file, '/core/extends')) {
-                                    $extension = pathinfo($file, PATHINFO_EXTENSION);
+                                if (str_starts_with((string) $file, '/core/extends')) {
+                                    $extension = pathinfo((string) $file, PATHINFO_EXTENSION);
                                 }
                             }
                         }

@@ -50,17 +50,17 @@ class SiteMapController
        /** @var Request $request */
        $request = Service::get('request'); // or inject RequestStack in Symfony services
 
-       $userAgent = strtolower($request->headers->get('User-Agent', ''));
+       $userAgent = strtolower((string) $request->headers->get('User-Agent', ''));
 
        $isBrowser = false;
        $isBot = false;
 
-       if ($userAgent) {
+       if ($userAgent !== '' && $userAgent !== '0') {
            // Common bots
            $bots = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandex'];
 
            foreach ($bots as $bot) {
-               if (strpos($userAgent, $bot) !== false) {
+               if (str_contains($userAgent, $bot)) {
                    $isBot = true;
                    break;
                }
@@ -77,8 +77,8 @@ class SiteMapController
        }
 
        // Generate the sitemap xml here
-       $grouped_paths = array();
-       foreach ($entries as $name=>$entry) {
+       $grouped_paths = [];
+       foreach ($entries as $entry) {
            $grouped_paths = array_merge($grouped_paths, $entry['paths']);
        }
 

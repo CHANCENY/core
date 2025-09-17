@@ -30,15 +30,13 @@ class HomeController
         $home_template = 'default.view.home';
         if (!empty($home_controller)) {
             $route = Route::fromRouteUrl($home_controller);
-            if ($route !== null) {
+            if ($route instanceof \Simp\Core\lib\routes\Route) {
                 return Route::getControllerResponse($route);
             }
         }
 
-        if (!CurrentUser::currentUser()?->isIsAdmin()) {
-            if($theme->getCurrentTheme() !== null) {
-                $home_template = $theme->getCurrentThemeHomeTemplate() ?? $home_template;
-            }
+        if (CurrentUser::currentUser()?->isIsAdmin() !== true && $theme->getCurrentTheme() !== null) {
+            $home_template = $theme->getCurrentThemeHomeTemplate() ?? $home_template;
         }
 
         return new Response(View::view($home_template),200);

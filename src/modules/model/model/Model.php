@@ -16,9 +16,10 @@ class Model extends Modal
      */
     public function __construct(?PDO $pdo = null)
     {
-        if ($pdo === null) {
+        if (!$pdo instanceof \PDO) {
             $pdo = Service::get('connection');
         }
+
         parent::__construct($pdo);
     }
 }

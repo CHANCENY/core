@@ -43,6 +43,7 @@ class JsonRestController
 
                     return $response;
                 }
+
                 throw new Exception('Handler not found  or handle has not implemented RestDataSourceInterface');
             }catch (Throwable $exception) {
                 ErrorLogger::logger()->logError($exception);
@@ -50,6 +51,7 @@ class JsonRestController
 
             return new JsonResponse(['status'=>true]);
         }
+
         return new JsonResponse(['error' => 'Endpoint not found']);
     }
 }

@@ -24,9 +24,10 @@ class AutoPathCronSubscriber implements CronSubscriber
 
         $created = count($result['created'] ?? []);
         $failed = count($result['failed'] ?? []);
-        $response->message = "Aliases created ({$created}) and Failed ({$failed}).";
+        $response->message = sprintf('Aliases created (%d) and Failed (%d).', $created, $failed);
         $response->status = $created > 0 ? 200 : 400;
         $response->end_timestamp = time();
+
         $execution_time = $response->end_timestamp - $response->start_timestamp;
         $response->execution_time = $execution_time;
         return $response;

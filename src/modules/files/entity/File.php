@@ -7,7 +7,7 @@ use Simp\Core\modules\database\Database;
 use Simp\Core\modules\user\entity\User;
 use Simp\Core\modules\user\trait\StaticHelperTrait;
 
-class File
+class File implements \Stringable
 {
     use StaticHelperTrait;
     public function __construct(protected int $fid, protected int $uid, protected string $uri, protected string $mime_type,
@@ -37,6 +37,7 @@ class File
             $files = $query->fetch();
             return new static(...$files);
         }
+
         return null;
     }
 
@@ -44,15 +45,17 @@ class File
     {
         $query = "SELECT * FROM `file_managed` WHERE `name` LIKE :name OR `uri` LIKE :uri OR `mime_type` LIKE :mime_type OR `size` LIKE :size OR `extension` LIKE :extension";
         $query = Database::database()->con()->prepare($query);
-        $searchTerm = "%$value%";
+
+        $searchTerm = sprintf('%%%s%%', $value);
         $query->bindParam(':name', $searchTerm);
         $query->bindParam(':uri', $searchTerm);
         $query->bindParam(':mime_type', $searchTerm);
         $query->bindParam(':size', $searchTerm);
         $query->bindParam(':extension', $searchTerm);
         $query->execute();
+
         $files = $query->fetchAll();
-        return array_map(fn($file) => new static(...$file), $files);
+        return array_map(fn($file): static => new static(...$file), $files);
     }
 
     public function getFid(): int
@@ -137,9 +140,10 @@ class File
 
     public function getOwner(): ?User
     {
-        if ($this->uid) {
+        if ($this->uid !== 0) {
             return User::load($this->uid);
         }
+
         return null;
     }
 
@@ -150,10 +154,12 @@ class File
         $query = $con->prepare($query);
         $query->bindParam(':id', $fid);
         $query->execute();
+
         $files = $query->fetch();
         if (empty($files)) {
             return null;
         }
+
         return new static(...$files);
     }
 
@@ -164,11 +170,13 @@ class File
         $query = $con->prepare($query);
         $query->bindParam(':uid', $uid);
         $query->execute();
+
         $files = $query->fetchAll();
         if (empty($files)) {
             return [];
         }
-        return array_map(fn($file) => new static(...$file), $files);
+
+        return array_map(fn($file): static => new static(...$file), $files);
     }
 
     public function delete(): bool
@@ -217,12 +225,13 @@ class File
         if (property_exists($this, $name)) {
             return $this->$name;
         }
+
         return null;
     }
 
     public function __toString(): string
     {
-        return json_encode($this->toArray(),JSON_PRETTY_PRINT);
+        return (string) json_encode($this->toArray(),JSON_PRETTY_PRINT);
     }
 
     public static function fileStorage(): FileStorageEntity

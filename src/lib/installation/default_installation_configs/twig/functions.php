@@ -33,18 +33,20 @@ use Simp\Core\modules\services\Service;
 
 function getContentType(?string $content_name): ?array
 {
-    if (empty($content_name)) {
+    if ($content_name === null || $content_name === '' || $content_name === '0') {
         return null;
     }
+
     return ContentDefinitionManager::contentDefinitionManager()
         ->getContentType($content_name);
 }
 
 function getContentTypeField(?string $content_name, ?string $field_name): ?array
 {
-    if (empty($content_name) || empty($field_name)) {
+    if ($content_name === null || $content_name === '' || $content_name === '0' || ($field_name === null || $field_name === '' || $field_name === '0')) {
         return null;
     }
+
     $content = getContentType($content_name);
     $fields = $content['fields'] ?? [];
     foreach ($fields as $field) {
@@ -53,13 +55,11 @@ function getContentTypeField(?string $content_name, ?string $field_name): ?array
             if ($result) {
                 return $result;
             }
-        }
-        else {
-            if ($field['name'] == $field_name) {
-                return $field;
-            }
+        } elseif ($field['name'] == $field_name) {
+            return $field;
         }
     }
+
     return null;
 }
 
@@ -71,23 +71,23 @@ function recursive_function(array $fields, string $field_name)
             if ($result) {
                 return $result;
             }
-        }
-        else {
-            if ($field['name'] == $field_name) {
-                return $field;
-            }
+        } elseif ($field['name'] == $field_name) {
+            return $field;
         }
     }
+
+    return null;
 }
 
 function routeByName(?string $route_name)
 {
-    if (empty($route_name)) {
+    if ($route_name === null || $route_name === '' || $route_name === '0') {
         return null;
     }
+
     try {
         return Caching::init()->get($route_name);
-    }catch (Throwable $exception){
+    }catch (Throwable){
         return null;
     }
 }
@@ -104,9 +104,11 @@ function breakLineToHtml(string $text,int $at = 100): string
         else {
             $text_line .= $text[$i];
         }
+
         $counter++;
     }
-    return nl2br($text_line);
+
+    return nl2br((string) $text_line);
 }
 
 /**
@@ -121,36 +123,31 @@ function url(string $id, array $options, array $params = []): ?string
         $alias = AutoPathAlias::createRouteId($options['nid']);
         $options['is_alias'] = true;
         $found = url($alias, $options, $params);
-        if (!empty($found)) {
+        if ($found !== null && $found !== '' && $found !== '0') {
             return $found;
         }
     }
 
-    if (!empty($id)) {
+    if ($id !== '' && $id !== '0') {
         $route = Caching::init()->get($id);
         if (empty($route) && ModuleHandler::factory()->isModuleEnabled('auto_path')) {
             $routes = AutoPathAlias::injectAliases();
             $route = $routes[$id] ?? null;
         }
+
         if ($route instanceof Route) {
             $pattern = $route->getRoutePath();
-            $generatePath = function (string $pattern, array $values): string {
-                return getStr($pattern, $values);
-            };
+            $generatePath = (fn(string $pattern, array $values): string => getStr($pattern, $values));
             $with_value_pattern = $generatePath($pattern, $options);
 
 
-            return empty($params) ? $with_value_pattern : $with_value_pattern . '?'. http_build_query($params);
+            return $params === [] ? $with_value_pattern : $with_value_pattern . '?'. http_build_query($params);
         }
     }
+
     return null;
 }
 
-/**
- * @param string $pattern
- * @param array $values
- * @return string
- */
 function getStr(string $pattern, array $values): string
 {
     $segments = explode('/', $pattern);
@@ -169,6 +166,7 @@ function getStr(string $pattern, array $values): string
             }
         }
     }
+
     return implode('/', $segments);
 }
 
@@ -257,7 +255,7 @@ function buildReferenceLink(int|string|array $value, \Simp\Fields\FieldBase $fie
 
     }
 
-    return empty($html) ? [
+    return $html === [] ? [
         [
             'url' => '#',
             'name' => $value
@@ -280,14 +278,12 @@ function t(string $text, ?string $from = null, ?string $to = null): string {
     // Check if the current user has timezone translation enabled.
     $current_user = CurrentUser::currentUser();
 
-    if ($current_user instanceof AuthUser) {
-        if (!$current_user->getUser()->getProfile()->isTranslationEnabled()) {
-            return $text;
-        }
+    if ($current_user instanceof AuthUser && !$current_user->getUser()->getProfile()->isTranslationEnabled()) {
+        return $text;
     }
 
-    if (empty($to)) {
-        if ($current_user?->getUser()?->getProfile()?->isTranslationEnabled()) {
+    if ($to === null || $to === '' || $to === '0') {
+        if ($current_user?->getUser()?->getProfile()?->isTranslationEnabled() === true) {
             $to = $current_user?->getUser()?->getProfile()?->getTranslation();
         }else {
             $to = 'en';
@@ -295,14 +291,9 @@ function t(string $text, ?string $from = null, ?string $to = null): string {
     }
 
     // Get the system language.
-    if (empty($from)) {
+    if ($from === null || $from === '' || $from === '0') {
         $config = ConfigManager::config()->getConfigFile('system.translation.settings');
-        if ($config instanceof ConfigReadOnly) {
-            $from = $config->get('system_lang', 'en');
-        }
-        else {
-            $from = 'en';
-        }
+        $from = $config instanceof ConfigReadOnly ? $config->get('system_lang', 'en') : 'en';
     }
 
     if (is_dir('public://translations')) {
@@ -314,9 +305,10 @@ function t(string $text, ?string $from = null, ?string $to = null): string {
 
 function translation(?string $code): ?array
 {
-    if (empty($code)) {
+    if ($code === null || $code === '' || $code === '0') {
         return [];
     }
+
     return LanguageManager::manager()->getByCode($code);
 }
 
@@ -330,7 +322,7 @@ function search_api(string $search_key): ?string
     return SearchManager::buildForm($search_key);
 }
 
-function getFieldTypeInfo(string $type = ''): ?array
+function getFieldTypeInfo(string $type = ''): array
 {
     return FieldManager::fieldManager()->getFieldInfo($type);
 }
@@ -340,15 +332,10 @@ function get_field_type_info(string $type = '', $index = 0, array $field = []): 
 
     $options = $field;
     $options['index'] = $index;
-
     if ($type === 'textarea') {
-        if (in_array('editor', $field['class'] ?? [])) {
-            $type = 'ck_editor';
-        }
-        else {
-            $type = 'simple_textarea';
-        }
+        $type = in_array('editor', $field['class'] ?? []) ? 'ck_editor' : 'simple_textarea';
     }
+
     if ($type === 'conditional') {
         $type = 'fieldset';
     }
@@ -357,6 +344,7 @@ function get_field_type_info(string $type = '', $index = 0, array $field = []): 
     if ($handler instanceof FieldBuilderInterface) {
         return $handler->build(Service::get('request'),$type, $options);
     }
+
     return '';
 }
 
@@ -378,82 +366,39 @@ function fieldDisplaySettingsHandler(string $field_type, \Simp\Fields\FieldBase 
     return $field->display($field_type, $field, $context);
 }
 
-/**
- * @return array
- */
 function get_functions(): array
 {
-    return array(
-        new TwigFunction('get_content_type', function ($content_name) {
-            return getContentType($content_name);
-        }),
-        new TwigFunction('get_content_type_field', function ($content_name, $field_name) {
-            return getContentTypeField($content_name, $field_name);
-        }),
-        new TwigFunction('route_by_name', function ($route_name) {
-            return routeByName($route_name);
-        }),
-        new TwigFunction('file_uri', function ($fid) {
-            return FileFunction::resolve_fid($fid);
-        }),
-        new TwigFunction('file', function ($fid) {
-            return FileFunction::file($fid);
-        }),
-        new TwigFunction('br', function ($text,$at= 100) {
-            return breakLineToHtml($text,$at);
-        }),
-        new TwigFunction('url', function ($url, $options = [], $params = []) {
-            return url($url, $options, $params);
-        }),
-        new TwigFunction('search_form', function ($search_key, $wrapper = false) {
-            return search_api($search_key,$wrapper);
-        }),
-        new TwigFunction('author', function ($uid) {
-            return author($uid);
-        }),
-        new TwigFunction('t',function(string $text, ?string $from = null, ?string $to = null){
-            return t($text, $from, $to);
-        }),
-        new TwigFunction('translation',function(?string $code){
-            return translation($code);
-        }),
-        new TwigFunction('getFieldTypeInfo',function(string $type){
-            return getFieldTypeInfo($type);
-        }),
-        new TwigFunction('get_field_type_info',function(string $type, $index = 0, array $field = []){
-            return get_field_type_info($type, $index, $field);
-        }),
-        new TwigFunction('tokens_floating_window',function(){
-            return TokenManager::token()->getFloatingWindow();
-        }),
-        new TwigFunction('reference_link',function(int|string|array $value, \Simp\Fields\FieldBase $field_definition){
-            return buildReferenceLink($value, $field_definition);
-        }),
-        new TwigFunction('size_format',function(int|float $size){
-            return file_size_format($size);
-        }),
-        new TwigFunction('is_module_enabled',function(string $module_name){
-            return ModuleHandler::factory()->isModuleEnabled($module_name);
-        }),
+    return [
+        new TwigFunction('get_content_type', fn($content_name): ?array => getContentType($content_name)),
+        new TwigFunction('get_content_type_field', fn($content_name, $field_name): ?array => getContentTypeField($content_name, $field_name)),
+        new TwigFunction('route_by_name', fn($route_name) => routeByName($route_name)),
+        new TwigFunction('file_uri', fn($fid): string => FileFunction::resolve_fid($fid)),
+        new TwigFunction('file', fn($fid): ?\Simp\Core\modules\files\entity\File => FileFunction::file($fid)),
+        new TwigFunction('br', fn($text, $at= 100): string => breakLineToHtml($text,$at)),
+        new TwigFunction('url', fn($url, $options = [], $params = []): ?string => url($url, $options, $params)),
+        new TwigFunction('search_form', fn($search_key, $wrapper = false): ?string => search_api($search_key)),
+        new TwigFunction('author', fn($uid): ?\Simp\Core\modules\user\entity\User => author($uid)),
+        new TwigFunction('t',fn(string $text, ?string $from = null, ?string $to = null): string => t($text, $from, $to)),
+        new TwigFunction('translation',fn(?string $code): ?array => translation($code)),
+        new TwigFunction('getFieldTypeInfo',fn(string $type): array => getFieldTypeInfo($type)),
+        new TwigFunction('get_field_type_info',fn(string $type, $index = 0, array $field = []): string => get_field_type_info($type, $index, $field)),
+        new TwigFunction('tokens_floating_window',fn(): string => TokenManager::token()->getFloatingWindow()),
+        new TwigFunction('reference_link',fn(int|string|array $value, \Simp\Fields\FieldBase $field_definition): array => buildReferenceLink($value, $field_definition)),
+        new TwigFunction('size_format',fn(int|float $size): string => file_size_format($size)),
+        new TwigFunction('is_module_enabled',fn(string $module_name): bool => ModuleHandler::factory()->isModuleEnabled($module_name)),
 
-        new TwigFunction('attached_library',function(string $section){
+        new TwigFunction('attached_library',function(string $section): string{
             $sections = $GLOBALS['theme'][$section] ?? [];
             return implode('',$sections);
 
         }),
-        new TwigFunction('attach_library',function(string $section, string $file) {
+        new TwigFunction('attach_library',function(string $section, string $file): void {
             $GLOBALS['theme'][$section][] = $file;
             $GLOBALS['theme'][$section] = array_unique($GLOBALS['theme'][$section]);
         }),
 
-        new TwigFunction('auto_path_key',function(int $number){
-            return AutoPathAlias::createRouteId($number);
-        }),
-        new TwigFunction('base64',function(string $file_path){
-            return FileFunction::base64_file($file_path);
-        }),
-        new TwigFunction('field_display_settings',function(string $field_type, \Simp\Fields\FieldBase $field, array $context){
-            return fieldDisplaySettingsHandler($field_type, $field, $context);
-        })
-    );
+        new TwigFunction('auto_path_key',fn(int $number): string => AutoPathAlias::createRouteId($number)),
+        new TwigFunction('base64',fn(string $file_path): string => FileFunction::base64_file($file_path)),
+        new TwigFunction('field_display_settings',fn(string $field_type, \Simp\Fields\FieldBase $field, array $context): string => fieldDisplaySettingsHandler($field_type, $field, $context))
+    ];
 }

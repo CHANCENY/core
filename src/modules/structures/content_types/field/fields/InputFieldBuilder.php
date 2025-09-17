@@ -16,6 +16,7 @@ use Twig\Error\SyntaxError;
 class InputFieldBuilder implements FieldBuilderInterface
 {
     protected string $field_type;
+
     /**
      * @throws RuntimeError
      * @throws SyntaxError
@@ -53,7 +54,7 @@ class InputFieldBuilder implements FieldBuilderInterface
         ];
     }
 
-    private function parseBasicInputSetting(Request $request, $entity): array
+    private function parseBasicInputSetting(Request $request, string $entity): array
     {
         $data = $request->request->all();
         $title = $data['title'] ?? '';
@@ -69,6 +70,7 @@ class InputFieldBuilder implements FieldBuilderInterface
             $field_data['handler'] = $this->getFieldHandler();
             $field_data['limit'] = (int)($data['limit'] ?? 1);
         }
+
         return $field_data;
     }
 
@@ -104,6 +106,7 @@ class InputFieldBuilder implements FieldBuilderInterface
                 $field_data['checkboxes'] = $data['options'] ?? ['none'=>'None'];
             }
         }
+
         return $field_data;
     }
 }

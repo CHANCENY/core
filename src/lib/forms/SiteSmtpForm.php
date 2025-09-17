@@ -14,6 +14,7 @@ class SiteSmtpForm extends FormBase
 {
 
     private bool $validated = true;
+
     public function getFormId(): string
     {
         return 'sitesmtp';
@@ -94,9 +95,7 @@ class SiteSmtpForm extends FormBase
     public function submitForm(array $form): void
     {
        if ($this->validated) {
-           $new_smtp = array_map(function ($item) {
-               return $item->getValue();
-           },$form);
+           $new_smtp = array_map(fn($item) => $item->getValue(),$form);
           ConfigManager::config()->addConfigFile("site.smtp.setting", $new_smtp);
           $redirect = new RedirectResponse('/admin/config/smtp');
 

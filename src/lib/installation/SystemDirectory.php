@@ -2,16 +2,24 @@
 
 namespace Simp\Core\lib\installation;
 
-class SystemDirectory
+class SystemDirectory implements \Stringable
 {
     public string $root_dir;
+
     public string $webroot_dir;
+
     public string $setting_dir;
+
     public string $var_dir;
+
     public string $global_dir;
+
     public string $public_dir;
+
     public string $private_dir;
+
     public string $theme_dir;
+
     public string $module_dir;
 
     public function __construct()
@@ -77,6 +85,7 @@ class SystemDirectory
                 $missing[] = $key;
             }
         }
+
         return $missing;
     }
 
@@ -85,6 +94,6 @@ class SystemDirectory
      */
     public function __toString(): string
     {
-        return json_encode($this->toArray(), JSON_PRETTY_PRINT);
+        return (string) json_encode($this->toArray(), JSON_PRETTY_PRINT);
     }
 }

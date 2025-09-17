@@ -12,20 +12,26 @@ use Simp\Core\modules\structures\content_types\ContentDefinitionManager;
 use Simp\Core\modules\user\current_user\CurrentUser;
 use Symfony\Component\HttpFoundation\Request;
 
-class Display
+class Display implements \Stringable
 {
     protected array $display = [];
+
     protected array $view = [];
+
     protected string $display_id = '';
+
     protected array $placeholders = [];
+
     protected string $view_display_query = '';
+
     protected array $view_display_results = [];
+
     protected array $raw_results = [];
 
     public function __construct(string $display_id)
     {
         $display = ViewsManager::viewsManager()->getDisplay($display_id);
-        if (!empty($display)) {
+        if ($display !== []) {
             $this->display = $display;
             $this->display_id = $display_id;
             $this->view = ViewsManager::viewsManager()->getView($display['view']);
@@ -34,12 +40,12 @@ class Display
 
     public function isDisplayExists(): bool
     {
-        return !empty($this->display);
+        return $this->display !== [];
     }
 
     public function isViewExists(): bool
     {
-        return !empty($this->view);
+        return $this->view !== [];
     }
 
     /**
@@ -52,13 +58,13 @@ class Display
     {
         $permissions = $this->display['permission'] ?? [];
         $permissions = is_array($permissions) ? $permissions : [$permissions];
+
         $current_user = CurrentUser::currentUser()?->getUser()?->getRoles() ?? [];
-        if (!empty($current_user)) {
-            $roles = array_map(function ($item) {
-                return $item->getRoleName();
-            }, $current_user);
-            return !empty(array_intersect($roles, $permissions));
+        if ($current_user !== []) {
+            $roles = array_map(fn($item) => $item->getRoleName(), $current_user);
+            return array_intersect($roles, $permissions) !== [];
         }
+
         return in_array('anonymous', $permissions);
     }
 
@@ -73,26 +79,29 @@ class Display
             foreach ($fields as $key => $details) {
                $field_name = $details['field'];
                $default_filters['node_data.bundle'][] = $details['content_type'] !== 'node' ? $details['content_type'] : null;
-               $table =  $details['content_type'] !== 'node' ?"node__$field_name" : 'node_data';
+               $table =  $details['content_type'] !== 'node' ?'node__' . $field_name : 'node_data';
                $fromTables[] = $table;
-               $selectFields[] = $details['content_type'] !== 'node' ? "{$table}.{$field_name}__value AS {$field_name}" : "{$table}.{$field_name} AS {$field_name}";
+               $selectFields[] = $details['content_type'] !== 'node' ? sprintf('%s.%s__value AS %s', $table, $field_name, $field_name) : sprintf('%s.%s AS %s', $table, $field_name, $field_name);
             }
+
             $fromTables = array_unique($fromTables);
-            if (($key = array_search('node_data', $fromTables)) !== false) {
+            if (($key = array_search('node_data', $fromTables, true)) !== false) {
                 unset($fromTables[$key]);
                 array_unshift($fromTables, 'node_data');
             }
+
             $default_filters['node_data.bundle'] = array_unique(array_filter($default_filters['node_data.bundle']));
             $selectFields = array_unique(array_filter($selectFields));
-            if (array_search('node_data.nid', $selectFields) === false) {
+            if (!in_array('node_data.nid', $selectFields)) {
                 $new_select = $selectFields;
                 $selectFields = ['node_data.nid AS nid', ...$new_select];
 
             }
 
             // Make basic select join query.
-            $join_statement_line = "SELECT ".implode(', ', $selectFields)." FROM {$fromTables[0]}";
-            for ($i = 1; $i < count($fromTables); $i++) {
+            $join_statement_line = "SELECT ".implode(', ', $selectFields).(' FROM ' . $fromTables[0]);
+            $counter = count($fromTables);
+            for ($i = 1; $i < $counter; $i++) {
                 $join_statement_line .= " LEFT JOIN " . $fromTables[$i] . " ON " . $fromTables[$i] . ".nid = " . $fromTables[0] . ".nid";
             }
 
@@ -100,36 +109,39 @@ class Display
             $where_line = "WHERE ";
             foreach ($default_filters as $key => $value) {
                 if (is_array($value)) {
-                    $value = implode(',', array_map(function ($v) { return "'$v'"; },$value));
-                    $where_line .= " {$key} IN ({$value})";
+                    $value = implode(',', array_map(fn($v): string => sprintf("'%s'", $v),$value));
+                    $where_line .= sprintf(' %s IN (%s)', $key, $value);
                 }
                 else {
-                    $where_line .= " {$key} = '{$value}'";
+                    $where_line .= sprintf(" %s = '%s'", $key, $value);
                 }
             }
-            $join_statement_line .= " {$where_line}";
+
+            $join_statement_line .= ' ' . $where_line;
 
             // TODO: add custom filters
             $custom_filters = [];
             foreach ($filterCriteria as $details) {
                 $field_name = $details['field'];
-                $table = $details['content_type'] !== 'node' ?"node__$field_name" : 'node_data';
+                $table = $details['content_type'] !== 'node' ?'node__' . $field_name : 'node_data';
                 $conjunction = $details['settings']['conjunction'] ?? 'AND';
                 $param_name = $details['settings']['param_name'] ?? '';
-                $field_name = $details['content_type'] !== 'node' ? "{$field_name}__value" : $field_name;
-                $custom_filters[] = "{$table}.{$field_name} = :{$param_name}";
+                $field_name = $details['content_type'] !== 'node' ? $field_name . '__value' : $field_name;
+                $custom_filters[] = sprintf('%s.%s = :%s', $table, $field_name, $param_name);
                 $custom_filters[] = $conjunction;
                 $param_value = null;
-                if ($request->get($param_name))
+                if ($request->get($param_name)) {
                     $param_value =$request->get($param_name);
-                elseif($request->request->get($param_name))
+                } elseif ($request->request->get($param_name)) {
                     $param_value = $request->request->get($param_name);
-                else
+                } else {
                     $param_value = json_decode($request->getContent(),true)[$param_name] ?? null;
+                }
 
                 $this->placeholders[$param_name] = $param_value;
             }
-            if (!empty($custom_filters)) {
+
+            if ($custom_filters !== []) {
                 $custom_filters = array_slice($custom_filters, 0, count($custom_filters) - 1);
                 $join_statement_line .= " AND (" . implode(', ', $custom_filters) . ")";
             }
@@ -139,11 +151,12 @@ class Display
                 $sort_criteria = " ORDER BY ";
                 foreach ($sortCriteria as $details) {
                     $field_name = $details['field'];
-                    $table = $details['content_type'] !== 'node' ?"node__$field_name" : 'node_data';
+                    $table = $details['content_type'] !== 'node' ?'node__' . $field_name : 'node_data';
                     $action = $details['settings']['order_in'] ?? 'ASC';
-                    $sort_criteria .= "{$table}.{$field_name} {$action}";
+                    $sort_criteria .= sprintf('%s.%s %s', $table, $field_name, $action);
                 }
-                $join_statement_line .= " {$sort_criteria}";
+
+                $join_statement_line .= ' ' . $sort_criteria;
             }
 
             // Other settings
@@ -151,8 +164,8 @@ class Display
                 $limit = (int) $this->display['settings']['limit'] ?? 20;
                 $page = (int) max(1, $request->get('page', 1));
                 $offset = ($page - 1) * $limit;
-                $limit_line = "LIMIT {$limit} OFFSET {$offset}";
-                $join_statement_line .= " {$limit_line}";
+                $limit_line = sprintf('LIMIT %d OFFSET %d', $limit, $offset);
+                $join_statement_line .= ' ' . $limit_line;
             }
 
             return $join_statement_line;
@@ -166,6 +179,7 @@ class Display
         }else {
             $content_types = [$this->display['content_type']];
         }
+
         $this->view_display_query = $generateMySQLQuery($request,
             $this->display['fields'],
             $content_types,
@@ -176,13 +190,12 @@ class Display
 
     public function runDisplayQuery(): void
     {
-        if (!empty($this->view_display_query)) {
+        if ($this->view_display_query !== '' && $this->view_display_query !== '0') {
             $statement = Database::database()->con()->prepare($this->view_display_query);
-            if (!empty($this->placeholders)) {
-                foreach ($this->placeholders as $key => $value) {
-                    $statement->bindValue(':' . $key, $value);
-                }
+            foreach ($this->placeholders as $key => $value) {
+                $statement->bindValue(':' . $key, $value);
             }
+
             $statement->execute();
             $result = $statement->fetchAll(PDO::FETCH_ASSOC);
             $processed = [];
@@ -201,7 +214,7 @@ class Display
             }
 
             $this->raw_results = array_values($processed);
-            $this->view_display_results = array_map(function ($row) { return new ViewDataObject($row); }, array_values($processed));
+            $this->view_display_results = array_map(fn($row): \Simp\Core\modules\structures\views\ViewDataObject => new ViewDataObject($row), array_values($processed));
 
         }
 
@@ -254,7 +267,7 @@ class Display
 
     public function __toString(): string
     {
-        return json_encode($this->raw_results);
+        return (string) json_encode($this->raw_results);
     }
 
     public function pagination(Request $request): array
@@ -265,14 +278,12 @@ class Display
             $page = (int) max(1, $request->get('page', 1));
             $offset = ($page - 1) * $limit;
 
-            $pagination = function () {
+            $pagination = function (): string {
                 $content_types = $this->display['content_type'] === 'all' ?
                     array_keys(ContentDefinitionManager::contentDefinitionManager()->getContentTypes()) :
                     [$this->display['content_type']];
 
-                $list = array_map(function ($content_type) {
-                    return "'$content_type'";
-                }, $content_types);
+                $list = array_map(fn($content_type): string => sprintf("'%s'", $content_type), $content_types);
 
                 return "SELECT COUNT(nid) FROM node_data WHERE bundle IN (" . implode(', ', $list) . ")";
             };
@@ -294,6 +305,7 @@ class Display
                     ]
                 ];
             }
+
             $totalPages = (int) ceil($totalRows / $limit);
 
             return [

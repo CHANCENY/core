@@ -16,6 +16,7 @@ use Symfony\Component\Yaml\Yaml;
 class Cron
 {
     protected array $jobs = [];
+
     protected array $subscribers = [];
 
     /**
@@ -30,14 +31,17 @@ class Cron
         if (!empty($default_cron) && \file_exists($default_cron)) {
             $this->jobs = Yaml::parseFile($default_cron) ?? [];
         }
+
         $system = new SystemDirectory;
         $custom_cron = $system->setting_dir . \DIRECTORY_SEPARATOR . 'cron' . \DIRECTORY_SEPARATOR . 'custom_cron.yml';
         if (!\is_dir( $system->setting_dir . \DIRECTORY_SEPARATOR . 'cron' )) {
             @\mkdir( $system->setting_dir . \DIRECTORY_SEPARATOR . 'cron', 0777, true);
         }
+
         if (!\file_exists($custom_cron)) {
             @\touch($custom_cron);
         }
+
         $custom = Yaml::parseFile($custom_cron) ?? [];
         $this->jobs = [...$this->jobs, ...$custom];
         $subscribers = Caching::init()->get('default.admin.cron.subscriber') ?? [];
@@ -49,6 +53,7 @@ class Cron
         if (!\file_exists($custom_subscribers)) {
             @\touch($custom_subscribers);
         }
+
         $custom = Yaml::parseFile($custom_subscribers) ?? [];
         $this->subscribers = [...$this->subscribers, ...$custom];
 
@@ -64,6 +69,7 @@ class Cron
                 if (function_exists($cron_subscriber)) {
                     $this->subscribers = array_merge($this->subscribers, $cron_subscriber());
                 }
+
                 if (function_exists($cron_job)) {
                     $this->jobs = array_merge($this->jobs, $cron_job());
                 }
@@ -85,6 +91,7 @@ class Cron
             $d = Yaml::dump($this->jobs, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK);
             return \file_put_contents($custom_cron, $d);
         }
+
         return false;
     }
 
@@ -105,8 +112,10 @@ class Cron
                 $cron['name'] = $name;
                 $cron['subscribers'] = new $class;
             }
+
             return new CronHandler(...$cron);
         }
+
         return null;
     }
 
@@ -130,7 +139,7 @@ class Cron
     public function getCronScriptFile(): array
     {
         $system = new SystemDirectory;
-        $root = getcwd();
+        getcwd();
         $script = $system->root_dir . DIRECTORY_SEPARATOR .'public' . DIRECTORY_SEPARATOR .
             'core' . DIRECTORY_SEPARATOR . 'cron.php';
 
@@ -142,6 +151,7 @@ class Cron
         if (\file_exists($script)) {
             $runnable[] = $script;
         }
+
         if (\file_exists($script2)) {
             $runnable[] = $script2;
         }

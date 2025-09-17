@@ -16,29 +16,29 @@ function variables_template_install(): array
 }
 
 // install routes
-function variables_route_install()
+function variables_route_install(): array
 {
-    return array(
-        'variables.dashboard.route' => array(
+    return [
+        'variables.dashboard.route' => [
             'title' => 'System Variables',
             'path' => '/admin/variables',
-            'method' => array('GET', 'POST', 'PUT', 'DELETE'),
-            'controller' => array(
+            'method' => ['GET', 'POST', 'PUT', 'DELETE'],
+            'controller' => [
                 'class' => \Simp\Core\extends\variables\src\Controller\EnvironmentVariableController::class,
                 'method' => 'index'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa','fa-gear']
-            )
-        )
-    );
+            ]
+        ]
+    ];
 }
 
 // register a menu item
-function variables_menu_install(array &$menus) {
+function variables_menu_install(array &$menus): void {
 
     if (!empty($menus['system.config'])) {
         $menus['system.config']?->addChild(new \Simp\Core\modules\menu\Menu('variables.dashboard.route'));

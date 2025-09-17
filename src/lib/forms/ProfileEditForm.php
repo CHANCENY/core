@@ -20,6 +20,7 @@ use Simp\Core\modules\services\Service;
 class ProfileEditForm extends FormBase
 {
     protected bool $validated = false;
+
     public function getFormId(): string
     {
         return 'profile_edit';
@@ -30,7 +31,7 @@ class ProfileEditForm extends FormBase
         $form = parent::buildForm($form);
         $request = Service::get('request');
         $user = User::load($request->get('uid'));
-        if ($profile = $user->getProfile()) {
+        if (($profile = $user->getProfile()) instanceof \Simp\Core\modules\user\profiles\Profile) {
 
             $form['first_name']['default_value'] = $profile->getFirstName();
             $form['last_name']['default_value'] = $profile->getLastName();
@@ -45,7 +46,7 @@ class ProfileEditForm extends FormBase
             $form['description']['default_value'] = $profile->getDescription();
 
             $fid = $profile->getProfileImage();
-            if ($fid) {
+            if ($fid !== null && $fid !== 0) {
                 $image = File::load($fid)?->toArray() ?? [];
                 $image['uri'] = FileFunction::reserve_uri($image['uri'] ?? '');
                 $form['profile_image']['default_value'] = [$image];
@@ -81,9 +82,10 @@ class ProfileEditForm extends FormBase
             if (!is_dir("public://profiles")) {
                 mkdir("public://profiles");
             }
-            $image = FormUpload::uploadFormImage($image, "public://profiles/profile_{$image['name']}");
+
+            $image = FormUpload::uploadFormImage($image, 'public://profiles/profile_' . $image['name']);
             $image = $image->getFileObject();
-            if ($image){
+            if ($image !== []){
                 $file = File::create([
                     'name' => $image['name'],
                     'size' => $image['size'],
@@ -93,10 +95,11 @@ class ProfileEditForm extends FormBase
                     'uid' => $request->get('uid')
                 ]);
                 $fid = $profile->getProfileImage();
-                if ($fid){
+                if ($fid !== null && $fid !== 0){
                     $file_old = File::load($fid);
                     $file_old->delete();
                 }
+
                 if ($file instanceof File) {
                     $profile->setProfileImage($file->getFid());
                 }
@@ -106,18 +109,22 @@ class ProfileEditForm extends FormBase
 
         elseif (!empty($image)) {
             $fid = $profile->getProfileImage();
-            if ($fid){
+            if ($fid !== null && $fid !== 0){
                 $file_old = File::load($fid);
                 $file_old?->delete();
             }
+
             $profile->setProfileImage(reset($image));
         }
+
         if (!empty($form['first_name']->getValue())) {
             $profile->setFirstName( $form['first_name']->getValue() );
         }
+
         if (!empty($form['last_name']->getValue())) {
            $profile->setLastName( $data['last_name'] = $form['last_name']->getValue() );
         }
+
         if (!empty($form['description']->getValue())) {
             $profile->setDescription( $form['description']->getValue() );
         }
@@ -125,17 +132,18 @@ class ProfileEditForm extends FormBase
         if (!empty($form['translations']?->getValue()['enable_translation'])) {
             $profile->setTranslation($form['translations']?->getValue()['enable_translation'] == 'yes' ? 1 : 0);
         }
+
         if (!empty($form['translations']?->getValue()['language'])) {
             $profile->setTranslationCode( $form['translations']?->getValue()['language']);
         }
 
         if ($profile->update()) {
             $redirect = new RedirectResponse('/user/'.$user->getUid());
-            Messager::toast()->addMessage("{$user->getName()} profile has been updated.");
+            Messager::toast()->addMessage($user->getName() . ' profile has been updated.');
             $redirect->send();
         }
         else {
-            Messager::toast()->addError("{$user->getName()} profile could not be updated.");
+            Messager::toast()->addError($user->getName() . ' profile could not be updated.');
         }
     }
 }

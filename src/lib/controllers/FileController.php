@@ -133,7 +133,7 @@ class FileController
             $upload['uid'] = CurrentUser::currentUser()?->getUser()->getUid();
             $upload['uri'] = $upload['file_path'];
             $file = File::create($upload);
-            if ($file) {
+            if ($file instanceof \Simp\Core\modules\files\entity\File) {
                 $file = $file->toArray();
                 $file['uri'] = FileFunction::reserve_uri($file['uri']);
                 $uploads[$key] = $file;
@@ -147,13 +147,14 @@ class FileController
     public function file_delete_ajx(...$args):Response
     {
         extract($args);
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode((string) $request->getContent(), true);
         if (!empty($data['fid'])) {
             $file = File::load($data['fid']);
-            if($file?->delete()) {
+            if($file?->delete() === true) {
                 return new JsonResponse(['results'=> 'File deleted successfully', 'status' => 'success']);
             }
         }
+
         return new JsonResponse(['results'=> [], 'status' => 'error']);
     }
 }

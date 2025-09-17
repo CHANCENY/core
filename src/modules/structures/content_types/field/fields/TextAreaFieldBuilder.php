@@ -14,8 +14,6 @@ use Twig\Error\SyntaxError;
 class TextAreaFieldBuilder implements FieldBuilderInterface
 {
 
-    private string $field_type;
-
     /**
      * @throws RuntimeError
      * @throws SyntaxError
@@ -23,7 +21,6 @@ class TextAreaFieldBuilder implements FieldBuilderInterface
      */
     public function build(Request $request, string $field_type, array $options = []): string
     {
-        $this->field_type = $field_type;
         $field = self::extensionInfo($field_type);
         $template = match ($field_type) {
             'simple_textarea' => 'default.view.basic.simple.textarea',
@@ -35,7 +32,6 @@ class TextAreaFieldBuilder implements FieldBuilderInterface
 
     public function fieldArray(Request $request, string $field_type, string $entity_type): array
     {
-        $this->field_type = $field_type;
         return match ($field_type) {
             'simple_textarea' => $this->parseSimpleTextAreaSettings($request, $entity_type),
             'ck_editor' => $this->parseCkEditorTextAreaSettings($request, $entity_type),
@@ -82,6 +78,7 @@ class TextAreaFieldBuilder implements FieldBuilderInterface
             ];
             $field_data['type'] = 'textarea';
         }
+
         return $field_data;
     }
 
@@ -105,6 +102,7 @@ class TextAreaFieldBuilder implements FieldBuilderInterface
             ];
             $field_data['type'] = 'textarea';
         }
+
         return $field_data;
     }
 }

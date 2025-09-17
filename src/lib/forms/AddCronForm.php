@@ -164,22 +164,23 @@ class AddCronForm extends FormBase {
 
     public function submitForm(array $form): void
     {
-        $data = \array_map(function($item){ return $item->getValue(); },$form);
+        $data = \array_map(fn($item) => $item->getValue(),$form);
         $name = \str_replace(' ', '_', $data['title']);
         $name = \strtolower($name);
         $cron[$name]['title'] = $data['title'];
         $cron[$name]['description'] = $data['description'];
 
-        if (!empty($data['timing_wrapper']['every_timing']) && \strlen($data['timing_wrapper']['every_timing']) > 5) {
+        if (!empty($data['timing_wrapper']['every_timing']) && \strlen((string) $data['timing_wrapper']['every_timing']) > 5) {
             $cron[$name]['timing'] = $data['timing_wrapper']['every_timing'];
         }
-        elseif (!empty($data['timing_wrapper']['once_timing']) && \strlen($data['timing_wrapper']['once_timing']) > 5) {
+        elseif (!empty($data['timing_wrapper']['once_timing']) && \strlen((string) $data['timing_wrapper']['once_timing']) > 5) {
             $cron[$name]['timing'] = 'once|'.$data['timing_wrapper']['once_timing'];
         }
-        elseif(!empty($data['timing_wrapper']['ontime_timing_wrapper']['ontime_every_timing']) && \strlen($data['timing_wrapper']['ontime_timing_wrapper']['ontime_every_timing']) > 5) {
+        elseif(!empty($data['timing_wrapper']['ontime_timing_wrapper']['ontime_every_timing']) && \strlen((string) $data['timing_wrapper']['ontime_timing_wrapper']['ontime_every_timing']) > 5) {
             $cron[$name]['timing'] = 'ontime|'.$data['timing_wrapper']['ontime_timing_wrapper']['ontime_timing']
             . "@". $data['timing_wrapper']['ontime_timing_wrapper']['ontime_every_timing'];
         }
+
         $cron[$name]['subscribers'] = $data['subscribers'];
         $array = \array_values($cron);
 

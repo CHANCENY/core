@@ -14,11 +14,8 @@ use MongoDB\Collection;
 
 class Client
 {
-    protected MongoClient $client;
-
-    public function __construct(MongoClient $client)
+    public function __construct(protected MongoClient $client)
     {
-        $this->client = $client;
     }
 
     /**

@@ -19,9 +19,13 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class SubmissionEditFormHandler extends FormBase
 {
     protected bool $validated = true;
+
     protected mixed $options;
+
     protected array $fields;
+
     protected string $form_id;
+
     protected ?Submission $submission;
 
     public function __construct(mixed $options = [])
@@ -46,6 +50,7 @@ class SubmissionEditFormHandler extends FormBase
             $form[$e]['handler'] = str_replace('\\\\', '\\', $field['handler']);
             $form[$e]['default_value'] = $this->submission->get($e)[0]['value'];
         }
+
 //        $form['submit'] = [
 //            'type' => 'submit',
 //            'name' => 'submit',
@@ -73,18 +78,13 @@ class SubmissionEditFormHandler extends FormBase
         if ($this->validated) {
             $fields = $this->submission->getFields();
 
-            $values = array();
+            $values = [];
 
-            foreach ($fields as $key=>$field) {
+            foreach (array_keys($fields) as $key) {
 
                 $value = $form[$key]->getValue();
 
-                if (!is_array($value)) {
-                    $values[$key] = [$value];
-                }
-                else {
-                    $values[$key] = $value;
-                }
+                $values[$key] = is_array($value) ? $value : [$value];
 
             }
 
@@ -98,6 +98,7 @@ class SubmissionEditFormHandler extends FormBase
                         foreach ($fields[$key]['settings']['allowed_file_types'] as $extension) {
                             $upload->addAllowedExtension($extension);
                         }
+
                         $upload->addAllowedMaxSize($fields[$key]['settings']['allowed_file_size']);
                         $upload->addFileObject($value);
                         $upload->validate();
@@ -122,7 +123,7 @@ class SubmissionEditFormHandler extends FormBase
                         $files['uri'] = $files['file_path'];
 
                         $file = File::create($files);
-                        if ($file) {
+                        if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $values[$key] = [$file->getFid()];
                         }
                     }
@@ -139,11 +140,9 @@ class SubmissionEditFormHandler extends FormBase
 
             $setting = FormSettings::factory($this->form_id);
 
-            if ($this->submission->update($values)) {
+            if ($this->submission->update($values) && !in_array($setting->getConfirmation(), ['', '0'], true)) {
 
-                if (!empty($setting->getConfirmation())) {
-                    Messager::toast()->addMessage($setting->getConfirmation());
-                }
+                Messager::toast()->addMessage($setting->getConfirmation());
             }
 
             $redirect = new RedirectResponse(Service::get('request')->getRequestUri());

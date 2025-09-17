@@ -14,8 +14,7 @@ class FormAccessSetting extends FormBase
 
     public function buildForm(array $form): array
     {
-        $form = parent::buildForm($form);
-        return $form;
+        return parent::buildForm($form);
     }
 
     public function validateForm(array $form): void

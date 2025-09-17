@@ -8,7 +8,9 @@ use Simp\Core\modules\structures\taxonomy\VocabularyManager;
 class Helper
 {
     protected string $table;
+
     protected string $vid;
+
     protected array $terms;
 
     protected SPDO $database;
@@ -21,10 +23,12 @@ class Helper
 
                 // save term data
                 $query = "INSERT INTO term_data (vid, name, label) VALUES (:vid, :name, :label)";
-                for ($i = 0; $i < count($this->terms); $i++) {
+                $counter = count($this->terms);
+                for ($i = 0; $i < $counter; $i++) {
                     $term = $this->terms[$i];
                     $this->database->prepare($query)->execute($term);
                 }
+
                 return true;
             }
 
@@ -34,6 +38,7 @@ class Helper
             }
 
         }
+
         return false;
     }
 
@@ -50,6 +55,7 @@ class Helper
                 return true;
             }
         }
+
         return false;
     }
 
@@ -65,6 +71,7 @@ class Helper
                 return VocabularyManager::factory()->removeVocabulary($this->vid);
             }
         }
+
         return false;
     }
 }

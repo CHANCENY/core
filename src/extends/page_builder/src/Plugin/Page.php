@@ -7,10 +7,15 @@ use Simp\Core\modules\database\Database;
 class Page
 {
     protected string $name;
+
     protected string $content;
+
     protected string $css;
+
     protected string $title;
+
     protected int $version;
+
     protected int $status;
 
 
@@ -20,6 +25,7 @@ class Page
         $statement = Database::database()->con()->prepare($query);
         $statement->bindValue(':pid', $this->pid);
         $statement->execute();
+
         $page = $statement->fetch();
         $this->name = $page['name'] ?? "";
         $this->content = $page['content'] ?? "";
@@ -29,11 +35,11 @@ class Page
         $this->status = $page['status'] ?? 0;
     }
 
-    public static function search(mixed $search)
+    public static function search(mixed $search): array
     {
         $query = "SELECT id, title, name, version, status, created_at FROM page_builder_templates WHERE title LIKE :search ORDER BY id DESC";
         $statement = Database::database()->con()->prepare($query);
-        $statement->bindValue(':search', "%$search%");
+        $statement->bindValue(':search', sprintf('%%%s%%', $search));
         $statement->execute();
         return $statement->fetchAll();
     }
@@ -73,11 +79,12 @@ class Page
         return new Page($pid);
     }
 
-    public function id()
+    public function id(): int
     {
         return $this->pid;
     }
-    public function getPid()
+
+    public function getPid(): int
     {
         return $this->pid;
     }

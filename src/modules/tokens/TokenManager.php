@@ -19,6 +19,7 @@ use Twig\Error\SyntaxError;
 class TokenManager
 {
     protected array $tokens = [];
+
     protected array $resolvers = [];
 
     /**
@@ -45,23 +46,28 @@ class TokenManager
         if (!is_dir($custom_replacement_token_file)) {
             mkdir($custom_replacement_token_file, 0777, true);
         }
+
         if (!is_dir($custom_resolver_token_file)) {
             mkdir($custom_resolver_token_file, 0777, true);
         }
+
         $custom_replacement_token_file = $custom_replacement_token_file . DIRECTORY_SEPARATOR . 'custom_replacement_tokens.yml';
         $custom_resolver_token_file = $custom_resolver_token_file . DIRECTORY_SEPARATOR . 'custom_replacement_token_resolvers.yml';
 
         if (!file_exists($custom_replacement_token_file)) {
            touch($custom_replacement_token_file);
         }
+
         if (!file_exists($custom_resolver_token_file)) {
             touch($custom_resolver_token_file);
         }
+
         $custom = Yaml::parseFile($custom_replacement_token_file);
         $custom_resolvers = Yaml::parseFile($custom_resolver_token_file);
         if ($custom) {
             $this->tokens = array_merge($this->tokens, $custom);
         }
+
         if ($custom_resolvers) {
             $this->resolvers = array_merge($this->resolvers, $custom_resolvers);
         }
@@ -88,20 +94,13 @@ class TokenManager
             if ($resolver) {
                 $resolver = new $resolver();
                 if (!$resolver instanceof ResolverInterface) {
-                    throw new Exception("Token Resolver ({$this->resolvers[$key]}) must implement ".ResolverInterface::class);
+                    throw new Exception(sprintf('Token Resolver (%s) must implement ', $this->resolvers[$key]).ResolverInterface::class);
                 }
                 else {
                     $value = $resolver->resolver($key, $value, $data);
-                    if ($value) {
-                        foreach ($value as $k => $v) {
-                            if (str_contains($k, ':')) {
-                                $replaced = str_replace("[$k]", $v, $replaced);
-                            }
-                            else {
-                                $replaced = str_replace("[{$key}:{$k}]", $v, $replaced);
-                            }
+                    foreach ($value as $k => $v) {
+                        $replaced = str_contains((string) $k, ':') ? str_replace(sprintf('[%s]', $k), $v, $replaced) : str_replace(sprintf('[%s:%s]', $key, $k), $v, $replaced);
 
-                        }
                     }
 
                 }

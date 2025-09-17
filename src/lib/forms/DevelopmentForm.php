@@ -108,9 +108,7 @@ class DevelopmentForm extends FormBase
 
     public function submitForm(array $form): void
     {
-        $settings = array_map(function ($setting) {
-            return $setting->getValue();
-        },$form);
+        $settings = array_map(fn($setting) => $setting->getValue(),$form);
         ConfigManager::config()->addConfigFile('development.setting', $settings);
         $system = new SystemDirectory();
         $schema = $system->schema_dir . DIRECTORY_SEPARATOR . 'manifest.yml';
@@ -120,6 +118,7 @@ class DevelopmentForm extends FormBase
             $content['twig_setting']['debug'] = $settings['logger']['enabled'] === 'no';
             file_put_contents($schema, Yaml::dump($content));
         }
+
         (new RedirectResponse('/admin/config'))->send();
 
     }

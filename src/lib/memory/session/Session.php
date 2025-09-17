@@ -40,13 +40,12 @@ class Session implements MemoryInterface
             $this->session_object = $_SESSION;
             return true;
         }
+
         return false;
     }
 
     /**
-     * @param string $key
      * @param $value
-     * @param int $duration
      * @throws PhpfastcacheIOException
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheLogicException
@@ -61,6 +60,7 @@ class Session implements MemoryInterface
            $instance->set($value)->expiresAfter($duration);
            return $this->session_object->save($instance);
        }
+
        $this->session_object[$key] = $value;
        return $this->persistAndReload();
     }
@@ -79,8 +79,10 @@ class Session implements MemoryInterface
             if ($instance->isHit()) {
                 return $instance->get();
             }
+
             return null;
         }
+
         return $this->session_object[$key] ?? null;
     }
 
@@ -97,6 +99,7 @@ class Session implements MemoryInterface
             $instance = $this->session_object->getItem($key);
             return $instance->isHit();
         }
+
         return !empty($this->session_object[$key]);
     }
 
@@ -116,6 +119,7 @@ class Session implements MemoryInterface
        if (empty($this->session_object[$key])) {
            return true;
        }
+
        unset($this->session_object[$key]);
        return $this->persistAndReload();
     }
@@ -131,6 +135,7 @@ class Session implements MemoryInterface
         if ($this->session_object instanceof Driver) {
             return $this->session_object->clear();
         }
+
         $this->session_object = [];
         return $this->persistAndReload();
     }
@@ -147,10 +152,12 @@ class Session implements MemoryInterface
         if ($this->session_object instanceof Driver) {
             return $this->session_object->deleteItems($keys);
         }
+
         foreach ($keys as $key) {
             $key = $key.".". $this->session_id;
             $this->delete($key);
         }
+
         return $this->persistAndReload();
     }
 
@@ -168,6 +175,7 @@ class Session implements MemoryInterface
         if ($this->session_object instanceof Driver) {
             return iterator_to_array($this->session_object->getAllItems());
         }
+
         return array_keys($this->session_object);
     }
 

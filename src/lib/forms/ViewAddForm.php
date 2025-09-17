@@ -39,8 +39,6 @@ class ViewAddForm extends FormBase
     public function buildForm(array $form): array
     {
         $routes = Caching::init()->get('system.routes.keys');
-        $routes = array_values($routes);
-        $routes = array_combine($routes, $routes);
 
         $content_list = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $content_list = array_keys($content_list);
@@ -165,9 +163,7 @@ class ViewAddForm extends FormBase
     {
         if ($this->validated) {
 
-            $data = array_map(function ($field) {
-                return $field->getValue();
-            },$form);
+            $data = array_map(fn($field) => $field->getValue(),$form);
             $view_data = [
                 ...$data['wrapper'],
                 ...$data['page_settings'],
@@ -185,7 +181,7 @@ class ViewAddForm extends FormBase
             $message = "Views successfully created!";
             $name = null;
 
-            if (empty($view)) {
+            if ($view === []) {
 
                 $name = $view_data['name'] ?? '';
                 if (!empty($name)) {
@@ -203,7 +199,7 @@ class ViewAddForm extends FormBase
             }
 
             if (ViewsManager::viewsManager()->addView($name, $view_data)) {
-                Messager::toast()->addMessage("$message");
+                Messager::toast()->addMessage($message);
                 $redirect->send();
             }
         }

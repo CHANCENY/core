@@ -15,9 +15,12 @@ use Simp\Core\modules\services\Service;
 class GitHubOauth
 {
     protected string $client_id;
+
     protected string $client_secret;
+
     protected string $redirect_uri;
-    private Github $github;
+
+    private readonly Github $github;
 
     public function __construct()
     {
@@ -28,7 +31,7 @@ class GitHubOauth
         $this->redirect_uri = $credential->redirect;
 
         $request = Service::get('request');
-        $schema = trim($request->getSchemeAndHttpHost(), '/');
+        $schema = trim((string) $request->getSchemeAndHttpHost(), '/');
 
         $this->github = new Github([
             'clientId' => $this->client_id,

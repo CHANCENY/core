@@ -36,6 +36,7 @@ class DatabaseForm extends FormBase
         if (file_exists($schema)) {
             $this->schema = Yaml::parseFile($schema);
         }
+
         $this->database = Database::database();
     }
 
@@ -47,13 +48,14 @@ class DatabaseForm extends FormBase
     public function buildForm(array $form): array
     {
         $form =  parent::buildForm($form);
-        if (!empty($this->schema) && !empty($this->database)) {
+        if (isset($this->schema) && $this->schema !== [] && $this->database instanceof \Simp\Core\modules\database\Database) {
             $form['host_name']['default_value'] = $this->database->getHostname() ?? '';
             $form['user_name']['default_value'] = $this->database->getUsername() ?? '';
             $form['database_name']['default_value'] = $this->database->getDbname() ?? '';
             $form['password']['default_value'] = $this->database->getPassword() ?? '';
             $form['database_port']['default_value'] = $this->database->getPort() ?? '';
         }
+
         return $form;
     }
 
@@ -116,7 +118,7 @@ class DatabaseForm extends FormBase
                 Messager::toast()->addMessage("Database connection created successfully");
             }
 
-            if (!empty($this->schema)) {
+            if (isset($this->schema) && $this->schema !== []) {
                 $schema_data = array_merge($this->schema, $data);
                 $system = new SystemDirectory();
                 @mkdir($system->setting_dir . DIRECTORY_SEPARATOR . 'database', 0777, true);

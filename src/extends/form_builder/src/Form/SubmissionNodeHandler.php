@@ -28,11 +28,17 @@ use Twig\Error\SyntaxError;
 class SubmissionNodeHandler extends FormBase
 {
     protected bool $validated = true;
+
     protected mixed $options;
+
     protected array $fields;
+
     protected string $form_id;
+
     protected ?Node $node;
+
     protected string $node_field;
+
     public function __construct(mixed $options = [])
     {
         parent::__construct($options);
@@ -60,6 +66,7 @@ class SubmissionNodeHandler extends FormBase
         foreach ($form as $e=>$field) {
             $form[$e]['handler'] = str_replace('\\\\', '\\', $field['handler']);
         }
+
         return $form;
     }
 
@@ -91,18 +98,13 @@ class SubmissionNodeHandler extends FormBase
             $submission = new Submission(form_name: $this->form_id);
             $fields = $submission->getFields();
 
-            $values = array();
+            $values = [];
 
-            foreach ($fields as $key=>$field) {
+            foreach (array_keys($fields) as $key) {
 
                 $value = $form[$key]->getValue();
 
-                if (!is_array($value)) {
-                    $values[$key] = [$value];
-                }
-                else {
-                    $values[$key] = $value;
-                }
+                $values[$key] = is_array($value) ? $value : [$value];
 
             }
 
@@ -116,6 +118,7 @@ class SubmissionNodeHandler extends FormBase
                         foreach ($fields[$key]['settings']['allowed_file_types'] as $extension) {
                             $upload->addAllowedExtension($extension);
                         }
+
                         $upload->addAllowedMaxSize($fields[$key]['settings']['allowed_file_size']);
                         $upload->addFileObject($value);
                         $upload->validate();
@@ -139,7 +142,7 @@ class SubmissionNodeHandler extends FormBase
                         $files['uri'] = $files['file_path'];
 
                         $file = File::create($files);
-                        if ($file) {
+                        if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $values[$key] = [$file->getFid()];
                         }
 
@@ -161,9 +164,9 @@ class SubmissionNodeHandler extends FormBase
             $setting = FormSettings::factory($this->form_id);
             $this->options['submission'] = $submission;
 
-            if (!empty($submission->getCreatedAt())) {
+            if (!in_array($submission->getCreatedAt(), ['', '0'], true)) {
 
-                if (!empty($setting->getConfirmation())) {
+                if (!in_array($setting->getConfirmation(), ['', '0'], true)) {
                     Messager::toast()->addMessage($setting->getConfirmation());
                 }
 
@@ -173,7 +176,7 @@ class SubmissionNodeHandler extends FormBase
                     $this->node->update([$this->node_field => $submissions]);
 
                     $json = new JsonResponse([
-                        'success' => !empty($submission->getCreatedAt()),
+                        'success' => !in_array($submission->getCreatedAt(), ['', '0'], true),
                         'sid' => $submission->getSid(),
                         'message' => 'Submission created successfully'
                     ]);

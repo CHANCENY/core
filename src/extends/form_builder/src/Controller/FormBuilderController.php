@@ -32,7 +32,7 @@ class FormBuilderController
     public function save(...$args): JsonResponse
     {
         extract($args);
-        $json_form = json_decode($request->getContent(), true);
+        $json_form = json_decode((string) $request->getContent(), true);
 
         if (!empty($json_form['name']) && !empty($json_form['fields'])) {
             $config = [
@@ -54,10 +54,11 @@ class FormBuilderController
                 return new JsonResponse(['success' => true, 'message' => 'Form saved successfully']);
             }
         }
+
         return new JsonResponse(['success' => true, 'message' => 'coming soon'], 404);
     }
 
-    public function list(...$args)
+    public function list(...$args): \Symfony\Component\HttpFoundation\Response
     {
         $forms = FormConfigManager::factory()->getForms();
         return new Response(View::view('default.view.form_builder.list',['forms'=>$forms]));
@@ -69,15 +70,16 @@ class FormBuilderController
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function delete(...$args)
+    public function delete(...$args): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         extract($args);
         $form_name = $request->get('name');
         if (FormConfigManager::factory()->deleteForm($form_name)) {
-            Messager::toast()->addMessage("Form '$form_name' has been deleted");
+            Messager::toast()->addMessage(sprintf("Form '%s' has been deleted", $form_name));
             return new RedirectResponse(Route::fromRouteName('form_builder.list')->route_path);
         }
-        Messager::toast()->addError("Form '$form_name' not found");
+
+        Messager::toast()->addError(sprintf("Form '%s' not found", $form_name));
         return new RedirectResponse(Route::fromRouteName('form_builder.list')->route_path);
     }
 
@@ -90,7 +92,7 @@ class FormBuilderController
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    public function edit(...$args)
+    public function edit(...$args): \Symfony\Component\HttpFoundation\Response
     {
         extract($args);
         $form_name = $request->get('name');
@@ -104,7 +106,6 @@ class FormBuilderController
 
     /**
      * @param ...$args
-     * @return Response
      * @throws LoaderError
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
@@ -127,11 +128,11 @@ class FormBuilderController
             if (!empty($request->request->get('title')) && !empty($request->request->get('status')) && !empty($request->request->get('require_login'))
                  && !empty($request->request->get('limit')) && !empty($request->request->get('confirmation')) && !empty($request->request->get('embedded'))) {
 
-                if (!empty($settings->getSlug()) && $settings->update(...$request->request->all())) {
+                if (!in_array($settings->getSlug(), ['', '0'], true) && $settings->update(...$request->request->all())) {
                     Messager::toast()->addMessage("Form settings saved successfully");
                     return new RedirectResponse(Route::fromRouteName('form_builder.list')->route_path);
                 }
-                elseif (empty($route) && $settings->create(...$request->request->all())) {
+                elseif (!$route instanceof \Simp\Core\lib\routes\Route && $settings->create(...$request->request->all())) {
                     Messager::toast()->addMessage("Form settings saved successfully");
                     return new RedirectResponse(Route::fromRouteName('form_builder.list')->route_path);
                 }
@@ -140,6 +141,7 @@ class FormBuilderController
                 Messager::toast()->addError("Form settings not saved, might be invalid slug or already in used");
             }
         }
+
         return new Response(View::view('default.view.form_builder.form_settings',['title'=>$form['title'],'form'=>$form, 'settings'=>$settings]));
     }
 
@@ -167,7 +169,8 @@ class FormBuilderController
         else {
             Messager::toast()->addError("Webform submission not deleted");
         }
-        return new RedirectResponse("/admin/form-builder/{$form_name}/submission");
+
+        return new RedirectResponse(sprintf('/admin/form-builder/%s/submission', $form_name));
     }
 
     public function form_submission_view(...$args): Response {
@@ -180,16 +183,16 @@ class FormBuilderController
         return new Response(View::view('default.view.form_builder.submission_view',['submission'=>$submission, 'fields'=>$fields, 'form_name'=>$form_name]));
     }
 
-    public function form_submission_edit(...$args)
+    public function form_submission_edit(...$args): \Symfony\Component\HttpFoundation\Response
     {
         extract($args);
         $sid = $request->get('sid');
         $form_name = $request->get('name');
-        $submission = Submission::load($sid);
+        Submission::load($sid);
         $form_config = FormConfigManager::factory()->getForm($form_name);
         $form_settings = FormSettings::factory($form_name);
 
-        if (!empty($form_settings) && !empty($form_config)) {
+        if ($form_config !== []) {
 
             $embedded_html = $form_settings->getEmbedded();
 
@@ -213,6 +216,7 @@ class FormBuilderController
             )
             );
         }
+
         return new Response("Form submission");
     }
 

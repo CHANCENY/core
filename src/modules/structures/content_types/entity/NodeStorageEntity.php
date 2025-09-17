@@ -53,7 +53,7 @@ class NodeStorageEntity implements IteratorAggregate
     public function __construct(string $bundle)
     {
         $this->nodeStorageQuery['start'] = "SELECT node_data.* FROM node_data";
-        if (!empty($bundle)) {
+        if ($bundle !== '' && $bundle !== '0') {
             $this->nodeStorageQuery['where'][] = "bundle = :bundle";
             $this->parameters['bundle'] = $bundle;
         }
@@ -62,21 +62,16 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Adds a join to the query.
-     * @param string $table
-     * @param string $alias
-     * @param string $condition
      * @return $this
      */
     public function addJoin(string $table, string $alias, string $condition): self
     {
-        $this->nodeStorageQuery['joins'][] = "JOIN {$table} {$alias} ON {$condition}";
+        $this->nodeStorageQuery['joins'][] = sprintf('JOIN %s %s ON %s', $table, $alias, $condition);
         return $this;
     }
 
     /**
      * Adds a where clause to the query.
-     * @param string $condition
-     * @param array $params
      * @return $this
      */
     public function addWhere(string $condition, array $params = []): self
@@ -85,47 +80,42 @@ class NodeStorageEntity implements IteratorAggregate
         foreach ($params as $key => $value) {
             $this->parameters[$key] = $value;
         }
+
         return $this;
     }
 
     /**
      * Adds an order by clause to the query.
-     * @param string $column
-     * @param string $direction
      * @return $this
      */
     public function orderBy(string $column, string $direction = 'ASC'): self
     {
-        $this->nodeStorageQuery['order'] = "ORDER BY {$column} {$direction}";
+        $this->nodeStorageQuery['order'] = sprintf('ORDER BY %s %s', $column, $direction);
         return $this;
     }
 
     /**
      * Adds a limit clause to the query.
-     * @param int $limit
      * @return $this
      */
     public function limit(int $limit): self
     {
-        $this->nodeStorageQuery['limit'] = "LIMIT {$limit}";
+        $this->nodeStorageQuery['limit'] = 'LIMIT ' . $limit;
         return $this;
     }
 
     /**
      * Adds an offset clause to the query.
-     * @param int $offset
      * @return $this
      */
     public function offset(int $offset): self
     {
-        $this->nodeStorageQuery['offset'] = "OFFSET {$offset}";
+        $this->nodeStorageQuery['offset'] = 'OFFSET ' . $offset;
         return $this;
     }
 
     /**
      * Executes the built query and hydrates Node entities.
-     *
-     * @return self
      */
     public function execute(string $connector = 'AND'): self
     {
@@ -135,19 +125,24 @@ class NodeStorageEntity implements IteratorAggregate
         if (!empty($this->nodeStorageQuery['joins'])) {
             $sql[] = implode(' ', $this->nodeStorageQuery['joins']);
         }
+
         if (!empty($this->nodeStorageQuery['where'])) {
-            $sql[] = 'WHERE ' . implode(" $connector ", $this->nodeStorageQuery['where']);
+            $sql[] = 'WHERE ' . implode(sprintf(' %s ', $connector), $this->nodeStorageQuery['where']);
         }
+
         if (!empty($this->nodeStorageQuery['group'] ?? '')) {
             $sql[] = $this->nodeStorageQuery['group'];
         }
+
         if (!empty($this->nodeStorageQuery['order'])) {
             $sql[] = $this->nodeStorageQuery['order'];
         }
+
         if (!empty($this->nodeStorageQuery['limit'])) {
             // ensure this is like "LIMIT 3", not a placeholder
             $sql[] = $this->nodeStorageQuery['limit'];
         }
+
         if (!empty($this->nodeStorageQuery['offset'])) {
             $sql[] = $this->nodeStorageQuery['offset'];
         }
@@ -160,7 +155,7 @@ class NodeStorageEntity implements IteratorAggregate
         // Bind ONLY placeholders that actually exist in the SQL.
         foreach ($this->parameters as $key => $value) {
             $placeholder = ':' . ltrim((string)$key, ':$');
-            if (strpos($this->sql, $placeholder) === false) {
+            if (in_array(str_contains($this->sql, $placeholder), [0, false], true)) {
                 continue; // skip params not present in SQL
             }
 
@@ -183,12 +178,13 @@ class NodeStorageEntity implements IteratorAggregate
         $this->results = $rows;
 
         $expected_columns = ['title','bundle','uid', 'nid', 'created', 'updated','lang', 'status'];
-        $this->entities = array_filter(array_map(function ($row) use ($expected_columns) {
+        $this->entities = array_filter(array_map(function ($row) use ($expected_columns): ?\Simp\Core\modules\structures\content_types\entity\Node {
             $keys = array_keys($row);
             $diff = array_diff($keys, $expected_columns);
-            if (!empty($diff)) {
+            if ($diff !== []) {
                 return null;
             }
+
             return new Node(...$row);
         },$rows));
 
@@ -209,8 +205,6 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Returns the first entity or null.
-     *
-     * @return Node|null
      */
     public function first(): ?Node
     {
@@ -219,18 +213,14 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Returns the last entity or null.
-     *
-     * @return Node|null
      */
     public function last(): ?Node
     {
-        return !empty($this->entities) ? end($this->entities) : null;
+        return $this->entities === [] ? null : end($this->entities);
     }
 
     /**
      * Retrieve entities as an iterator (foreach support).
-     *
-     * @return Traversable
      */
     public function getIterator(): Traversable
     {
@@ -247,8 +237,6 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Retrieves the parameters associated with the current instance.
-     *
-     * @return array
      */
     public function getParameters(): array
     {
@@ -260,7 +248,6 @@ class NodeStorageEntity implements IteratorAggregate
      * If $fromDatabase = true, run a COUNT(*) query directly in DB.
      *
      * @param bool $fromDatabase Whether to count via SQL (true) or loaded entities (false).
-     * @return int
      */
     public function count(bool $fromDatabase = false): int
     {
@@ -281,6 +268,7 @@ class NodeStorageEntity implements IteratorAggregate
             foreach ($this->parameters as $key => $value) {
                 $stmt->bindValue($key, $value);
             }
+
             $stmt->execute();
             return (int) $stmt->fetchColumn();
         }
@@ -355,8 +343,6 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Filter nodes that are published.
-     *
-     * @return self
      */
     public function published(): self
     {
@@ -367,7 +353,6 @@ class NodeStorageEntity implements IteratorAggregate
      * Filter nodes by author ID.
      *
      * @param int $uid The user ID of the author.
-     * @return self
      */
     public function byAuthor(int $uid): self
     {
@@ -376,9 +361,6 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Filter nodes by a specific content type (bundle).
-     *
-     * @param string $bundle
-     * @return self
      */
     public function byBundle(string $bundle): self
     {
@@ -387,9 +369,6 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Filter nodes created after a certain timestamp.
-     *
-     * @param int $timestamp
-     * @return self
      */
     public function createdAfter(int $timestamp): self
     {
@@ -398,9 +377,6 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Filter nodes created before a certain timestamp.
-     *
-     * @param int $timestamp
-     * @return self
      */
     public function createdBefore(int $timestamp): self
     {
@@ -411,11 +387,10 @@ class NodeStorageEntity implements IteratorAggregate
      * Filter nodes created within the last given number of days.
      *
      * @param int $days Number of days to look back. Default is 7.
-     * @return self
      */
     public function recent(int $days = 7): self
     {
-        $timestamp = strtotime("-{$days} days");
+        $timestamp = strtotime(sprintf('-%d days', $days));
         return $this->createdAfter($timestamp);
     }
 
@@ -423,7 +398,6 @@ class NodeStorageEntity implements IteratorAggregate
      * Filter nodes updated after a certain timestamp.
      *
      * @param int $timestamp UNIX timestamp to filter nodes updated after.
-     * @return self
      */
     public function updatedAfter(int $timestamp): self
     {
@@ -434,7 +408,6 @@ class NodeStorageEntity implements IteratorAggregate
      * Filter nodes updated before a certain timestamp.
      *
      * @param int $timestamp UNIX timestamp to filter nodes updated before.
-     * @return self
      */
     public function updatedBefore(int $timestamp): self
     {
@@ -446,11 +419,10 @@ class NodeStorageEntity implements IteratorAggregate
      *
      * @param int $termId The taxonomy term ID to filter nodes by.
      * @param string $field The field in node table that stores term reference. Defaults to 'tid'.
-     * @return self
      */
     public function byTerm(int $termId, string $field = 'tid'): self
     {
-        return $this->addWhere("{$field} = :termId", ['termId' => $termId]);
+        return $this->addWhere($field . ' = :termId', ['termId' => $termId]);
     }
 
     /**
@@ -459,11 +431,10 @@ class NodeStorageEntity implements IteratorAggregate
      *
      * @param string $field The field/property to count items in (must be array or Countable).
      * @param string $direction 'ASC' or 'DESC'. Default 'DESC'.
-     * @return self
      */
     public function orderByFieldCountPhp(string $field, string $direction = 'DESC'): self
     {
-        usort($this->entities, function ($a, $b) use ($field, $direction) {
+        usort($this->entities, function ($a, $b) use ($field, $direction): int {
 
             /**@var Node $a **/
             /**@var Node $b **/
@@ -471,24 +442,16 @@ class NodeStorageEntity implements IteratorAggregate
             $a_data = [];
             $b_data = [];
 
-            if (empty($a->get($field)[0])) {
-                $a_data = [];
-            }
-            else {
-                $a_data = $a->get($field);
-            }
+            $a_data = empty($a->get($field)[0]) ? [] : $a->get($field);
 
-            if (empty($b->get($field)[0])) {
-                $b_data = [];
-            }
-            else {
-                $b_data = $b->get($field);
-            }
+            $b_data = empty($b->get($field)[0]) ? [] : $b->get($field);
 
             $countA =  count($a_data);
             $countB =  count($b_data);
+            if ($countA === $countB) {
+                return 0;
+            }
 
-            if ($countA === $countB) return 0;
             return ($direction === 'ASC') ? ($countA <=> $countB) : ($countB <=> $countA);
         });
 
@@ -501,16 +464,16 @@ class NodeStorageEntity implements IteratorAggregate
         $alias = $table . '_cnt';
 
         // Build subquery to count the field per node, with proper alias
-        $subquery = "(SELECT nid, COUNT($field) AS field_count FROM $table GROUP BY nid) AS $alias";
+        $subquery = sprintf('(SELECT nid, COUNT(%s) AS field_count FROM %s GROUP BY nid) AS %s', $field, $table, $alias);
 
         // Add LEFT JOIN with the subquery
-        $this->nodeStorageQuery['joins'][] = "LEFT JOIN $subquery ON $alias.nid = node_data.nid";
+        $this->nodeStorageQuery['joins'][] = sprintf('LEFT JOIN %s ON %s.nid = node_data.nid', $subquery, $alias);
 
         // Update SELECT to include all node_data fields plus the count from subquery
-        $this->nodeStorageQuery['start'] = "SELECT node_data.*, $alias.field_count FROM node_data";
+        $this->nodeStorageQuery['start'] = sprintf('SELECT node_data.*, %s.field_count FROM node_data', $alias);
 
         // Order by the counted field
-        $this->nodeStorageQuery['order'] = "ORDER BY $alias.field_count $direction";
+        $this->nodeStorageQuery['order'] = sprintf('ORDER BY %s.field_count %s', $alias, $direction);
 
         return $this;
     }
@@ -524,7 +487,7 @@ class NodeStorageEntity implements IteratorAggregate
     {
         // Step 1: Get total rows
         $this->nodeStorageQuery['start'] = "SELECT COUNT(*) AS total FROM node_data";
-        $limit = !empty($this->nodeStorageQuery['limit']) ? (int) str_replace('LIMIT ', '', $this->nodeStorageQuery['limit']) : 20;
+        $limit = empty($this->nodeStorageQuery['limit']) ? 20 : (int) str_replace('LIMIT ', '', $this->nodeStorageQuery['limit']);
         $this->nodeStorageQuery['limit'] = "";
         $this->execute();
 
@@ -532,9 +495,6 @@ class NodeStorageEntity implements IteratorAggregate
 
         // Step 2: Calculate total pages
         $totalPages = (int) ceil($total / $limit);
-
-        // Step 3: Calculate offset
-        $offset = ($page - 1) * $limit;
 
         $this->execute();
 
@@ -549,14 +509,12 @@ class NodeStorageEntity implements IteratorAggregate
 
     /**
      * Randomizes the order of nodes in the query.
-     *
-     * @return self
      */
-    public function pickRandom()
+    public function pickRandom(): static
     {
-        $this->nodeStorageQuery['order'] = !empty($this->nodeStorageQuery['order']) ?
-            $this->nodeStorageQuery['order'] . ', RAND()' :
-            'ORDER BY RAND()';
+        $this->nodeStorageQuery['order'] = empty($this->nodeStorageQuery['order']) ?
+            'ORDER BY RAND()' :
+            $this->nodeStorageQuery['order'] . ', RAND()';
         return $this;
     }
 

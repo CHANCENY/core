@@ -21,7 +21,9 @@ class FormConfigureEditForm extends FormBase
 {
 
     protected bool $validated = true;
+
     protected mixed $options;
+
     public function __construct(mixed $options = [])
     {
         parent::__construct($options);
@@ -83,8 +85,8 @@ class FormConfigureEditForm extends FormBase
 
         try{
             $config = Yaml::parse($form['configuration']->getValue());
-        }catch (Throwable $e) {
-            $form['configuration']->setError($form['configuration']->getError() . '<br>'.$e->getMessage());
+        }catch (Throwable $throwable) {
+            $form['configuration']->setError($form['configuration']->getError() . '<br>'.$throwable->getMessage());
             $this->validated = false;
         }
 
@@ -104,6 +106,7 @@ class FormConfigureEditForm extends FormBase
             foreach ($this->options['fields'] as $key=>&$field) {
                 $field['name'] = $key;
             }
+
             if (FormConfigManager::factory()->updateForm($this->options['name'], $this->options)) {
                 $redirect = new RedirectResponse(Route::fromRouteName('form_builder.list')->route_path);
                 $redirect->setStatusCode(302);

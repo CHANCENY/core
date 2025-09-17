@@ -18,13 +18,12 @@ class ErrorLogger extends SystemDirectory
             if (!is_dir($error_file)) {
                 mkdir($error_file, 0777, true);
             }
+
             $list = array_diff(scandir($error_file) ?? [], ['.', '..']);
 
             // Sort: newest created file first
-            usort($list, function($a, $b) use ($error_file) {
-                return filectime($error_file . DIRECTORY_SEPARATOR . $b)
-                    <=> filectime($error_file . DIRECTORY_SEPARATOR . $a);
-            });
+            usort($list, fn($a, $b): int => filectime($error_file . DIRECTORY_SEPARATOR . $b)
+                <=> filectime($error_file . DIRECTORY_SEPARATOR . $a));
 
             foreach ($list as $file) {
                 $path = $error_file . DIRECTORY_SEPARATOR . $file;
@@ -44,12 +43,13 @@ class ErrorLogger extends SystemDirectory
                 'message' => $message->getMessage(),
                 'file'    => $message->getFile(),
                 'line'    => $message->getLine(),
-                'class'   => get_class($message),
+                'class'   => $message::class,
                 'trace'   => $message->getTrace()
             ],
-            'page_title' => $message->getCode() ." - ".get_class($message)
+            'page_title' => $message->getCode() ." - ".$message::class
         ];
     }
+
     public function logWarning(\Throwable $message): void
     {
         $GLOBALS['temp_error_log'][] = [
@@ -59,10 +59,10 @@ class ErrorLogger extends SystemDirectory
                 'message' => $message->getMessage(),
                 'file'    => $message->getFile(),
                 'line'    => $message->getLine(),
-                'class'   => get_class($message),
+                'class'   => $message::class,
                 'trace'   => $message->getTrace()
             ],
-            'page_title' => $message->getCode() ." - ".get_class($message)
+            'page_title' => $message->getCode() ." - ".$message::class
         ];
     }
 
@@ -75,12 +75,13 @@ class ErrorLogger extends SystemDirectory
                 'message' => $message->getMessage(),
                 'file'    => $message->getFile(),
                 'line'    => $message->getLine(),
-                'class'   => get_class($message),
+                'class'   => $message::class,
                 'trace'   => $message->getTrace()
             ],
-            'page_title' => $message->getCode() ." - ".get_class($message)
+            'page_title' => $message->getCode() ." - ".$message::class
         ];
     }
+
     public function logDebug(\Throwable $message): void
     {
         $GLOBALS['temp_error_log'][] = [
@@ -90,10 +91,10 @@ class ErrorLogger extends SystemDirectory
                 'message' => $message->getMessage(),
                 'file'    => $message->getFile(),
                 'line'    => $message->getLine(),
-                'class'   => get_class($message),
+                'class'   => $message::class,
                 'trace'   => $message->getTrace()
             ],
-            'page_title' => $message->getCode() ." - ".get_class($message)
+            'page_title' => $message->getCode() ." - ".$message::class
         ];
     }
 
@@ -113,11 +114,10 @@ class ErrorLogger extends SystemDirectory
         if(is_dir($system->private_dir . DIRECTORY_SEPARATOR . 'logs') === false) {
             mkdir($system->private_dir . DIRECTORY_SEPARATOR . 'logs', 0777, true);
         }
+
         $log_file = $system->private_dir . DIRECTORY_SEPARATOR . 'logs';
 
-        $content = array_map(function ($item) {
-            return View::view('default.view.system.error', $item);
-        }, $GLOBALS['temp_error_log'] ?? []);
+        $content = array_map(fn($item): string => View::view('default.view.system.error', $item), $GLOBALS['temp_error_log'] ?? []);
 
         foreach ($content as $item) {
 

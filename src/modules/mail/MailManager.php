@@ -8,6 +8,7 @@ use Simp\Mail\Mail\Envelope;
 class MailManager
 {
     protected \Simp\Mail\Mail\MailManager $mailManager;
+
     public function __construct()
     {
         $config = ConfigManager::config()->getConfigFile("site.smtp.setting");

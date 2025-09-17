@@ -10,11 +10,12 @@ class PageConfigManager
 {
     /** @var int[] */
     protected array $pages = [];
+
     public function __construct(protected string $name = "")
     {
         $query = "SELECT * FROM page_builder_templates ORDER BY created_at DESC";
         $statement = Database::database()->con()->prepare($query);
-        if (!empty($this->name)) {
+        if ($this->name !== '' && $this->name !== '0') {
             $query = "SELECT id FROM page_builder_templates WHERE name = :name";
             $statement = Database::database()->con()->prepare($query);
             $statement->bindValue(':name', $this->name);
@@ -34,12 +35,10 @@ class PageConfigManager
      */
     public function getPages(): array
     {
-        return array_map(function ($id) {
-            return new Page($id);
-        }, $this->pages);
+        return array_map(fn(int $id): \Simp\Core\extends\page_builder\src\Plugin\Page => new Page($id), $this->pages);
     }
 
-    public function addPage(string $name, string $title, string $css, string $content)
+    public function addPage(string $name, string $title, string $css, string $content): string|false
     {
         $name = $this->makeSlug($name);
 
@@ -69,10 +68,11 @@ class PageConfigManager
         if ($statement->execute()) {
             return $name;
         }
+
         return false;
     }
 
-    public function unpublishPage(int $page_id)
+    public function unpublishPage(int $page_id): bool
     {
         $query = "UPDATE page_builder_templates SET status = 0 WHERE id = :id";
         $statement = Database::database()->con()->prepare($query);
@@ -101,7 +101,7 @@ class PageConfigManager
         $slug = preg_replace('/[^a-z0-9]+/', '_', $slug);
 
         // remove leading/trailing hyphens
-        $slug = preg_replace('/^_+|_+$/', '', $slug);
+        $slug = preg_replace('/^_+|_+$/', '', (string) $slug);
 
         return $slug;
     }

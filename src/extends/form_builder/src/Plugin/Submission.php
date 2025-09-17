@@ -10,43 +10,39 @@ use Symfony\Component\HttpFoundation\Request;
 
 class Submission
 {
-    protected array $fields;
+    protected array $fields = [];
+
     protected FormSettings $settings;
-    protected array $raw_data;
-    protected array $values;
+
+    protected array $raw_data = [];
+
+    protected array $values = [];
 
     // Protection against direct access
-    private int $sid;
-    private string $form_name;
-    private int $status;
-    private string $created_at;
-    private string $updated_at;
-    private string $ip;
-    private string $user_agent;
-    private int $uid;
-    private array $sids;
+    private int $sid = 0;
 
-    public function __construct(int $sid = 0, string $form_name = '')
+    private int $status = 1;
+
+    private string $created_at = '';
+
+    private string $updated_at = '';
+
+    private string $ip = '';
+
+    private string $user_agent = '';
+
+    private int $uid = 0;
+
+    private array $sids = [];
+
+    public function __construct(int $sid = 0, private string $form_name = '')
     {
-        $this->raw_data = [];
-        $this->values = [];
         $this->settings = new FormSettings('');
-        $this->fields = [];
-        $this->sid = 0;
-        $this->form_name = $form_name;
-        $this->status = 1;
-        $this->created_at = '';
-        $this->updated_at = '';
-        $this->ip = '';
-        $this->user_agent = '';
-        $this->uid = 0;
-        $this->sids = [];
 
 
-        if (!empty($form_name)) {
-            $this->settings = FormSettings::factory($form_name);
-            $this->fields = FormConfigManager::factory()->getForm($form_name)['fields'] ?? [];
-            $this->form_name = $form_name;
+        if ($this->form_name !== '' && $this->form_name !== '0') {
+            $this->settings = FormSettings::factory($this->form_name);
+            $this->fields = FormConfigManager::factory()->getForm($this->form_name)['fields'] ?? [];
 
             $query = "SELECT sid FROM form_submissions WHERE webform = :webform ORDER BY sid DESC";
             $statement = Database::database()->con()->prepare($query);
@@ -56,11 +52,12 @@ class Submission
             if (!empty($submission)) {
                 $this->sids = array_column($submission, 'sid');
             }
-            $this->sid = $this->sid + 1;
+
+            $this->sid += 1;
             $this->sid = str_pad($this->sid, 10, '0', STR_PAD_LEFT);
         }
 
-        if (!empty($sid)) {
+        if ($sid !== 0) {
             $query = "SELECT * FROM form_submissions WHERE sid = :sid";
             $statement = Database::database()->con()->prepare($query);
             $statement->bindValue(':sid', $sid);
@@ -82,7 +79,7 @@ class Submission
 
                 foreach ($this->fields as $key=>$field) {
                     $table = "forms__".$this->form_name."_".$field['name'];
-                    $select = "SELECT * FROM {$table} WHERE sid = :sid";
+                    $select = sprintf('SELECT * FROM %s WHERE sid = :sid', $table);
                     $statement = Database::database()->con()->prepare($select);
                     $statement->bindValue(':sid', $this->sid);
                     $statement->execute();
@@ -111,9 +108,10 @@ class Submission
         $statement->bindValue(':user_agent', $this->user_agent);
         $statement->bindValue(':uid', $this->uid);
         $statement->execute();
+
         $this->sid = Database::database()->con()->lastInsertId();
 
-        if (!empty($this->sid)) {
+        if ($this->sid !== 0) {
 
             foreach ($this->fields as $key=>$field) {
                 $table = "forms__".$this->form_name."_".$field['name'];
@@ -123,18 +121,19 @@ class Submission
                 }
 
                 foreach ($submission_data[$key] as $value) {
-                    $insert_query = "INSERT INTO {$table} (sid, value) VALUES (:sid, :value)";
+                    $insert_query = sprintf('INSERT INTO %s (sid, value) VALUES (:sid, :value)', $table);
                     $insert_statement = Database::database()->con()->prepare($insert_query);
                     $insert_statement->bindValue(':sid', $this->sid);
                     $insert_statement->bindValue(':value', $value);
-                    if ($insert_statement->execute()); {
-                        $this->values[$key][] = [
-                            'id' => Database::database()->con()->lastInsertId(),
-                            'value' => $value,
-                        ];
-                    }
+                    if ($insert_statement->execute());
+
+                    $this->values[$key][] = [
+                        'id' => Database::database()->con()->lastInsertId(),
+                        'value' => $value,
+                    ];
                 }
             }
+
             $select = "SELECT created, updated FROM form_submissions WHERE sid = :sid";
             $statement = Database::database()->con()->prepare($select);
             $statement->bindValue(':sid', $this->sid);
@@ -143,6 +142,7 @@ class Submission
             $this->created_at = $submission['created'];
             $this->updated_at = $submission['updated'];
         }
+
         return $this;
     }
 
@@ -152,15 +152,17 @@ class Submission
         $statement = Database::database()->con()->prepare($query);
         $statement->bindValue(':sid', $this->sid);
         if ($statement->execute()) {
-            foreach ($this->fields as $key=>$field) {
+            foreach ($this->fields as $field) {
                 $table = "forms__".$this->form_name."_".$field['name'];
-                $delete_query = "DELETE FROM {$table} WHERE sid = :sid";
+                $delete_query = sprintf('DELETE FROM %s WHERE sid = :sid', $table);
                 $delete_statement = Database::database()->con()->prepare($delete_query);
                 $delete_statement->bindValue(':sid', $this->sid);
                 $delete_statement->execute();
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -177,7 +179,7 @@ class Submission
         if ($statement->execute()) {
             foreach ($this->fields as $key=>$field) {
                 $table = "forms__".$this->form_name."_".$field['name'];
-                $delete_query = "DELETE FROM {$table} WHERE sid = :sid";
+                $delete_query = sprintf('DELETE FROM %s WHERE sid = :sid', $table);
                 $delete_statement = Database::database()->con()->prepare($delete_query);
                 $delete_statement->bindValue(':sid', $this->sid);
                 $delete_statement->execute();
@@ -189,22 +191,24 @@ class Submission
                 foreach ($submission_data[$key] as $value) {
 
                     if (!empty($value)) {
-                        $insert_query = "INSERT INTO {$table} (sid, value) VALUES (:sid, :value)";
+                        $insert_query = sprintf('INSERT INTO %s (sid, value) VALUES (:sid, :value)', $table);
                         $insert_statement = Database::database()->con()->prepare($insert_query);
                         $insert_statement->bindValue(':sid', $this->sid);
                         $insert_statement->bindValue(':value', $value);
-                        if ($insert_statement->execute()); {
-                            $this->values[$key][] = [
-                                'id' => Database::database()->con()->lastInsertId(),
-                                'value' => $value,
-                            ];
-                        }
+                        if ($insert_statement->execute());
+
+                        $this->values[$key][] = [
+                            'id' => Database::database()->con()->lastInsertId(),
+                            'value' => $value,
+                        ];
                     }
 
                 }
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -213,7 +217,7 @@ class Submission
         return $this->raw_data;
     }
 
-    public function getAuthor()
+    public function getAuthor(): ?\Simp\Core\modules\user\entity\User
     {
         return User::load($this->uid);
     }
@@ -226,19 +230,21 @@ class Submission
                 $data = $value;
             }
         }
+
         return $data;
     }
 
     public function getSubmissionDataByFieldId(int $field_id): array
     {
         $data = [];
-        foreach ($this->values as $key=>$value) {
+        foreach ($this->values as $value) {
             foreach ($value as $v) {
                 if ($v['id'] == $field_id) {
                     $data = $v;
                 }
             }
         }
+
         return $data;
     }
 
@@ -327,6 +333,7 @@ class Submission
         foreach ($sids as $sid) {
             $submissions[] = new Submission($sid);
         }
+
         return $submissions;
     }
 

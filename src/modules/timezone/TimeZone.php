@@ -10,6 +10,7 @@ class TimeZone extends SystemDirectory
     protected array $timezones = [];
 
     protected Zone $zone;
+
     public function __construct(?string $timezone = null)
     {
         parent::__construct();
@@ -19,11 +20,9 @@ class TimeZone extends SystemDirectory
             $this->timezones = Yaml::parse(file_get_contents($timezone_file));
         }
 
-        if (!empty($timezone)) {
-           $found = array_filter($this->timezones, function ($item) use ($timezone) {
-               return $item['tzCode'] === $timezone;
-           });
-           if (!empty($found) && $zone = reset($found)) {
+        if ($timezone !== null && $timezone !== '' && $timezone !== '0') {
+           $found = array_filter($this->timezones, fn(array $item): bool => $item['tzCode'] === $timezone);
+           if ($found !== [] && $zone = reset($found)) {
                $this->zone =new Zone(...$zone);
            }
         }
@@ -43,6 +42,7 @@ class TimeZone extends SystemDirectory
                 break;
             }
         }
+
         return $found;
     }
 
@@ -52,6 +52,7 @@ class TimeZone extends SystemDirectory
         foreach ($this->timezones as $timezone_info) {
             $timezone[$timezone_info['tzCode']] = $timezone_info['label'] ?? $timezone_info['name'];
         }
+
         return $timezone;
     }
 

@@ -21,6 +21,7 @@ class DatabaseRecorder
     // Static property to hold logs for the current request/process
     // Keyed by Request URI
     private static array $queryLog = [];
+
     // Flag to enable/disable recording globally
     private static bool $recordingEnabled = true;
 
@@ -65,9 +66,9 @@ class DatabaseRecorder
 
 
             Caching::init()->set($token, self::$queryLog);
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             // Log error if recording fails, using the static logger from the refined Database class
-            Database::staticLogger("DatabaseRecorder Error: Failed to record query for URI [{$uri}]: " . $e->getMessage());
+            Database::staticLogger(sprintf('DatabaseRecorder Error: Failed to record query for URI [%s]: ', $uri) . $throwable->getMessage());
             // Avoid throwing exceptions from recorder to not break the main flow
         }
     }
@@ -88,6 +89,7 @@ class DatabaseRecorder
         if ($uri === null) {
             return self::$queryLog; // Return all logs for the current request
         }
+
         $token = md5($uri);
         $list = Caching::init()->get($token) ?? [];
         Caching::init()->deleteAll([$token]);

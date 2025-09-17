@@ -12,8 +12,11 @@ use Simp\Core\modules\user\current_user\CurrentUser;
 class Announcement
 {
     protected int $owner_uid;
-    protected string $title;
-    protected string $content;
+
+    protected string $title = 'Hi';
+
+    protected string $content = 'Hello there!';
+
     protected int $to_uid;
 
     /**
@@ -25,8 +28,6 @@ class Announcement
     public function __construct()
     {
         $this->owner_uid = CurrentUser::currentUser()->getUser()->getUid();
-        $this->title = 'Hi';
-        $this->content = 'Hello there!';
         $this->to_uid = CurrentUser::currentUser()->getUser()->getUid();
     }
 
@@ -34,6 +35,7 @@ class Announcement
     {
         $this->owner_uid = $owner_uid;
     }
+
     public function setTitle(string $title): void
     {
         $this->title = $title;
@@ -73,6 +75,7 @@ class Announcement
         if (empty($announcements)) {
             return $announcements;
         }
+
         $query = "UPDATE announcement SET status = 1 WHERE id IN (".implode(',', $id).")";
         $query = Database::database()->con()->prepare($query);
         $query->execute();

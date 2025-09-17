@@ -25,7 +25,6 @@ class MultiSiteSupportController
 {
     /**
      * @param mixed ...$args
-     * @return Response
      * @throws DependencyException
      * @throws LoaderError
      * @throws NotFoundException
@@ -41,16 +40,17 @@ class MultiSiteSupportController
         ModuleHandler::factory()->attachLibrary('multi_site_support', 'multi_site_support.assets');
 
         $sites = Service::get(MultiSiteSupport::class)->getSites();
-        $new_sites = [];
         foreach ($sites as $key => &$value) {
             $value['id'] = $key;
         }
+
         $sites = array_values($sites);
         $themes = ThemeManager::manager()->getThemes();
 
         foreach ($themes as $key => &$value) {
             $value['id'] = $key;
         }
+
         $themes = array_values($themes);
 
         /**@var RolesRepository $roles**/
@@ -78,12 +78,12 @@ class MultiSiteSupportController
         extract($args);
 
         /**@var Request $request**/
-        $content = json_decode($request->getContent(), true);
+        $content = json_decode((string) $request->getContent(), true);
 
         $multi_site = new MultiSiteSupport();
 
         if (!empty($content)) {
-            foreach ($content as $key => $value) {
+            foreach ($content as $value) {
                 $multi_site->addSite($value);
             }
         }

@@ -17,6 +17,7 @@ class ReferenceFieldBuilder implements FieldBuilderInterface
 {
 
     protected string $field_type;
+
     /**
      * @throws RuntimeError
      * @throws SyntaxError
@@ -52,7 +53,7 @@ class ReferenceFieldBuilder implements FieldBuilderInterface
         ];
     }
 
-    private function parseBasicInputSetting(Request $request, $entity): array
+    private function parseBasicInputSetting(Request $request, string $entity): array
     {
         $data = $request->request->all();
         $title = $data['title'] ?? '';

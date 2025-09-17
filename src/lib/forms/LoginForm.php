@@ -17,9 +17,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class LoginForm extends FormBase
 {
 
-    /**
-     * @var true
-     */
     private bool $validated = false;
 
     public function getFormId(): string
@@ -42,6 +39,7 @@ class LoginForm extends FormBase
             unset($form['name']);
             unset($form['password']);
         }
+
         return $form;
     }
 
@@ -69,7 +67,7 @@ class LoginForm extends FormBase
            if ($auth->authenticate($name, $password)) {
                $auth->finalizeAuthenticate();
                $user = $auth->getUser();
-               Messager::toast()->addMessage("Welcome back {$user->getName()}!");
+               Messager::toast()->addMessage(sprintf('Welcome back %s!', $user->getName()));
                $redirect = new RedirectResponse(Route::url('system.account.view',['uid'=>$user->getUid()]));
                $redirect->send();
            }
