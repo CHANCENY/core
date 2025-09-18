@@ -216,6 +216,9 @@
 .wiki-page-container #edit-full-btn {
     position: absolute;
     bottom: 0;
+    right: 19%;
+    z-index: 1007;
+    top: 5%;
 }
 
 /* Responsive */
