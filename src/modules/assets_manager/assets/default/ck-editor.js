@@ -115,3 +115,4 @@ function reloadCk() {
 }
 
 window.reloadCk = reloadCk;
+window.initCkEditor = initCkEditor;

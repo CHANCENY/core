@@ -7,8 +7,10 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
+use Simp\Core\extends\multi_site_support\src\Plugin\MultiSiteSupport;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\View;
+use Simp\Core\modules\services\Service;
 use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\roles\RoleManager;
 
@@ -113,6 +115,14 @@ class Menus implements \Stringable
 
             if (!$flag) {
                 unset($this->menus[$key]);
+            }
+        }
+
+        if (MultiSiteSupport::isMultiSiteSupportEnabled()) {
+
+            $sites = Service::get(MultiSiteSupport::class)->getSites();
+            foreach ($sites as $site) {
+                $this->menus[$site['domain']] = new Menu('');
             }
         }
     }

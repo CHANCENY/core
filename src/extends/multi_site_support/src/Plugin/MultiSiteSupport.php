@@ -4,13 +4,8 @@ namespace Simp\Core\extends\multi_site_support\src\Plugin;
 
 use DI\DependencyException;
 use DI\NotFoundException;
-use Phpfastcache\Exceptions\PhpfastcacheCoreException;
-use Phpfastcache\Exceptions\PhpfastcacheDriverException;
-use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
-use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\lib\installation\SystemDirectory;
-use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\lib\themes\TwigResolver;
 use Simp\Core\modules\services\Service;
 use Symfony\Component\Yaml\Yaml;

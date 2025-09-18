@@ -66,7 +66,7 @@ class Term
     }
 
 
-    public function create(string $vid, string $name): bool
+    public function create(string $vid, string $name): int|bool
     {
         $term = [
             'vid' => $vid,
@@ -74,8 +74,8 @@ class Term
             'label' => $name
         ];
         $query = $this->PDO->prepare("INSERT INTO `term_data` (`vid`, `name`, `label`) VALUES (:vid, :name, :label)");
-        return $query->execute($term);
-
+        $query->execute($term);
+        return $this->PDO->lastInsertId();
     }
 
     public function update(string $tid, string $label): bool

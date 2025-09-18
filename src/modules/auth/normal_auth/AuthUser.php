@@ -17,6 +17,7 @@ use Simp\Core\modules\user\roles\Role;
 
 class AuthUser
 {
+    protected int $id = 0;
     protected string $name  = '';
 
     protected string $password = '';
@@ -56,6 +57,11 @@ class AuthUser
         return $this->password;
     }
 
+    public function id(): ?int
+    {
+        return $this->id;
+    }
+
     public function authenticate(string $username, string $password): bool
     {
         if ($username !== '' && $username !== '0' && ($password !== '' && $password !== '0')) {
@@ -65,6 +71,7 @@ class AuthUser
                 $this->user = $user;
                 $this->validated = true;
                 $this->is_login = true;
+                $this->id = $user->id();
                 return true;
             }
 
@@ -73,6 +80,7 @@ class AuthUser
                 $this->user = $user;
                 $this->validated = true;
                 $this->is_login = true;
+                $this->id = $user->id();
                 return true;
             }
         }
@@ -132,6 +140,7 @@ class AuthUser
             $this->user = $user_system;
             $this->validated = true;
             $this->is_login = true;
+            $this->id = $user_system->id();
             return true;
         }
         else {
@@ -168,6 +177,7 @@ class AuthUser
             $this->user = $user_system;
             $this->validated = true;
             $this->is_login = true;
+            $this->id = $user_system->id();
             return true;
         }
 

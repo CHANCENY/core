@@ -39,6 +39,12 @@ class MultiSiteSupportMiddleware implements Middleware
         $redirect = new RedirectResponse('/error/page/access-denied');
         $current_user = CurrentUser::currentUser();
 
+        $roles = array_map(function ($role) { return $role->getName(); },$current_user->getUser()->getRoles());
+        if (count($roles) === 1 && $roles[0] === 'anonymous') {
+            $access_interface->access_granted = true;
+            return $next($request, $access_interface);
+        }
+
         if (!MultiSiteSupport::isMultiSiteSupportEnabled()) {
             return $next($request, $access_interface);
         }

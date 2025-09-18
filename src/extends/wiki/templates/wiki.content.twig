@@ -1,0 +1,72 @@
+{% extends "default.view.admin_base" %}
+
+{% block body %}
+    <noscript>{{ noscript|json_encode|raw }}</noscript>
+
+    <div class="wiki-page-container">
+
+        <!-- Main Wiki Content -->
+        <main>
+            <h1>{{ wiki.title }}</h1>
+            <p class="text-sm text-gray-500 mb-4">
+                By:
+                {% for author in authors %}
+                    <a href="{{ url('system.account.view',{uid: author.id}) }}" class="text-blue-600 hover:underline">{{ author.name }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                | Published: {{ wiki.created_at|date("F j, Y") }}
+            </p>
+
+            <!-- Wiki Content -->
+            <div class="wiki-content" id="wiki-content" data-content="{{ noscript.wiki_wrapper }}">
+                {{ wiki.content|raw }}
+            </div>
+            <button id="edit-full-btn">Edit Full Content</button>
+        </main>
+
+        <!-- Sidebar -->
+        <aside>
+            <!-- Related Entries Section -->
+            <section>
+                <h2>Related Entries</h2>
+                <ul>
+                    {% for entry in related %}
+                        <li>
+                            <a href="{{ url('wiki.entry', {slug: entry.slug}) }}">{{ entry.title }}</a>
+                        </li>
+                    {% else %}
+                        <li>No related entries found.</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <!-- Authors Section -->
+            <section>
+                <h2>Authors</h2>
+                {% for author in authors %}
+                    <div class="author-profile">
+                        <img src="{{ author.avatar_url }}" alt="{{ author.name }}">
+                        <div class="author-info">
+                            <a href="{{ url('system.account.view',{uid: author.id}) }}">{{ author.name }}</a>
+                            <p>{{ author.bio|default('No bio available.')|raw }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+        </aside>
+    </div>
+
+    <!-- Editor Modal -->
+    <div id="editor-modal" class="hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h3 id="modal-title">Edit</h3>
+            <form id="modal-form">
+                <div id="modal-fields"></div>
+                <div class="modal-actions">
+                    <button type="submit" id="modal-save-btn">Save</button>
+                    <button type="button" id="modal-close-btn">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

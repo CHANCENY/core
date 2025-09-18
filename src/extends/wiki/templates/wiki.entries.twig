@@ -1,0 +1,41 @@
+{% extends "default.view.admin_base" %}
+
+{% block body %}
+
+    <div class="wiki-container">
+        <!-- Left Sidebar: Tags -->
+        <aside class="sidebar">
+            <h2>Categories</h2>
+            <ul id="category-list">
+                {% for tag in tags %}
+                    <li><a href="#" data-tag="{{ tag.id }}">{{ tag.label }}</a></li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Main Content: Wiki entries -->
+        <main class="main-content-entries">
+            <h2>Wiki Entries</h2>
+
+            <!-- Search box -->
+            <div class="wiki-search">
+                <input type="text" id="wiki-search-input" placeholder="Search wikis..." />
+                <button id="wiki-search-btn">Search</button>
+            </div>
+
+            <div id="wiki-grid" class="wiki-grid">
+                {% for wiki in wikis %}
+                    <div class="wiki-card">
+                        <h3>{{ wiki.title }}</h3>
+                        <p>{{ wiki.getSummary(150) }}</p>
+                        <a href="/wiki/view/{{ wiki.id }}">Read More</a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button id="load-more-btn" data-page="1" style="display:none;">Load More</button>
+            <div id="loading" style="display:none;">Loading...</div>
+        </main>
+    </div>
+
+{% endblock %}

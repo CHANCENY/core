@@ -23,6 +23,7 @@ use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\TwigResolver;
 use Simp\Core\modules\database\Database;
 use Simp\Core\modules\theme\ThemeManager;
+use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\roles\RolesRepository;
 use Simp\StreamWrapper\WrapperRegister\WrapperRegister;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -433,7 +434,8 @@ class InstallerValidator extends SystemDirectory
             'system.directory' => new SystemDirectory(),
             'database' => Database::database(),
             'connection' => Database::database()->con(),
-            'system.roles' => new RolesRepository($this)
+            'system.roles' => new RolesRepository($this),
+            'current_user' => CurrentUser::currentUser(),
         ];
 
         $merged_services = array_merge($defaults_services, $custom_services);

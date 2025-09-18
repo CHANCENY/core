@@ -420,4 +420,9 @@ class User implements \Stringable
     {
         return new UserStorageEntity();
     }
+
+    public function id()
+    {
+        return $this->uid;
+    }
 }

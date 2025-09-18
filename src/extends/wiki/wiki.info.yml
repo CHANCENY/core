@@ -1,0 +1,4 @@
+name: Wiki
+description: 'This module is provide wiki feature'
+type: module
+core_version_requirement: ^1

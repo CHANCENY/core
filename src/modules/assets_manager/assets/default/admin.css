@@ -887,6 +887,10 @@ fieldset input[type="radio"] {
     text-decoration: none;
     font-weight: 500;
 }
+.resizable-editor {
+    resize: vertical;      /* or both: horizontal vertical */
+    overflow: auto;        /* required for resize to work */
+}
 
 .create-link:hover {
     text-decoration: underline;

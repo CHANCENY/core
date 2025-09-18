@@ -183,6 +183,7 @@ class App
         $router = new Router($middlewares);
 
         if ($route_keys->isHit()) {
+
             $route_keys = $route_keys->get();
             $response[] = null;
 
@@ -255,14 +256,6 @@ class App
 
     }
 
-    /**
-     * @throws PhpfastcacheCoreException
-     * @throws PhpfastcacheDriverNotFoundException
-     * @throws PhpfastcacheDriverException
-     * @throws PhpfastcacheInvalidArgumentException
-     * @throws PhpfastcacheInvalidConfigurationException
-     * @throws PhpfastcacheLogicException
-     */
     public static function consoleApp(): void
     {
         $set_up_wizard = new InstallerValidator();

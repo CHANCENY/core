@@ -1,0 +1,232 @@
+.container {
+    max-width: unset;
+    padding: unset;
+}
+.page-header {
+    margin: 12rem 2rem 2rem;
+}
+.wiki-container {
+    display: flex;
+    min-height: 100vh;
+
+
+    /* Sidebars */
+    .sidebar {
+        padding: 20px;
+    }
+
+    .sidebar h2 {
+        margin-bottom: 15px;
+    }
+
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar ul li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar a {
+        text-decoration: none;
+        color: #007BFF;
+    }
+
+    .sidebar a:hover {
+        text-decoration: underline;
+    }
+
+    /* Main content */
+    .main-content-entries {
+        flex: 1;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .main-content-entries h1 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .wiki-grid {
+        /*display: flex;*/
+        /*flex-wrap: wrap;*/
+        /*gap: 20px;*/
+    }
+
+    .wiki-card {
+        background-color: #fff;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+        transition: box-shadow 0.2s;
+        margin-bottom: 20px;
+    }
+
+    .wiki-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .wiki-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 18px;
+    }
+
+    .wiki-card p {
+        font-size: 14px;
+        color: #555;
+    }
+
+    .wiki-card a {
+        display: inline-block;
+        margin-top: 10px;
+        color: #007BFF;
+        text-decoration: none;
+    }
+
+    .wiki-card a:hover {
+        text-decoration: underline;
+    }
+
+    #category-list a.active {
+        font-weight: bold;
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .wiki-card {
+            width: calc(50% - 20px);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            flex-direction: column;
+        }
+        .sidebar {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .wiki-card {
+            width: 100%;
+        }
+    }
+}
+
+.wiki-page-container {
+    display: flex;
+    gap: 20px;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Main content */
+.wiki-page-container main {
+    flex: 1;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fff;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.wiki-page-container main h1 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+
+.wiki-page-container .wiki-content {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Sidebar */
+.wiki-page-container aside {
+    width: 300px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+/* Sidebar sticky */
+@media (min-width: 1025px) {
+    .wiki-page-container aside {
+        position: sticky;
+        top: 20px;
+        align-self: flex-start;
+    }
+}
+
+/* Sidebar sections */
+.wiki-page-container aside section {
+    margin-bottom: 30px;
+}
+
+.wiki-page-container aside h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.wiki-page-container aside ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wiki-page-container aside ul li {
+    margin-bottom: 10px;
+}
+
+.wiki-page-container aside a {
+    text-decoration: none;
+    color: #007BFF;
+}
+
+.wiki-page-container aside a:hover {
+    text-decoration: underline;
+}
+
+/* Author profiles */
+.wiki-page-container aside .author-profile {
+    margin-bottom: 15px;
+}
+
+.wiki-page-container aside .author-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.wiki-page-container aside .author-profile .author-info {
+    font-size: 14px;
+}
+
+.wiki-page-container #edit-full-btn {
+    position: absolute;
+    bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .wiki-page-container {
+        flex-direction: column;
+    }
+    .wiki-page-container aside {
+        width: 100%;
+        position: static;
+        top: auto;
+        margin-bottom: 20px;
+    }
+}
