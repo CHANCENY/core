@@ -53,13 +53,8 @@ class RoleManager
 
     public function isRoleExist(string $name): bool
     {
-        foreach ($this->roles as $role) {
-            if ($role->getName() === $name) {
-                return true;
-            }
-        }
+        return array_any($this->roles, fn($role) => $role->getName() === $name);
 
-        return false;
     }
 
     public function appendRoles(array $roles): RoleManager

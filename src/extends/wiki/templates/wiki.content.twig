@@ -20,7 +20,10 @@
             <div class="wiki-content" id="wiki-content" data-content="{{ noscript.wiki_wrapper }}">
                 {{ wiki.content|raw }}
             </div>
-            <button id="edit-full-btn">Edit Full Content</button>
+
+            {% if noscript.editable %}
+            <a id="edit-full-btn"><i class="fas fa-edit"></i></a>
+            {% endif %}
         </main>
 
         <!-- Sidebar -->

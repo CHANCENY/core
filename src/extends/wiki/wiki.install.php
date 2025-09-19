@@ -1,6 +1,7 @@
 <?php
 
 use Simp\Core\extends\wiki\src\Controller\WikiController;
+use Simp\Core\modules\menu\Menu;
 use Simp\Core\modules\services\Service;
 use Simp\Core\modules\structures\taxonomy\VocabularyManager;
 
@@ -106,6 +107,7 @@ function wiki_template_install(): array
 
 function wiki_route_install(): array
 {
+
     return array(
         'wiki.entries' => array(
             'title' => 'Wiki Entries',
@@ -135,7 +137,9 @@ function wiki_route_install(): array
                 'support',
                 'guest'
             ),
-            'options' => array()
+            'options' => array(
+                'classes' => ['fa-brands fa-wikipedia-w']
+            )
         ),
         'wiki.tag.entries' => array(
             'title' => 'Wiki Tag Entries',
@@ -252,6 +256,71 @@ function wiki_route_install(): array
                 'analyst',
                 'support',
             ]
-        ]
+        ],
+        'wiki.create' => array(
+            'title' => 'Wiki Create',
+            'path' => '/wiki/create/add',
+            'method' => array(
+                'GET',
+                'POST'
+            ),
+            'controller' => array(
+                'class' => WikiController::class,
+                'method' => 'create'
+            ),
+            'access' => [
+                'administrator',
+                'content_creator',
+                'manager',
+                'editor',
+                'author',
+                'subscriber',
+                'contributor',
+                'moderator',
+                'reviewer',
+                'publisher',
+                'analyst',
+                'support',
+            ],
+            'options' => array(
+                'classes' => ['fa','fa-plus']
+            )
+        ),
+        'wiki.tag.create' => array(
+            'title' => 'Wiki Tag Create',
+            'path' => '/wiki/tag/create',
+            'method' => array(
+                'GET',
+                'POST'
+            ),
+            'controller' => array(
+                'class' => WikiController::class,
+                'method' => 'tag_create'
+            ),
+            'access' => [
+                'administrator',
+                'content_creator',
+                'manager',
+                'editor',
+                'author',
+                'subscriber',
+                'contributor',
+                'moderator',
+                'reviewer',
+                'publisher',
+                'analyst',
+                'support',
+            ]
+        )
     );
+}
+
+function wiki_menu_install(array &$menus): void
+{
+    if (!empty($menus['system.content'])) {
+
+        $menu = new Menu('wiki.entries');
+        $menu->addChild(new Menu('wiki.create'));
+        $menus['system.content']->addChild($menu);
+    }
 }

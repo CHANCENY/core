@@ -11,9 +11,12 @@ use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\extensions\ModuleHandler;
 use Simp\Core\extends\wiki\src\Entity\Wiki;
 use Simp\Core\extends\wiki\src\enum\WikiStatusEnum;
+use Simp\Core\extends\wiki\src\Form\WikiCreateForm;
+use Simp\Core\extends\wiki\src\Form\WikiTagForm;
 use Simp\Core\lib\themes\View;
 use Simp\Core\modules\structures\taxonomy\Term;
 use Simp\Core\modules\user\current_user\CurrentUser;
+use Simp\FormBuilder\FormBuilder;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Error\LoaderError;
@@ -192,6 +195,31 @@ class WikiController
 
         $related = $wiki->getRelatedWiki(4);
 
+        $editable = false;
+
+        $allowed = array(
+            'administrator',
+            'content_creator',
+            'manager',
+            'editor',
+            'author',
+            'subscriber',
+            'contributor',
+            'moderator',
+            'reviewer',
+            'publisher',
+            'analyst',
+            'support',
+        );
+
+        $user = CurrentUser::currentUser()->getUser();
+        foreach ($allowed as $role) {
+            if ($user->roleManager()->isRoleExist($role)) {
+                $editable = true;
+                break;
+            }
+        }
+
         return new Response(View::view('default.view.wiki.content',[
             'wiki' => $wiki,
             'authors' => $authors,
@@ -200,7 +228,7 @@ class WikiController
             'noscript' => [
                 'wiki_id' => $wiki->id(),
                 'wiki_wrapper' => 'wiki-wrapper',
-                'editable' => true,
+                'editable' => $editable,
                 'author' => CurrentUser::currentUser()->getUser()->id()
             ]
         ]));
@@ -239,4 +267,23 @@ class WikiController
         return new JsonResponse(['error'=>'Invalid request'],400);
 
     }
+
+    public function create(...$args)
+    {
+        extract($args);
+        $wiki_form = new FormBuilder(new WikiCreateForm(['request'=>$request]));
+        $wiki_form->getFormBase()->setFormMethod('POST');
+
+        return new Response(View::view('default.view.wiki.creation.form',['_form'=>$wiki_form]));
+    }
+
+    public function tag_create(...$args): Response
+    {
+        extract($args);
+
+        $wiki_tag_form = new FormBuilder(new WikiTagForm(['request'=>$request]));
+        $wiki_tag_form->getFormBase()->setFormMethod('POST');
+        return new Response(View::view('default.view.wiki.tag.form',['_form'=>$wiki_tag_form]));
+    }
+
 }

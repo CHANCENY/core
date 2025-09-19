@@ -39,12 +39,6 @@ class MultiSiteSupportMiddleware implements Middleware
         $redirect = new RedirectResponse('/error/page/access-denied');
         $current_user = CurrentUser::currentUser();
 
-        $roles = array_map(function ($role) { return $role->getName(); },$current_user->getUser()->getRoles());
-        if (count($roles) === 1 && $roles[0] === 'anonymous') {
-            $access_interface->access_granted = true;
-            return $next($request, $access_interface);
-        }
-
         if (!MultiSiteSupport::isMultiSiteSupportEnabled()) {
             return $next($request, $access_interface);
         }
@@ -58,10 +52,12 @@ class MultiSiteSupportMiddleware implements Middleware
             $primary_roles = [$site['primaryRole'], 'administrator'];
             $secondary_roles = $site['additionalRoles'];
 
-            $all_roles = array_merge($primary_roles, $secondary_roles);
+            $all_roles = array_merge($primary_roles, $secondary_roles, ['anonymous']);
             $all_roles = array_unique($all_roles);
 
             $user_roles = array_map(fn($role) => $role->getName(),$current_user->getUser()->roleManager()->getRoles());
+            $user_roles[] = 'anonymous';
+            $user_roles = array_unique($user_roles);
 
             // Check if a user has any of the roles
             if (array_intersect($all_roles, $user_roles) !== []) {
@@ -77,10 +73,11 @@ class MultiSiteSupportMiddleware implements Middleware
             return $next($request, $access_interface);
 
         }
-
-        $redirect = new RedirectResponse(Route::url('multi_site_support.blocked'));
-        $access_interface->access_granted = false;
-        $access_interface->redirect = $redirect;
-        return $next($request, $access_interface);
+        else {
+            $redirect = new RedirectResponse(Route::url('multi_site_support.blocked'));
+            $access_interface->access_granted = false;
+            $access_interface->redirect = $redirect;
+            return $next($request, $access_interface);
+        }
     }
 }
