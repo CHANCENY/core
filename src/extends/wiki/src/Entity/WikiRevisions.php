@@ -25,7 +25,6 @@ class WikiRevisions implements IteratorAggregate
     protected Wiki|int $wiki;
 
     /**
-     * @param int|Wiki $wiki
      * @throws DependencyException
      * @throws DateMalformedStringException
      * @throws NotFoundException
@@ -61,10 +60,7 @@ class WikiRevisions implements IteratorAggregate
     /**
      * Add a new revision to the wiki with the given content, status, and author.
      *
-     * @param string $content
-     * @param WikiStatusEnum $status
      * @param int|null $authorId Optional author ID, defaults to current user
-     * @return static
      * @throws DateMalformedStringException
      * @throws DependencyException
      * @throws NotFoundException
@@ -101,6 +97,7 @@ class WikiRevisions implements IteratorAggregate
         $checkStmt->bindValue(':wiki_id', $wikiId);
         $checkStmt->bindValue(':uid', $authorId);
         $checkStmt->execute();
+
         $exists = (int) $checkStmt->fetchColumn();
 
         if ($exists === 0) {
@@ -153,7 +150,7 @@ class WikiRevisions implements IteratorAggregate
      */
     public function filterByStatus(WikiStatusEnum $status): array
     {
-        return array_filter($this->revisions, fn($rev) => $rev->getStatus() === $status);
+        return array_filter($this->revisions, fn(\Simp\Core\extends\wiki\src\Entity\WikiRevision $rev): bool => $rev->getStatus() === $status);
     }
 
     /**
@@ -161,7 +158,7 @@ class WikiRevisions implements IteratorAggregate
      */
     public function filterByDate(\DateTime $from, \DateTime $to): array
     {
-        return array_filter($this->revisions, fn($rev) =>
+        return array_filter($this->revisions, fn(\Simp\Core\extends\wiki\src\Entity\WikiRevision $rev): bool =>
             $rev->getCreatedAt() >= $from && $rev->getCreatedAt() <= $to
         );
     }
@@ -176,10 +173,15 @@ class WikiRevisions implements IteratorAggregate
         $diff = [];
 
         foreach ($new as $i => $line) {
-            if (!isset($old[$i]) || $old[$i] !== $line) $diff[] = "+ $line";
+            if (!isset($old[$i]) || $old[$i] !== $line) {
+                $diff[] = '+ ' . $line;
+            }
         }
+
         foreach ($old as $i => $line) {
-            if (!isset($new[$i]) || $line !== $new[$i] ?? null) $diff[] = "- $line";
+            if (!isset($new[$i]) || $line !== $new[$i] ?? null) {
+                $diff[] = '- ' . $line;
+            }
         }
 
         return implode("\n", $diff);
@@ -190,7 +192,7 @@ class WikiRevisions implements IteratorAggregate
      */
     public function getRevisionById(int $id): ?WikiRevision
     {
-        return array_find($this->revisions, fn($rev) => $rev->getId() === $id);
+        return array_find($this->revisions, fn($rev): bool => $rev->getId() === $id);
     }
 
     /**
@@ -228,8 +230,6 @@ class WikiRevisions implements IteratorAggregate
      * - author object (nullable)
      * - created_at
      * - status
-     *
-     * @return array
      */
     public function getRevisionHistory(): array
     {
@@ -250,12 +250,10 @@ class WikiRevisions implements IteratorAggregate
 
     /**
      * Get the latest revision (most recent)
-     *
-     * @return WikiRevision|null
      */
     public function getLatestRevision(): ?WikiRevision
     {
-        if (empty($this->revisions)) {
+        if ($this->revisions === []) {
             return null;
         }
 
@@ -264,9 +262,6 @@ class WikiRevisions implements IteratorAggregate
 
     /**
      * Get a revision by index (0 = oldest)
-     *
-     * @param int $index
-     * @return WikiRevision|null
      */
     public function getRevisionByIndex(int $index): ?WikiRevision
     {
@@ -290,11 +285,12 @@ class WikiRevisions implements IteratorAggregate
         if (is_int($revA)) {
             $revA = $this->getRevisionByIndex($revA);
         }
+
         if (is_int($revB)) {
             $revB = $this->getRevisionByIndex($revB);
         }
 
-        if (!$revA || !$revB) {
+        if (!$revA instanceof \Simp\Core\extends\wiki\src\Entity\WikiRevision || !$revB instanceof \Simp\Core\extends\wiki\src\Entity\WikiRevision) {
             return '';
         }
 
@@ -307,6 +303,7 @@ class WikiRevisions implements IteratorAggregate
             if ($diff === false) {
                 return "No differences found.";
             }
+
             return $diff;
         }
 
@@ -322,11 +319,11 @@ class WikiRevisions implements IteratorAggregate
             $lineB = $linesB[$i] ?? '';
 
             if ($lineA !== $lineB) {
-                $output .= "- $lineA\n+ $lineB\n";
+                $output .= "- {$lineA}\n+ {$lineB}\n";
             }
         }
 
-        return $output ?: "No differences found.";
+        return $output !== '' && $output !== '0' ? $output : "No differences found.";
     }
 
     /**
@@ -348,13 +345,13 @@ class WikiRevisions implements IteratorAggregate
         $content = preg_replace('#<form[^>]*>(.*?)</form>#is', '', $content);
 
         // Remove <script> tags
-        $content = preg_replace('#<script[^>]*>(.*?)</script>#is', '', $content);
+        $content = preg_replace('#<script[^>]*>(.*?)</script>#is', '', (string) $content);
 
         // Remove <iframe> tags
-        $content = preg_replace('#<iframe[^>]*>(.*?)</iframe>#is', '', $content);
+        $content = preg_replace('#<iframe[^>]*>(.*?)</iframe>#is', '', (string) $content);
 
         // Remove <object> tags
-        return preg_replace('#<object[^>]*>(.*?)</object>#is', '', $content);
+        return preg_replace('#<object[^>]*>(.*?)</object>#is', '', (string) $content);
     }
 
 }

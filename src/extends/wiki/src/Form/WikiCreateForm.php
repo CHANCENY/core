@@ -121,27 +121,27 @@ class WikiCreateForm extends FormBase
 
     public function validateForm(array $form): void
     {
-        $wiki_values = array_map(function ($value) {
-            return $value->getValue();
-        }, $form);
+        $wiki_values = array_map(fn($value) => $value->getValue(), $form);
         $wiki_values = $wiki_values['wiki_create_form'];
 
         if (empty($wiki_values['wiki_title'])) {
             $this->validated = false;
         }
+
         if (empty($wiki_values['wiki_tag'])) {
             $this->validated = false;
         }
+
         if (empty($wiki_values['wiki_content'])) {
             $this->validated = false;
         }
+
         if (empty($wiki_values['wiki_status'])) {
             $this->validated = false;
         }
     }
 
     /**
-     * @param array $form
      * @throws PhpfastcacheCoreException
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
@@ -152,14 +152,12 @@ class WikiCreateForm extends FormBase
      */
     public function submitForm(array $form): void
     {
-        $wiki_values = array_map(function ($value) {
-            return $value->getValue();
-        }, $form);
+        $wiki_values = array_map(fn($value) => $value->getValue(), $form);
         $wiki_values = $wiki_values['wiki_create_form'];
 
         if ($this->validated) {
 
-            $status = WikiStatusEnum::tryFrom(strtolower($wiki_values['wiki_status']));
+            $status = WikiStatusEnum::tryFrom(strtolower((string) $wiki_values['wiki_status']));
 
             if (empty($status)) {
                 $status = WikiStatusEnum::DRAFT;

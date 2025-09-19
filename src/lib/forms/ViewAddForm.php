@@ -38,7 +38,7 @@ class ViewAddForm extends FormBase
      */
     public function buildForm(array $form): array
     {
-        $routes = Caching::init()->get('system.routes.keys');
+        Caching::init()->get('system.routes.keys');
 
         $content_list = ContentDefinitionManager::contentDefinitionManager()->getContentTypes();
         $content_list = array_keys($content_list);

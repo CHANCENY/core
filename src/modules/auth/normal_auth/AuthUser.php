@@ -18,6 +18,7 @@ use Simp\Core\modules\user\roles\Role;
 class AuthUser
 {
     protected int $id = 0;
+
     protected string $name  = '';
 
     protected string $password = '';

@@ -19,11 +19,17 @@ use Throwable;
 class Wiki
 {
     protected int $id;
-    protected string $title;
+
+    protected string $title = '';
+
     protected WikiContent $content;
-    protected string $slug;
-    protected WikiStatusEnum $status;
+
+    protected string $slug = '';
+
+    protected WikiStatusEnum $status = WikiStatusEnum::DRAFT;
+
     protected \DateTime $created_at;
+
     protected \DateTime $updated_at;
 
     /**
@@ -31,9 +37,6 @@ class Wiki
      */
     protected array $author;
 
-    /**
-     * @var array
-     */
     protected array $tags;
 
     protected WikiRevisions $revision;
@@ -41,7 +44,6 @@ class Wiki
     protected bool $enforceNew = false;
 
     /**
-     * @param int|null $id
      * @throws DependencyException
      * @throws NotFoundException
      * @throws PhpfastcacheCoreException
@@ -55,18 +57,15 @@ class Wiki
 
         // Initialize properties
         $this->id = $id ?? 0;
-        $this->title = '';
         $this->content = new WikiContent("");
-        $this->slug = '';
-        $this->status = WikiStatusEnum::DRAFT;
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->author = $id ? $this->getAuthors($id) : [];
-        $this->tags = $id ? $this->getTags($id) : [];
+        $this->author = $id !== null && $id !== 0 ? $this->getAuthors($id) : [];
+        $this->tags = $id !== null && $id !== 0 ? $this->getTags($id) : [];
         $this->revision = new WikiRevisions($this);
 
         // Load from a database if id is provided
-        if ($id) {
+        if ($id !== null && $id !== 0) {
             $query = "SELECT * FROM wiki_entities WHERE id = :id";
             $statement = Service::get('connection')->prepare($query);
             $statement->bindValue(':id', $id);
@@ -85,7 +84,6 @@ class Wiki
 
     /**
      * Load wikis by search params
-     * @param array $search_params
      * @return Wiki[]
      * @throws DependencyException
      * @throws NotFoundException
@@ -95,7 +93,7 @@ class Wiki
      * @throws PhpfastcacheLogicException
      * @throws \DateMalformedStringException
      */
-    public static function loadBySearch(array $search_params)
+    public static function loadBySearch(array $search_params): array
     {
         $limit = $search_params['limit'] ?? 10;
         $offset = $search_params['offset'] ?? 0;
@@ -114,12 +112,12 @@ class Wiki
             $where[] = "wiki_entity_tags.tid = :tid";
         }
 
-        $query = "SELECT wiki_entities.id AS id
+        $query = 'SELECT wiki_entities.id AS id
               FROM wiki_entities
               LEFT JOIN wiki_entities_revision ON wiki_entities.id = wiki_entities_revision.wiki_id
-              $joins";
+              ' . $joins;
 
-        if (!empty($where)) {
+        if ($where !== []) {
             $query .= " WHERE " . implode(" AND ", $where);
         }
 
@@ -135,9 +133,9 @@ class Wiki
 
         // Bind search query
         if (!empty($search_params['q'])) {
-            $statement->bindValue(':q', "%{$q}%");
-            $statement->bindValue(':q1', "%{$q}%");
-            $statement->bindValue(':q2', "%{$q}%");
+            $statement->bindValue(':q', sprintf('%%%s%%', $q));
+            $statement->bindValue(':q1', sprintf('%%%s%%', $q));
+            $statement->bindValue(':q2', sprintf('%%%s%%', $q));
         }
 
         // Bind tag id
@@ -172,10 +170,12 @@ class Wiki
         $statement = Service::get('connection')->prepare($query);
         $statement->bindValue(':slug', $slug);
         $statement->execute();
+
         $wiki = $statement->fetch();
         if (!empty($wiki)) {
             return new Wiki($wiki['id']);
         }
+
         return false;
     }
 
@@ -187,8 +187,6 @@ class Wiki
 
     /**
      * Get the tags of the wiki
-     * @param int $id
-     * @return array
      * @throws DependencyException
      * @throws NotFoundException
      */
@@ -198,17 +196,18 @@ class Wiki
         $statement = Service::get('connection')->prepare($query);
         $statement->bindValue(':wiki_id', $id);
         $statement->execute();
+
         $tags = $statement->fetchAll();
         $result = [];
         foreach ($tags as $tag) {
             $result[] = Term::load($tag['tid']);
         }
+
         return $result;
     }
 
     /**
      * Get the authors of the wiki
-     * @param int $id
      * @return User[]
      * @throws DependencyException
      * @throws NotFoundException
@@ -220,18 +219,18 @@ class Wiki
         $statement = Service::get('connection')->prepare($query);
         $statement->bindValue(':wiki_id', $id);
         $statement->execute();
+
         $authors = $statement->fetchAll();
         $result = [];
         foreach ($authors as $author) {
             $result[] = User::load($author['uid']);
         }
+
         return $result;
     }
 
     /**
      * Generate a slug from a title
-     * @param string $title
-     * @return string
      */
     private function buildSlug(string $title): string
     {
@@ -239,7 +238,7 @@ class Wiki
         $slug = preg_replace('/[^a-z0-9]+/i', '-', $title);
 
         // Trim hyphens from start and end
-        $slug = trim($slug, '-');
+        $slug = trim((string) $slug, '-');
 
         // Convert to lowercase
         $slug = strtolower($slug);
@@ -250,8 +249,6 @@ class Wiki
 
     /**
      * Enforces the creation of a new Wiki instance by setting the enforceNew property to true.
-     *
-     * @return Wiki
      */
     public function enforceNew(): Wiki
     {
@@ -290,7 +287,8 @@ class Wiki
                     $this->author[] = User::load($author);
                 }
             }
-            if (empty($this->author)) {
+
+            if ($this->author === []) {
                 throw new \InvalidArgumentException('At least one author is required.');
             }
 
@@ -300,13 +298,13 @@ class Wiki
 
                     if (is_numeric($tag)) {
                         $term = Term::load($tag);
-                        if ($term) {
+                        if ($term !== null && $term !== []) {
                             $this->tags[] = $term['id'];
                         }
                     }
                     elseif (is_string($tag)) {
                         $term = Term::search($tag);
-                        if (count($term) > 0) {
+                        if ($term !== []) {
                             $this->tags[] = $term[0]['id'];
                         }
                         else {
@@ -320,18 +318,19 @@ class Wiki
 
                 }
             }
-            if (empty($this->tags)) {
+
+            if ($this->tags === []) {
                 throw new \InvalidArgumentException('At least one tag is required.');
             }
+
             return $this;
-        }catch (Throwable $e){
+        }catch (Throwable){
             return false;
         }
     }
 
     /**
      * Save the wiki instance to the database.
-     * @return $this
      * @throws DependencyException
      * @throws NotFoundException
      * @throws PhpfastcacheCoreException
@@ -386,7 +385,6 @@ class Wiki
 
     /**
      * Create a new wiki instance and save it to the database.
-     * @param array $wiki_data
      * @return false|Wiki
      */
     public static function create(array $wiki_data): false|static
@@ -426,7 +424,7 @@ class Wiki
      */
     public function addRevision(string $content, WikiStatusEnum $status, ?int $author = null): Wiki
     {
-        $author = $author ?? $this->author[0]->id();
+        $author ??= $this->author[0]->id();
         $revision = $this->revision->addRevision($content, $status, $author);
         $this->revision = $revision;
         return $this;
@@ -434,7 +432,6 @@ class Wiki
 
     /**
      * Get the title of the wiki.
-     * @return string
      */
     public function getTitle(): string
     {
@@ -443,20 +440,19 @@ class Wiki
 
     /**
      * Get the content of the wiki.
-     * @return WikiContent
      */
     public function getContent(): WikiContent
     {
         if ($this->hasRevision() && $this->getLatestRevision()->getStatus() === WikiStatusEnum::PUBLISHED) {
             return $this->getLatestRevision()->getContent();
         }
+
         return $this->content;
     }
 
 
     /**
      * Get the slug of the wiki.
-     * @return string
      */
     public function getSlug(): string
     {
@@ -465,7 +461,6 @@ class Wiki
 
     /**
      * Get the status of the wiki.
-     * @return WikiStatusEnum
      */
     public function getStatus(): WikiStatusEnum
     {
@@ -492,7 +487,6 @@ class Wiki
 
     /**
      * Check if the wiki is a draft.
-     * @return bool
      */
     public function isDraft(): bool
     {
@@ -501,7 +495,6 @@ class Wiki
 
     /**
      * Check if the wiki is published.
-     * @return bool
      */
     public function isPublished(): bool
     {
@@ -510,7 +503,6 @@ class Wiki
 
     /**
      * Check if the wiki is archived.
-     * @return bool
      */
     public function isArchived(): bool
     {
@@ -519,20 +511,18 @@ class Wiki
 
     /**
      * Get a summary of the wiki content.
-     * @param int $length
-     * @return string
      */
     public function getSummary(int $length = 150): string
     {
         if ($this->hasRevision() && $this->getLatestRevision()->getStatus() === WikiStatusEnum::PUBLISHED) {
             return mb_strimwidth(strip_tags($this->getLatestRevision()->getContent()->__toString()), 0, $length, "...");
         }
+
         return mb_strimwidth(strip_tags($this->content->__toString()), 0, $length, "...");
     }
 
     /**
      * Get the word count of the wiki content.
-     * @return int
      */
     public function getWordCount(): int
     {
@@ -541,18 +531,15 @@ class Wiki
 
     /**
      * Calculate the reading time of the wiki based on word count.
-     * @return string
      */
     public function getReadingTime(): string
     {
         $minutes = ceil($this->getWordCount() / 200);
-        return "{$minutes} min read";
+        return $minutes . ' min read';
     }
 
     /**
      * Update the wiki entity with the provided data.
-     * @param array $wiki_data
-     * @return bool
      */
     public function update(array $wiki_data): bool
     {
@@ -592,7 +579,7 @@ class Wiki
             $statement->execute();
 
             return true;
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -610,7 +597,7 @@ class Wiki
             $statement->bindValue(':id', $this->id);
             $statement->execute();
             return true;
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -639,7 +626,6 @@ class Wiki
 
     /**
      * Get the revisions object.
-     * @return WikiRevisions
      */
     public function getRevisions(): WikiRevisions
     {
@@ -680,6 +666,7 @@ class Wiki
         $statement->bindValue(':offset', $offset, PDO::PARAM_INT);
 
         $statement->execute();
+
         $wikis = $statement->fetchAll(PDO::FETCH_ASSOC);
 
         $result = [];
@@ -692,11 +679,10 @@ class Wiki
 
     public function hasRevision(): bool
     {
-        return count($this->revision->getRevisions()) > 0;
+        return $this->revision->getRevisions() !== [];
     }
 
     /**
-     * @param int $limit
      * @return Wiki[]
      * @throws DependencyException
      * @throws NotFoundException
@@ -710,9 +696,7 @@ class Wiki
         }
 
         // Remove the current wiki from the list
-        $list = array_filter($list, function ($wiki) {
-            return $wiki->id() !== $this->id;
-        });
+        $list = array_filter($list, fn(\Simp\Core\extends\wiki\src\Entity\Wiki $wiki): bool => $wiki->id() !== $this->id);
 
         shuffle($list);
         return $list;

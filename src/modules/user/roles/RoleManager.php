@@ -53,7 +53,7 @@ class RoleManager
 
     public function isRoleExist(string $name): bool
     {
-        return array_any($this->roles, fn($role) => $role->getName() === $name);
+        return array_any($this->roles, fn($role): bool => $role->getName() === $name);
 
     }
 

@@ -108,19 +108,19 @@ function wiki_template_install(): array
 function wiki_route_install(): array
 {
 
-    return array(
-        'wiki.entries' => array(
+    return [
+        'wiki.entries' => [
             'title' => 'Wiki Entries',
             'path' => '/wiki/entries',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => WikiController::class,
                 'method' => 'entries'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
                 'authenticated',
                 'anonymous',
@@ -136,23 +136,23 @@ function wiki_route_install(): array
                  'analyst',
                 'support',
                 'guest'
-            ),
-            'options' => array(
+            ],
+            'options' => [
                 'classes' => ['fa-brands fa-wikipedia-w']
-            )
-        ),
-        'wiki.tag.entries' => array(
+            ]
+        ],
+        'wiki.tag.entries' => [
             'title' => 'Wiki Tag Entries',
             'path' => '/wiki/[id:int]',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => WikiController::class,
                 'method' => 'tag_entries'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
                 'authenticated',
                 'anonymous',
@@ -168,21 +168,21 @@ function wiki_route_install(): array
                 'analyst',
                 'support',
                 'guest'
-            ),
-            'options' => array()
-        ),
-        'wiki.search' => array(
+            ],
+            'options' => []
+        ],
+        'wiki.search' => [
             'title' => 'Wiki Search',
             'path' => '/wiki/search',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => WikiController::class,
                 'method' => 'search'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
                 'authenticated',
                 'anonymous',
@@ -198,21 +198,21 @@ function wiki_route_install(): array
                 'analyst',
                 'support',
                 'guest'
-            ),
-            'options' => array()
-        ),
-        'wiki.entry' => array(
+            ],
+            'options' => []
+        ],
+        'wiki.entry' => [
             'title' => 'Wiki Entry',
             'path' => '/wiki/[slug:string]',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => WikiController::class,
                 'method' => 'entry'
-            ),
-            'access' => array(
+            ],
+            'access' => [
                 'administrator',
                 'authenticated',
                 'anonymous',
@@ -228,9 +228,9 @@ function wiki_route_install(): array
                 'analyst',
                 'support',
                 'guest'
-            ),
-            'options' => array()
-        ),
+            ],
+            'options' => []
+        ],
         'wiki.revision.add' => [
             'title' => 'Wiki Revision Add',
             'path' => '/wiki/revision/add',
@@ -257,17 +257,17 @@ function wiki_route_install(): array
                 'support',
             ]
         ],
-        'wiki.create' => array(
+        'wiki.create' => [
             'title' => 'Wiki Create',
             'path' => '/wiki/create/add',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => WikiController::class,
                 'method' => 'create'
-            ),
+            ],
             'access' => [
                 'administrator',
                 'content_creator',
@@ -282,21 +282,21 @@ function wiki_route_install(): array
                 'analyst',
                 'support',
             ],
-            'options' => array(
+            'options' => [
                 'classes' => ['fa','fa-plus']
-            )
-        ),
-        'wiki.tag.create' => array(
+            ]
+        ],
+        'wiki.tag.create' => [
             'title' => 'Wiki Tag Create',
             'path' => '/wiki/tag/create',
-            'method' => array(
+            'method' => [
                 'GET',
                 'POST'
-            ),
-            'controller' => array(
+            ],
+            'controller' => [
                 'class' => WikiController::class,
                 'method' => 'tag_create'
-            ),
+            ],
             'access' => [
                 'administrator',
                 'content_creator',
@@ -311,8 +311,8 @@ function wiki_route_install(): array
                 'analyst',
                 'support',
             ]
-        )
-    );
+        ]
+    ];
 }
 
 function wiki_menu_install(array &$menus): void

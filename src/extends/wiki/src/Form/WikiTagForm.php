@@ -78,9 +78,7 @@ class WikiTagForm extends FormBase
      */
     public function validateForm(array $form): void
     {
-        $values = array_map(function ($value) {
-            return $value->getValue();
-        }, $form);
+        $values = array_map(fn($value) => $value->getValue(), $form);
 
         if (empty($values['wiki_tag_form']['wiki_tag'])) {
             $this->validated = false;
@@ -100,21 +98,19 @@ class WikiTagForm extends FormBase
     {
         if ($this->validated) {
 
-            $function = function(string $name) {
+            $function = function(string $name): ?string {
                 $name = preg_replace('/[^a-zA-Z0-9_]/', '_', $name);
                 $name = preg_replace('/\s+/', '_', (string) $name);
                 return preg_replace('/_+/', '_', (string) $name);
             };
 
-            $values = array_map(function ($value) {
-                return $value->getValue();
-            }, $form);
+            $values = array_map(fn($value) => $value->getValue(), $form);
 
             $label = $function($values['wiki_tag_form']['wiki_tag']);
 
             $term = Term::factory()->get($label);
 
-            if (empty($term)) {
+            if ($term === []) {
                 $term = Term::factory()->create('wiki', $values['wiki_tag_form']['wiki_tag']);
                 if ($term) {
                     Messager::toast()->addMessage("Wiki tag created successfully");;

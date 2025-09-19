@@ -142,6 +142,7 @@ class ContentDefinitionManager extends SystemDirectory
                ErrorLogger::logger()->logError($e);
            }
         }
+
         return (bool) file_put_contents($this->content_file . DIRECTORY_SEPARATOR . $name . '.yml',
          Yaml::dump($this->savable($name, $this->content_types),Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
     }
@@ -159,6 +160,7 @@ class ContentDefinitionManager extends SystemDirectory
             $sta = Database::database()->con()->prepare($delete_query);
             $sta->execute();
         }
+
         return (bool) file_put_contents($this->content_file . DIRECTORY_SEPARATOR . $name . '.yml', 
         Yaml::dump($this->savable($name, $this->content_types),Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK));
     }

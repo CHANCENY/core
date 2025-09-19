@@ -2,7 +2,7 @@
 
 namespace Simp\Core\extends\wiki\src\Entity;
 
-class WikiContent
+class WikiContent implements \Stringable
 {
     private string $content;
 
@@ -33,13 +33,13 @@ class WikiContent
         $content = preg_replace('#<form[^>]*>(.*?)</form>#is', '', $content);
 
         // Remove <script> tags
-        $content = preg_replace('#<script[^>]*>(.*?)</script>#is', '', $content);
+        $content = preg_replace('#<script[^>]*>(.*?)</script>#is', '', (string) $content);
 
         // Remove <iframe> tags
-        $content = preg_replace('#<iframe[^>]*>(.*?)</iframe>#is', '', $content);
+        $content = preg_replace('#<iframe[^>]*>(.*?)</iframe>#is', '', (string) $content);
 
         // Remove <object> tags
-        $content = preg_replace('#<object[^>]*>(.*?)</object>#is', '', $content);
+        $content = preg_replace('#<object[^>]*>(.*?)</object>#is', '', (string) $content);
 
         $this->content = $content;
     }

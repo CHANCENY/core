@@ -421,7 +421,7 @@ class User implements \Stringable
         return new UserStorageEntity();
     }
 
-    public function id()
+    public function id(): ?int
     {
         return $this->uid;
     }

@@ -26,6 +26,7 @@ use Twig\Error\SyntaxError;
 class WikiController
 {
     protected int $limit = 10;
+
     /**
      * @throws RuntimeError
      * @throws LoaderError
@@ -46,7 +47,6 @@ class WikiController
 
     /**
      * @param mixed ...$args
-     * @return JsonResponse
      * @throws DependencyException
      * @throws NotFoundException
      * @throws PhpfastcacheCoreException
@@ -82,12 +82,10 @@ class WikiController
                 'title' => $wiki->getTitle(),
                 'id' => $wiki->id(),
                 'summary' => $wiki->getSummary(300),
-                'authors' => array_map(function($author) {
-                    return [
-                        'name' => $author->getName(),
-                        'role' => implode(',', array_map(function($role) { return $role->getRoleLabel(); },$author->getRoles()))
-                    ];
-                },$wiki->getAuthorsList()),
+                'authors' => array_map(fn(\Simp\Core\modules\user\entity\User $author): array => [
+                    'name' => $author->getName(),
+                    'role' => implode(',', array_map(fn($role) => $role->getRoleLabel(),$author->getRoles()))
+                ],$wiki->getAuthorsList()),
                 'slug' => $wiki->getSlug(),
             ];
         }
@@ -98,7 +96,7 @@ class WikiController
         ]);
     }
 
-    public function search(...$args)
+    public function search(...$args): \Symfony\Component\HttpFoundation\JsonResponse
     {
         extract($args);
         $q = $request->get('q',null);
@@ -115,6 +113,7 @@ class WikiController
         if (!empty($tid)) {
             $search_params['tid'] = $tid;
         }
+
         $search_params['q'] = $q;
         $search_params['limit'] = $this->limit;
         $search_params['offset'] = $offset;
@@ -127,12 +126,10 @@ class WikiController
                 'title' => $wiki->getTitle(),
                 'id' => $wiki->id(),
                 'summary' => $wiki->getSummary(300),
-                'authors' => array_map(function($author) {
-                    return [
-                        'name' => $author->getName(),
-                        'role' => implode(',', array_map(function($role) { return $role->getRoleLabel(); },$author->getRoles()))
-                    ];
-                },$wiki->getAuthorsList()),
+                'authors' => array_map(fn(\Simp\Core\modules\user\entity\User $author): array => [
+                    'name' => $author->getName(),
+                    'role' => implode(',', array_map(fn($role) => $role->getRoleLabel(),$author->getRoles()))
+                ],$wiki->getAuthorsList()),
                 'slug' => $wiki->getSlug(),
             ];
         }
@@ -181,13 +178,15 @@ class WikiController
             if (!empty($profile->getFirstName())) {
                 $full_name .= $profile->getFirstName();
             }
+
             if (!empty($profile->getLastName())) {
                 $full_name .= " " . $profile->getLastName();
             }
+
             $authors[] = [
-                'name' => !empty($full_name) ? $full_name :  $author->getName(),
-                'role' => implode(',', array_map(function($role) { return $role->getRoleLabel(); },$author->getRoles())),
-                'avatar_url' => !empty($profile->getImage()) ? $profile->getImage() : "/core/modules/wiki/assets/User-Avatar-Profile-PNG-Pic.png",
+                'name' => $full_name === '' || $full_name === '0' ? $author->getName() :  $full_name,
+                'role' => implode(',', array_map(fn($role) => $role->getRoleLabel(),$author->getRoles())),
+                'avatar_url' => empty($profile->getImage()) ? "/core/modules/wiki/assets/User-Avatar-Profile-PNG-Pic.png" : $profile->getImage(),
                 'id' => $author->id(),
                 'bio' => $profile->getDescription()
             ];
@@ -197,7 +196,7 @@ class WikiController
 
         $editable = false;
 
-        $allowed = array(
+        $allowed = [
             'administrator',
             'content_creator',
             'manager',
@@ -210,7 +209,7 @@ class WikiController
             'publisher',
             'analyst',
             'support',
-        );
+        ];
 
         $user = CurrentUser::currentUser()->getUser();
         foreach ($allowed as $role) {
@@ -247,12 +246,12 @@ class WikiController
     {
         extract($args);
 
-        $wiki_data = json_decode($request->getContent(),true);
+        $wiki_data = json_decode((string) $request->getContent(),true);
 
         if (!empty($wiki_data['content']) && !empty($wiki_data['author']) && !empty($wiki_data['status']) && !empty($wiki_data['wiki_id'])) {
 
             $wiki = Wiki::load($wiki_data['wiki_id']);
-            $status = strtolower($wiki_data['status']);
+            $status = strtolower((string) $wiki_data['status']);
             $status = WikiStatusEnum::tryFrom($status);
             if (empty($status)) {
                 return new JsonResponse(['error'=>'Invalid status'],400);
@@ -268,7 +267,7 @@ class WikiController
 
     }
 
-    public function create(...$args)
+    public function create(...$args): \Symfony\Component\HttpFoundation\Response
     {
         extract($args);
         $wiki_form = new FormBuilder(new WikiCreateForm(['request'=>$request]));

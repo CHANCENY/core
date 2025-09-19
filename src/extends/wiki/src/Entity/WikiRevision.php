@@ -15,12 +15,16 @@ use Simp\Core\modules\user\entity\User;
 
 class WikiRevision
 {
-    protected int $id;
     protected WikiContent $content;
-    protected WikiStatusEnum $status;
+
+    protected WikiStatusEnum $status = WikiStatusEnum::DRAFT;
+
     protected \DateTime $created_at;
+
     protected \DateTime $updated_at;
-    protected int $wiki;
+
+    protected int $wiki = 0;
+
     protected ?User $author = null;
 
     /**
@@ -31,19 +35,17 @@ class WikiRevision
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException|DateMalformedStringException
      */
-    public function __construct(int $id)
+    public function __construct(protected int $id)
     {
-        $this->id = $id;
         $this->content = new WikiContent('');
-        $this->status = WikiStatusEnum::DRAFT;
         $this->created_at = new \DateTime();
         $this->updated_at = new \DateTime();
-        $this->wiki = 0;
 
         $query = "SELECT * FROM wiki_entities_revision WHERE id = :id";
         $statement = Service::get('connection')->prepare($query);
-        $statement->bindValue(':id', $id);
+        $statement->bindValue(':id', $this->id);
         $statement->execute();
+
         $revision = $statement->fetch();
 
         if (!empty($revision)) {
@@ -99,7 +101,6 @@ class WikiRevision
 
     /**
      * Load the associated Wiki object
-     * @return Wiki
      * @throws DependencyException
      * @throws DateMalformedStringException
      * @throws \Exception
