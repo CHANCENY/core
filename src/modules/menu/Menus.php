@@ -92,7 +92,11 @@ class Menus implements \Stringable
             $route = $edit_account->toArray();
             $route['path'] = '/user/'. CurrentUser::currentUser()->getUser()->getUid() .'/edit';
             $account->addChild(new Menu(['route_id' => 'system.account.edit', 'route_data' => $route]));
-            $this->menus['system.people']->addChild($account);
+
+            if (!empty($this->menus['system.people'])){
+                $this->menus['system.people']?->addChild($account);
+            }
+
 
             $profile_edit = Route::fromRouteName('system.account.profile.edit');
             $route = $profile_edit->toArray();
