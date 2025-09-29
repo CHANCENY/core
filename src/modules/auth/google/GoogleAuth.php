@@ -38,7 +38,6 @@ class GoogleAuth
         $schema = trim((string) $request->getSchemeAndHttpHost(), '/');
         $this->client->setRedirectUri($schema.'/'. trim($this->redirect_uri, '/'));
         $this->client->setScopes($this->scope);
-
     }
 
     public function generateLoginUrl(): string

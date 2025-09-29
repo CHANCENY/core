@@ -11,6 +11,7 @@ use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\components\request\Request;
 use Simp\Core\extends\system\src\Plugin\SystemAction;
 use Simp\Core\lib\themes\View;
+use Simp\Core\modules\auth\AuthenticationSystem;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Error\LoaderError;
@@ -73,5 +74,53 @@ class System
         SystemAction::persistContentTypes();
         return new RedirectResponse($request->headers->get('referer') ?? '/');
     }
+
+    public function outh_setting(...$args)
+    {
+        extract($args);
+
+        /** @var Request $request **/
+
+        $authentication = AuthenticationSystem::getSetting();
+
+        if ($request->getMethod() === 'POST') {
+            $data = $request->request->all();
+
+            $authentication = [
+                'normal' => [
+                    'types' => ['password', 'password-less'],
+                    'default' => $data['normal_type'] ?? 'password',
+                ],
+                'google' => [
+                    'types' => ['google'],
+                    'default' => $data['active'] === 'google' ? 'google' : null,
+                    'credential' => [
+                        'client_id' => $data['google_client_id'] ?? null,
+                        'client_secret' => $data['google_client_secret'] ?? null,
+                        'redirect' => $data['google_redirect'] ?? '/user/oauth/google/access',
+                        'scope' => $data['google_scope'] ?? ['email', 'profile'],
+                    ],
+                ],
+                'github' => [
+                    'types' => ['github'],
+                    'default' => $data['active'] === 'github' ? 'github' : null,
+                    'credential' => [
+                        'client_id' => $data['github_client_id'] ?? null,
+                        'client_secret' => $data['github_client_secret'] ?? null,
+                        'redirect' => $data['github_redirect'] ?? '/user/oauth/github/access',
+                    ],
+                ],
+                'active' => $data['active'] ?? 'normal',
+            ];
+
+            AuthenticationSystem::addSetting($authentication);
+            return new RedirectResponse($request->headers->get('referer') ?? '/');
+        }
+
+        return new Response(View::view('default.view.system.outh.setting', [
+            'authentication' => $authentication
+        ]));
+    }
+
 
 }

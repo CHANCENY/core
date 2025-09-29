@@ -96,6 +96,19 @@ function system_route_install(): array
             'options' => [
                 'classes' => ['fa','fa-gear']
             ]
+        ],
+        'system.outh.setting' => [
+            'title' => 'Outh2 Setting',
+            'path' => '/admin/system/outh/setting',
+            'method' => ['GET', 'POST'],
+            'controller' => [
+                'class' => System::class,
+                'method' => 'outh_setting'
+            ],
+            'access' => ['administrator'],
+            'options' => [
+                'classes' => ['fa','fa-gear']
+            ]
         ]
     ];
 }
@@ -204,6 +217,8 @@ function system_menu_install(array &$menus): void
         $menus['system.config']->addChild(new Menu('system.search.settings'));
         $menus['system.config']->addChild(new Menu('system.configuration.logger'));
         $menus['system.config']->addChild(new Menu('system.reports.errors'));
+
+        $menus['system.config']->addChild(new Menu('system.outh.setting'));
 
     }
 }

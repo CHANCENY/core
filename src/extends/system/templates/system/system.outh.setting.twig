@@ -1,0 +1,81 @@
+{% extends 'default.view.admin_base' %}
+
+{% block head %}
+    <style>
+        h2 { margin-top: 0; }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; }
+        input[type="text"], input[type="password"], select { width: 100%; padding: 8px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #ccc; }
+        input[type="submit"] { background: #30466b; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        input[type="submit"]:hover { background: #243b58; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <form id="authSettingsForm" method="post">
+        <h2>Authentication Settings</h2>
+
+        <!-- Active Method -->
+        <div class="section">
+            <label for="active">Active Authentication Method</label>
+            <select id="active" name="active">
+                <option value="normal" {% if authentication.active == 'normal' %}selected{% endif %}>Normal</option>
+                <option value="google" {% if authentication.active == 'google' %}selected{% endif %}>Google</option>
+                <option value="github" {% if authentication.active == 'github' %}selected{% endif %}>GitHub</option>
+            </select>
+        </div>
+
+        <!-- Normal Auth -->
+        <div class="section">
+            <h3>Normal Authentication</h3>
+            <label for="normalType">Type</label>
+            <select id="normalType" name="normal_type">
+                <option value="password" {% if authentication.normal.default == 'password' %}selected{% endif %}>Password</option>
+                <option value="password-less" {% if authentication.normal.default == 'password-less' %}selected{% endif %}>Password-less</option>
+            </select>
+        </div>
+
+        <!-- Google Auth -->
+        <div class="section">
+            <h3>Google Authentication</h3>
+            <label for="googleType">Type</label>
+            <select id="googleType" name="google_type">
+                <option value="google" {% if authentication.google.default == 'google' %}selected{% endif %}>Google</option>
+            </select>
+
+            <label for="googleClientId">Client ID</label>
+            <input type="text" id="googleClientId" name="google_client_id" placeholder="Enter Google Client ID" value="{{ authentication.google.credential.client_id }}">
+
+            <label for="googleClientSecret">Client Secret</label>
+            <input type="text" id="googleClientSecret" name="google_client_secret" placeholder="Enter Google Client Secret" value="{{ authentication.google.credential.client_secret }}">
+
+            <label for="googleRedirect">Redirect URI</label>
+            <input type="text" id="googleRedirect" name="google_redirect" value="{{ authentication.google.credential.redirect }}">
+
+            <label>Scope</label>
+            {% for scope in authentication.google.credential.scope %}
+                <input type="text" name="google_scope[]" value="{{ scope }}" placeholder="Scope">
+            {% endfor %}
+        </div>
+
+        <!-- GitHub Auth -->
+        <div class="section">
+            <h3>GitHub Authentication</h3>
+            <label for="githubType">Type</label>
+            <select id="githubType" name="github_type">
+                <option value="github" {% if authentication.github.default == 'github' %}selected{% endif %}>GitHub</option>
+            </select>
+
+            <label for="githubClientId">Client ID</label>
+            <input type="text" id="githubClientId" name="github_client_id" placeholder="Enter GitHub Client ID" value="{{ authentication.github.credential.client_id }}">
+
+            <label for="githubClientSecret">Client Secret</label>
+            <input type="text" id="githubClientSecret" name="github_client_secret" placeholder="Enter GitHub Client Secret" value="{{ authentication.github.credential.client_secret }}">
+
+            <label for="githubRedirect">Redirect URI</label>
+            <input type="text" id="githubRedirect" name="github_redirect" value="{{ authentication.github.credential.redirect }}">
+        </div>
+
+        <input type="submit" value="Save Settings">
+    </form>
+{% endblock %}

@@ -63,6 +63,16 @@ class AuthUser
         return $this->id;
     }
 
+    public function forceValidation(User $user)
+    {
+        $this->user = $user;
+        $this->is_login = true;
+        $this->is_authenticated = true;
+        $this->id = $user->id();
+        $this->validated = true;
+        return $this;
+    }
+
     public function authenticate(string $username, string $password): bool
     {
         if ($username !== '' && $username !== '0' && ($password !== '' && $password !== '0')) {
