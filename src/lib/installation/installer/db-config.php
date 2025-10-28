@@ -3,6 +3,14 @@
 // install.php
 require_once __DIR__ . "/../../vendor/autoload.php";
 
+try{
+    $database = \Simp\Core\modules\database\Database::database();
+}catch (Throwable $e){
+    if ($e->getCode() === 5555) {
+        $_SESSION['install'] = true;
+    }
+}
+
 if (!isset($_SESSION['install'])) {
     echo "Access denied";
     exit;

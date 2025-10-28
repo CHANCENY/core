@@ -209,7 +209,7 @@ class App
                         foreach ($methods as $method) {
                             $method_single = strtolower((string) $method);
                             /**@var Response $response**/
-                           $response[] = $router->$method_single($path, $name,$controller, $options);
+                            $router->$method_single($path, $name,$controller, $options);
                         }
                     }
                 }
@@ -236,15 +236,13 @@ class App
                     foreach ($methods as $method) {
                         $method_single = strtolower((string) $method);
                         /**@var Response $response**/
-                        $response[] = $router->$method_single($path, $name,$controller, $options);
+                       $router->$method_single($path, $name,$controller, $options);
                     }
                 }
             }
 
-            $response = array_filter($response);
-            $response = reset($response);
-            $response = $response ?: new Response("Page not found", 404);
-            $response?->send(true);
+            $router->send();
+            exit;
         }
         else {
 
@@ -252,7 +250,7 @@ class App
             $response->send(true);
         }
 
-        return $response;
+        return new Response("Page not found", 404);
 
     }
 
