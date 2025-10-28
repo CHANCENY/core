@@ -78,7 +78,7 @@ class ContentTypeDefinitionEditForm extends FormBase
 
                 if ($field['type'] === 'file') {
                     $value = is_array($value) ? $value : [$value];
-                    $value = array_map(function (array $file): ?array {
+                    $value = array_map(function ($file): ?array {
                         $file = File::load($file);
                         if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $file = $file->toArray();
@@ -115,6 +115,7 @@ class ContentTypeDefinitionEditForm extends FormBase
             'default_value' => $this->node->getTitle(),
         ];
         $fields = $this->content_type["fields"] ?? [];
+
         foreach ($fields as $k=>&$field) {
 
             if (!isset($field['inner_field'])) {
@@ -122,7 +123,7 @@ class ContentTypeDefinitionEditForm extends FormBase
 
                 if ($field['type'] == 'file') {
                     $value = is_array($value) ? $value : [$value];
-                    $value = array_map(function (array $file): ?array {
+                    $value = array_map(function ($file): ?array {
                         $file = File::load($file ?? 0);
                         if ($file instanceof \Simp\Core\modules\files\entity\File) {
                             $file = $file->toArray();

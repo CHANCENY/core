@@ -7,6 +7,8 @@ use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
 use Simp\Core\lib\routes\Route;
+use Simp\Core\modules\services\Service;
+use Symfony\Component\HttpFoundation\Request;
 
 class Menu
 {
@@ -49,6 +51,19 @@ class Menu
     public function getChildren(): array
     {
         return $this->children;
+    }
+
+    public function setAccess(array $access)
+    {
+        $this->menu->access = $access;
+    }
+
+    public function isActive()
+    {
+        /**@var \Simp\Core\lib\routes\Route $route */
+        $route = Request::createFromGlobals()->server->get('ROUTE_ATTRIBUTES')['route'];
+
+        return $route->route_id === $this->menu->route_id;
     }
 
 }

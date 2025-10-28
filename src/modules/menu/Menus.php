@@ -137,7 +137,7 @@ class Menus implements \Stringable
 
     }
 
-    PUBLIC function getMenus(): array
+    public function getMenus(): array
     {
         return $this->menus;
     }
