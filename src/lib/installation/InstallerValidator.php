@@ -447,6 +447,9 @@ class InstallerValidator extends SystemDirectory
 
         $container = new \DI\Container($merged_services);
         define('DI_CONTAINER_SERVICES_TAGS',$container);
+
+        $dotenv = Dotenv\Dotenv::createImmutable($this->root_dir);
+        $dotenv->load();
     }
 
     /**
