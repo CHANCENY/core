@@ -41,7 +41,9 @@
         "mpdf/mpdf": "^8.2",
         "symfony/console": "^7.3",
         "php-di/php-di": "^7.1",
-        "simp/modal": "^1.0"
+        "simp/modal": "^1.0",
+      "ext-libxml": "*",
+      "ext-dom": "*"
     },
     "require-dev": {
         "rector/rector": "^2.1"

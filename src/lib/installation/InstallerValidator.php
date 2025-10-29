@@ -22,6 +22,8 @@ use Simp\Core\lib\memory\cache\Caching;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\lib\themes\TwigResolver;
 use Simp\Core\modules\database\Database;
+use Simp\Core\modules\pages\PageLoader;
+use Simp\Core\modules\services\Service;
 use Simp\Core\modules\theme\ThemeManager;
 use Simp\Core\modules\user\current_user\CurrentUser;
 use Simp\Core\modules\user\roles\RolesRepository;
@@ -272,10 +274,13 @@ class InstallerValidator extends SystemDirectory
             $routes = array_merge($routes, Yaml::parseFile($general_routes) ?? []);
         }
 
+        $pageLoader = Service::get(PageLoader::class);
+        $pages = $pageLoader->getRoutes();
+
         // Modules routes
         $module = ModuleHandler::factory();
         $modules_routes = $module->getModulesRoutes();
-        return \array_merge($routes, $modules_routes);
+        return \array_merge($routes, $modules_routes, $pages);
     }
 
     /**

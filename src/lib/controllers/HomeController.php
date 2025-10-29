@@ -31,7 +31,9 @@ class HomeController
         if (!empty($home_controller)) {
             $route = Route::fromRouteUrl($home_controller);
             if ($route instanceof \Simp\Core\lib\routes\Route) {
-                return Route::getControllerResponse($route);
+                $options = $route->getOptions();
+                $options['route'] = $route;
+                return Route::getControllerResponse($route, $options);
             }
         }
 
