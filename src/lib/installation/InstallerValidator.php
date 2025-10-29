@@ -2,6 +2,7 @@
 
 namespace Simp\Core\lib\installation;
 
+use Dotenv\Dotenv;
 use JetBrains\PhpStorm\NoReturn;
 use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
@@ -448,7 +449,7 @@ class InstallerValidator extends SystemDirectory
         $container = new \DI\Container($merged_services);
         define('DI_CONTAINER_SERVICES_TAGS',$container);
 
-        $dotenv = Dotenv\Dotenv::createImmutable($this->root_dir);
+        $dotenv = Dotenv::createImmutable($this->root_dir);
         $dotenv->load();
     }
 
