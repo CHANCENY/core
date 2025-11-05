@@ -6,6 +6,7 @@ use Phpfastcache\Exceptions\PhpfastcacheCoreException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
+use Simp\Core\lib\installation\SystemDirectory;
 use Simp\Core\lib\routes\Route;
 use Simp\Core\modules\logger\ErrorLogger;
 use Simp\Core\modules\services\Service;
@@ -104,6 +105,32 @@ class TemplateLoader
 
        $twig->addFunction(new TwigFunction('url', [$this, 'url']));
 
+       $system = new SystemDirectory;
+
+       // in static directory we have static/twigDataLoader.inc file that we return array of twig functions and filters
+        $data_loader = $system->webroot_dir . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'twigDataLoader.inc';
+
+        if (file_exists($data_loader)) {
+            $returnArray = require $data_loader;
+            if (is_array($returnArray)) {
+
+                foreach ($returnArray as $key => $value) {
+
+                    if ($key === 'functions') {
+                        foreach ($value as $func) {
+                            $twig->addFunction($func);
+                        }
+                    }
+                    if ($key === 'filters') {
+                        foreach ($value as $filter) {
+                            $twig->addFilter($filter);
+                        }
+                    }
+
+                }
+            }
+        }
+
         $this->twig = $twig;
         try {
 
@@ -146,6 +173,7 @@ class TemplateLoader
             $file_path = preg_replace('/\.(html|htm)$/i', '.twig', $file_path);
         }
 
+        $uriPath = '';
        foreach ($routes as $route) {
 
            $file = $route['options']['file'] ?? '';
@@ -155,11 +183,16 @@ class TemplateLoader
            $file_name = end($list);
 
            if (strtolower($file_name) === strtolower($file_path) || $uri === $file_path) {
-               return $uri;
+               $uriPath = $uri;
            }
 
        }
 
-       return '#';
+       if ($options) {
+           $query = http_build_query($options);
+           $uriPath .= '?' . $query;
+       }
+
+       return $uriPath;
     }
 }
