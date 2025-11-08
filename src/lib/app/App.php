@@ -82,7 +82,12 @@ class App
         register_shutdown_function([$this, 'shutdownHandler']);
 
         // Start app now.
-        $this->response = $this->mapRouteListeners();
+        $response = $this->mapRouteListeners();
+        $this->response = $response instanceof Router ? $response->getResponse() : $response;
+        if ($this->response->getStatusCode() === Response::HTTP_SERVICE_UNAVAILABLE) {
+            $this->response = new Response(View::view('default.view.not_found_page'), 404);
+        }
+        $this->response->send();
     }
 
     /**
@@ -158,7 +163,7 @@ class App
      * @throws PhpfastcacheDriverException
      * @throws PhpfastcacheInvalidArgumentException
      */
-    protected function mapRouteListeners(): Response|JsonResponse|null
+    protected function mapRouteListeners()
     {
         $cache = Caching::init()->driver();
         $route_keys = $cache->getItem('system.routes.keys');
@@ -241,16 +246,14 @@ class App
                 }
             }
 
-            $router->send();
-            exit;
-        }
-        else {
-
-            $response = new Response("Page not found", 404);
-            $response->send(true);
+            try{
+                return $router;
+            }catch (Throwable $exception){
+                ErrorLogger::logger()->logError($exception);
+            }
         }
 
-        return new Response("Page not found", 404);
+        return new Response(View::view('default.view.not_found_page'), 404);
 
     }
 

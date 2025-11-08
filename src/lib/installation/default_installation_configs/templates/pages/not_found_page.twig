@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>404 Not Found</title>
+    <!-- Tailwind play CDN for quick styling (remove in production and build properly) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* minor customization to match Laravel default spacing/feel */
+        body { background-color: #f8fafc; }
+    </style>
+</head>
+<body class="antialiased">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-xl w-full text-center">
+        <h1 class="text-9xl font-extrabold text-gray-300">404</h1>
+
+        <div class="mt-6">
+            <h2 class="text-2xl font-semibold text-gray-900">Not Found</h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Sorry, the page you are looking for could not be found.
+            </p>
+        </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row sm:justify-center gap-3">
+            <a href="/"
+               class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm
+                  text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                Go back home
+            </a>
+
+            <a href="javascript:history.back()"
+               class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md
+                  text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
+                Go back
+            </a>
+        </div>
+
+        <p class="mt-6 text-xs text-gray-400">If you think this is an error, contact the site administrator.</p>
+    </div>
+</div>
+</body>
+</html>
